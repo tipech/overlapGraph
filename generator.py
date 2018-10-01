@@ -10,10 +10,10 @@ Classes:
   IntervalGenerator -- handles generation of interval objects
 
 """
-import sys, random, argparse
+import sys, random, argparse, json, os
 from shapes import IntervalObject, RectangleObject
-from setuptools import setup
-from graphics import *
+from graphics import Point, Line, Rectangle, Text, GraphWin
+from datetime import datetime
 from pprint import pprint
 
 
@@ -36,6 +36,8 @@ def main():
         help="print results to console")
     parser.add_argument("-g", "--graphics", action="store_true",
         help="display graphics and draw results")
+    parser.add_argument("-s", "--store", action="store_true",
+        help="store data to file")
     
     # extra optional arguments: area size, min & max object size ratios
     parser.add_argument("--area", type=int, default=1000,
@@ -65,6 +67,9 @@ def main():
 
     if args.graphics:
         generator.draw()
+
+    if args.store:
+        generator.export_data()
 
 
 
@@ -131,6 +136,16 @@ class Generator():
         return("Generator(objects={%s}\n,count=%d)" % (s, self.objects_count))
 
 
+    def as_dict(self):
+        """Represent generator parameters and data as dictionary."""
+
+        dataset = {"object_number": self.object_number, "area": self.area,
+            "min": self.min_ratio, "max": self.max_ratio,
+            "objects": [obj.as_dict() for obj in self.objects_dict.values()]}
+
+        return dataset
+
+
 
 class IntervalGenerator(Generator):
 
@@ -191,6 +206,25 @@ class IntervalGenerator(Generator):
             label.draw(self.win)
 
         self._pause_graphics()
+
+
+    def export_data(self):
+        """Store generator parameters and results as JSON."""
+
+        type_ = "interval"
+        generator_dict = self.as_dict()
+        generator_dict["type"] = type_
+
+        # check if data storage exists and if not, create it
+        if not os.path.isdir("data"):
+            os.mkdir("data")
+
+        # open file for storage, filename is timestamp
+        with open("data/%s_%s.json"% (type_, datetime.now()), "w+") as file:
+            
+            # write pretty JSON to file
+            file.write( json.dumps(generator_dict, sort_keys=True,
+                indent=4, separators=(',', ': ')))
 
 
 
@@ -255,6 +289,24 @@ class RectangleGenerator(Generator):
 
         self._pause_graphics() # pause window with results until click
 
+
+    def export_data(self):
+        """Store generator parameters and results as JSON."""
+
+        type_ = "rectangle"
+        generator_dict = self.as_dict()
+        generator_dict["type"] = type_
+
+        # check if data storage exists and if not, create it
+        if not os.path.isdir("data"):
+            os.mkdir("data")
+
+        # open file for storage, filename is timestamp
+        with open("data/%s_%s.json"% (type_, datetime.now()), "w+") as file:
+            
+            # write pretty JSON to file
+            file.write( json.dumps(generator_dict, sort_keys=True,
+                indent=4, separators=(',', ': ')))
 
         
 

@@ -34,8 +34,14 @@ class RectangleObject:
         return ((self.x1 + self.x2) / 2, (self.y1 + self.y2) / 2)
 
 
+    def as_dict(self):
+        """Return a dictionary representation of the object."""
+        return {"shape": "rectangle", "id_": self.id_, "x1": self.x1,
+            "y1": self.y1, "x2": self.x2, "y2": self.y2}
+
+
     def __repr__(self):
-        """Convert to string."""
+        """Convert to representation."""
         return ("Rectangle(id=%r,x1=%r,y1=%r,x2=%r,y2=%r)"
             % (self.id_, self.x1, self.y1, self.x2, self.y2))
 
@@ -63,6 +69,6 @@ class IntervalObject:
 
 
     def __repr__(self):
-        """Convert to string."""
-        return ("Interval(id=%r,start=%r,end=%r)"
-            % (self.id_, self.start, self.end))
+        """Serialize this object."""
+        return "%s" % {"shape": "interval", "id_": self.id_,
+            "start": self.start, "end": self.end}

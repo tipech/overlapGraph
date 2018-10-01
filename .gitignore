@@ -1,3 +1,11 @@
+# ==== Project related ====
+
+# data storage directory
+data/
+
+
+# ==== General Python ====
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
