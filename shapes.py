@@ -29,6 +29,16 @@ class RectangleObject:
         self.y2 = y2
         self.id_ = id_
 
+
+    def __init__(self, rectangle_dict):
+        """Create a rectangle from a dictionary representation."""
+        self.x1 = rectangle_dict['x1']
+        self.y1 = rectangle_dict['y1']
+        self.x2 = rectangle_dict['x2']
+        self.y2 = rectangle_dict['y2']
+        self.id_ = rectangle_dict['id_']
+
+
     def get_center(self):
         """Calculate the coordinates of the recatangle's center"""
         return ((self.x1 + self.x2) / 2, (self.y1 + self.y2) / 2)
@@ -63,9 +73,22 @@ class IntervalObject:
         self.id_ = id_
 
 
+    def __init__(self, interval_dict):
+        """Create an interval from a dictionary representation."""
+        self.start = interval_dict['start']
+        self.end = interval_dict['end']
+        self.id_ = interval_dict['id_']
+
+
     def get_center(self):
         """Calculate the coordinate of the interval's center"""
         return (self.start + self.end) / 2
+
+
+    def as_dict(self):
+        """Return a dictionary representation of the object."""
+        return {"shape": "interval", "id_": self.id_, "start": self.start,
+            "end": self.end}
 
 
     def __repr__(self):

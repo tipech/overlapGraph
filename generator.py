@@ -21,15 +21,15 @@ from pprint import pprint
 def main():
     """Run the generator with command-line parameters."""
 
+    window_size = 1200
+
     # parser for command line arguments
     parser = argparse.ArgumentParser(
         description="Randomly generate overlapping objects in space.")
 
-    # positional arguments: object type, number of objects
+    # positional arguments: object type
     parser.add_argument("type", choices=["interval", "rectangle"],
         help="type of overlapping objects")
-    parser.add_argument("number", metavar="N", type=int,
-        help="number of generated objects")
 
     # optional arguments: print results, draw results with graphics
     parser.add_argument("-p", "--print", action="store_true",
@@ -39,7 +39,9 @@ def main():
     parser.add_argument("-s", "--store", action="store_true",
         help="store data to file")
     
-    # extra optional arguments: area size, min & max object size ratios
+    # extra optional arguments: number of objects, area, min & max size ratios
+    parser.add_argument("--number", metavar="N", type=int, default=20,
+        help="number of generated objects")
     parser.add_argument("--area", type=int, default=1000,
         help="size of generated area (default: 1000)")
     parser.add_argument("--min", type=float, default=0.01,
@@ -47,8 +49,9 @@ def main():
     parser.add_argument("--max", type=float, default=0.1,
         help="max ratio of object size relative to area (def: 0.1)")
 
+    args = parser.parse_args() # parse the arguments
+
     # check for invalid numbers
-    args = parser.parse_args()
     if args.number < 0 or args.area < 0 or args.min < 0 or args.max < 0 :
         parser.error("Invalid number argument.")
     if args.max > 1 or args.min > args.max :
@@ -57,10 +60,10 @@ def main():
     # run generator
     if args.type == "interval":
         generator = IntervalGenerator(args.number, args.area, args.min,
-           args.max, 1200)
+           args.max, window_size)
     elif args.type == "rectangle":
         generator = RectangleGenerator(args.number, args.area, args.min,
-           args.max, 1200)
+           args.max, window_size)
     
     if args.print:  # print results
         print(generator)
@@ -88,7 +91,8 @@ class Generator():
     """
 
     def __init__(self, object_number, area, min_ratio, max_ratio, window):
-        """Prepare space and initialize generation"""
+        """Prepare space and initialize generation of new objects and data"""
+
         self.object_number = object_number
         self.area = area
         self.min_ratio = min_ratio
@@ -98,7 +102,22 @@ class Generator():
         self.objects_dict = {}
         self.objects_count = 0
 
+        self.win = None   # controller for graphics window
+
         random.seed()       # seed random number generator
+
+
+    def __init__(self, input_dict, window):
+        """Load parameters, objects and data from previous run"""
+        
+        self.object_number = input_dict['object_number']
+        self.area = input_dict['area']
+        self.min_ratio = input_dict['min']
+        self.max_ratio = input_dict['max']
+        self.window = window
+
+        self.objects_dict = {}
+        self.objects_count = 0
 
 
     def _get_line_segment(self):
@@ -129,13 +148,6 @@ class Generator():
             self.win.close()
 
 
-    def __repr__(self):
-        """Convert to string."""
-        s = ",\n".join(" %d: %r" % (id_, object_) # stringify dictionary
-            for id_, object_ in self.objects_dict.items())        
-        return("Generator(objects={%s}\n,count=%d)" % (s, self.objects_count))
-
-
     def as_dict(self):
         """Represent generator parameters and data as dictionary."""
 
@@ -146,25 +158,51 @@ class Generator():
         return dataset
 
 
+    def load_dict(self, dict):
+        """Load previously generated data from JSON format."""
+
+        print("AAA")
+
+
+    def __repr__(self):
+        """Convert to string."""
+        s = ",\n".join(" %d: %r" % (id_, object_) # stringify dictionary
+            for id_, object_ in self.objects_dict.items())        
+        return("Generator(objects={%s}\n,count=%d)" % (s, self.objects_count))
+
 
 class IntervalGenerator(Generator):
 
     """Randomly generate overlapping intervals in a defined space
 
     Methods:
-        __init__ -- prepares the space and generates the intervals
-        _generate_interval -- generates a single interval"""
+        __init__ -- prepares the space and generates or loads the intervals
+        _generate_interval -- generates a single interval
+
+    """
 
     def __init__(self, object_number, area, min_ratio, max_ratio, window):
         """Prepare space and initialize generation"""
         super().__init__(object_number, area, min_ratio, max_ratio, window)
 
-        self.win = None   # controller for graphics window
-
         # generate intervals and add them to the dictionary
         for i in range(0, self.object_number):
             new_object = self._generate_interval()
             self.objects_dict[new_object.id_] = new_object
+            self.objects_count += 1 
+
+
+    def __init__(self, input_dict, window):
+        """Load parameters, objects and data from previous run"""
+        super().__init__(input_dict, window)
+
+        # load objects from file to IntervalObjects
+        for interval in input_dict['objects']:
+
+            # load single object and add it to the dictionary
+            new_object = IntervalObject(interval)
+            self.objects_dict[new_object.id_] = new_object
+            self.objects_count += 1
 
 
     def _generate_interval(self):
@@ -173,7 +211,6 @@ class IntervalGenerator(Generator):
 
         # assign id based on count
         id_ = self.objects_count  
-        self.objects_count += 1
 
         # generate interval object
         interval = IntervalObject(start, end, id_)
@@ -233,7 +270,7 @@ class RectangleGenerator(Generator):
     """Randomly generate overlapping rectangles in a defined space
 
     Methods:
-        __init__ -- prepares the space and generates the rectangles
+        __init__ -- prepares the space and generates or loads the rectangles
         _generate_rectangle -- generates a single rectangle
 
     """
@@ -242,12 +279,25 @@ class RectangleGenerator(Generator):
         """Prepare space and generate rectangles"""
         super().__init__(object_number, area, min_ratio, max_ratio, window)
 
-        self.win = None   # controller for graphics window
-
         # generate rectangles and add them to the dictionary
         for i in range(0, self.object_number):
             new_object = self._generate_rectangle()
-            self.objects_dict[new_object.id_] = new_object  
+            self.objects_dict[new_object.id_] = new_object 
+            self.objects_count += 1 
+
+
+    def __init__(self, input_dict, window):
+        """Load parameters, objects and data from previous run"""
+        super().__init__(input_dict, window)
+
+        # load objects from file to RectangleObjects
+        for rectangle in input_dict['objects']:
+
+            # load single object and add it to the dictionary
+            new_object = RectangleObject(rectangle)
+            self.objects_dict[new_object.id_] = new_object
+            self.objects_count += 1
+
 
 
     def _generate_rectangle(self):
@@ -257,7 +307,6 @@ class RectangleGenerator(Generator):
         
         # assign id based on count
         id_ = self.objects_count  
-        self.objects_count += 1
 
         # generate rectangle object
         rectangle = RectangleObject(x_start, y_start, x_end, y_end, id_)
@@ -311,5 +360,5 @@ class RectangleGenerator(Generator):
         
 
 if __name__ == "__main__":
-    # Run the generator with command-line parameters.
+    # Run the module with command-line parameters.
     main()
