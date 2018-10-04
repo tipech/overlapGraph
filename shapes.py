@@ -30,14 +30,23 @@ class RectangleObject:
         self.id_ = id_
 
 
-    def __init__(self, rectangle_dict):
-        """Create a rectangle from a dictionary representation."""
-        self.x1 = rectangle_dict['x1']
-        self.y1 = rectangle_dict['y1']
-        self.x2 = rectangle_dict['x2']
-        self.y2 = rectangle_dict['y2']
-        self.id_ = rectangle_dict['id_']
+    @classmethod
+    def from_params(cls, x1, y1, x2, y2, id_=None):
+        """Create a rectangle from two opposite corners."""
+        return cls(x1, y1, x2, y2, id_)
 
+
+    @classmethod
+    def from_dict(cls, rectangle_dict):
+        """Create a rectangle from a dictionary representation."""
+        x1 = rectangle_dict['x1']
+        y1 = rectangle_dict['y1']
+        x2 = rectangle_dict['x2']
+        y2 = rectangle_dict['y2']
+        id_ = rectangle_dict['id_']
+
+        return cls(x1, y1, x2, y2, id_)
+        
 
     def get_center(self):
         """Calculate the coordinates of the recatangle's center"""
@@ -73,11 +82,20 @@ class IntervalObject:
         self.id_ = id_
 
 
-    def __init__(self, interval_dict):
+    @classmethod
+    def from_params(cls, start, end, id_=None):
+        """Create an interval (line segment)."""
+        return cls(start, end, id_)
+
+
+    @classmethod
+    def from_dict(cls, interval_dict):
         """Create an interval from a dictionary representation."""
-        self.start = interval_dict['start']
-        self.end = interval_dict['end']
-        self.id_ = interval_dict['id_']
+        start = interval_dict['start']
+        end = interval_dict['end']
+        id_ = interval_dict['id_']
+
+        return cls(start, end, id_)
 
 
     def get_center(self):

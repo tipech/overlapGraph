@@ -62,7 +62,7 @@ def main():
         generator = IntervalGenerator(args.number, args.area, args.min,
            args.max, window_size)
     elif args.type == "rectangle":
-        generator = RectangleGenerator(args.number, args.area, args.min,
+        generator = RectangleGenerator.from_params(args.number, args.area, args.min,
            args.max, window_size)
     
     if args.print:  # print results
@@ -99,25 +99,9 @@ class Generator():
         self.max_ratio = max_ratio
         self.window = window
 
-        self.objects_dict = {}
-        self.objects_count = 0
-
         self.win = None   # controller for graphics window
 
         random.seed()       # seed random number generator
-
-
-    def __init__(self, input_dict, window):
-        """Load parameters, objects and data from previous run"""
-        
-        self.object_number = input_dict['object_number']
-        self.area = input_dict['area']
-        self.min_ratio = input_dict['min']
-        self.max_ratio = input_dict['max']
-        self.window = window
-
-        self.objects_dict = {}
-        self.objects_count = 0
 
 
     def _get_line_segment(self):
@@ -181,28 +165,58 @@ class IntervalGenerator(Generator):
 
     """
 
-    def __init__(self, object_number, area, min_ratio, max_ratio, window):
-        """Prepare space and initialize generation"""
+    def __init__(self, object_number, area, min_ratio, max_ratio, window,
+        objects_dict, objects_count):
+        """Prepare space and generate intervals"""
         super().__init__(object_number, area, min_ratio, max_ratio, window)
 
-        # generate intervals and add them to the dictionary
-        for i in range(0, self.object_number):
-            new_object = self._generate_interval()
-            self.objects_dict[new_object.id_] = new_object
-            self.objects_count += 1 
+        if objects_dict != None: # if already loaded objects
+
+            self.objects_dict = objects_dict
+            self.objects_count = objects_count
+
+        else:   # if no loaded data, generate new
+
+            self.objects_dict = {}
+            self.objects_count = 0
+
+            # generate intervals and add them to the dictionary
+            for i in range(0, self.object_number):
+                new_object = self._generate_interval()
+                self.objects_dict[new_object.id_] = new_object 
+                self.objects_count += 1
 
 
-    def __init__(self, input_dict, window):
+    @classmethod
+    def from_params(cls, object_number, area, min_ratio, max_ratio, window):
+        """Create generator normally, from parameters"""
+        return cls(object_number, area, min_ratio, max_ratio, window, None, 0)
+
+
+    @classmethod
+    def from_file(cls, input_dict, window):
         """Load parameters, objects and data from previous run"""
-        super().__init__(input_dict, window)
+        
+        # retrieve parameters
+        object_number = input_dict['object_number']
+        area = input_dict['area']
+        min_ratio = input_dict['min']
+        max_ratio = input_dict['max']
+        window = window
+
+        objects_dict = {}
+        objects_count = 0
 
         # load objects from file to IntervalObjects
         for interval in input_dict['objects']:
 
             # load single object and add it to the dictionary
-            new_object = IntervalObject(interval)
-            self.objects_dict[new_object.id_] = new_object
-            self.objects_count += 1
+            new_object = IntervalObject.from_dict(interval)
+            objects_dict[new_object.id_] = new_object
+            objects_count += 1
+
+        return cls(object_number, area, min_ratio, max_ratio, window,
+            objects_dict, objects_count)
 
 
     def _generate_interval(self):
@@ -213,7 +227,7 @@ class IntervalGenerator(Generator):
         id_ = self.objects_count  
 
         # generate interval object
-        interval = IntervalObject(start, end, id_)
+        interval = IntervalObject.from_params(start, end, id_)
         return interval
 
 
@@ -275,29 +289,58 @@ class RectangleGenerator(Generator):
 
     """
 
-    def __init__(self, object_number, area, min_ratio, max_ratio, window):
+    def __init__(self, object_number, area, min_ratio, max_ratio, window,
+        objects_dict, objects_count):
         """Prepare space and generate rectangles"""
         super().__init__(object_number, area, min_ratio, max_ratio, window)
 
-        # generate rectangles and add them to the dictionary
-        for i in range(0, self.object_number):
-            new_object = self._generate_rectangle()
-            self.objects_dict[new_object.id_] = new_object 
-            self.objects_count += 1 
+        if objects_dict != None: # if already loaded objects
+
+            self.objects_dict = objects_dict
+            self.objects_count = objects_count
+
+        else:   # if no loaded data, generate new
+
+            self.objects_dict = {}
+            self.objects_count = 0
+
+            # generate rectangles and add them to the dictionary
+            for i in range(0, self.object_number):
+                new_object = self._generate_rectangle()
+                self.objects_dict[new_object.id_] = new_object 
+                self.objects_count += 1
 
 
-    def __init__(self, input_dict, window):
+    @classmethod
+    def from_params(cls, object_number, area, min_ratio, max_ratio, window):
+        """Create generator normally, from parameters"""
+        return cls(object_number, area, min_ratio, max_ratio, window, None, 0)
+
+
+    @classmethod
+    def from_file(cls, input_dict, window):
         """Load parameters, objects and data from previous run"""
-        super().__init__(input_dict, window)
+        
+        # retrieve parameters
+        object_number = input_dict['object_number']
+        area = input_dict['area']
+        min_ratio = input_dict['min']
+        max_ratio = input_dict['max']
+        window = window
+
+        objects_dict = {}
+        objects_count = 0
 
         # load objects from file to RectangleObjects
         for rectangle in input_dict['objects']:
 
             # load single object and add it to the dictionary
-            new_object = RectangleObject(rectangle)
-            self.objects_dict[new_object.id_] = new_object
-            self.objects_count += 1
+            new_object = RectangleObject.from_dict(rectangle)
+            objects_dict[new_object.id_] = new_object
+            objects_count += 1
 
+        return cls(object_number, area, min_ratio, max_ratio, window,
+            objects_dict, objects_count)
 
 
     def _generate_rectangle(self):
@@ -309,7 +352,8 @@ class RectangleGenerator(Generator):
         id_ = self.objects_count  
 
         # generate rectangle object
-        rectangle = RectangleObject(x_start, y_start, x_end, y_end, id_)
+        rectangle = RectangleObject.from_params(x_start, y_start, x_end,
+             y_end, id_)
         return rectangle
 
 
