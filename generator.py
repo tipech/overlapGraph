@@ -41,7 +41,7 @@ def main():
     
     # extra optional arguments: number of objects, area, min & max size ratios
     parser.add_argument("--number", metavar="N", type=int, default=20,
-        help="number of generated objects")
+        help="number of generated objects (default: 20)")
     parser.add_argument("--area", type=int, default=1000,
         help="size of generated area (default: 1000)")
     parser.add_argument("--min", type=float, default=0.01,
@@ -59,7 +59,7 @@ def main():
 
     # run generator
     if args.type == "interval":
-        generator = IntervalGenerator(args.number, args.area, args.min,
+        generator = IntervalGenerator.from_params(args.number, args.area, args.min,
            args.max, window_size)
     elif args.type == "rectangle":
         generator = RectangleGenerator.from_params(args.number, args.area, args.min,
@@ -67,12 +67,13 @@ def main():
     
     if args.print:  # print results
         print(generator)
+        
+    if args.store:
+        generator.export_data()
 
     if args.graphics:
         generator.draw()
 
-    if args.store:
-        generator.export_data()
 
 
 

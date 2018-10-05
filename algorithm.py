@@ -53,7 +53,7 @@ def main():
 
     # extra optional arguments: number of objects, area, min & max size ratios
     gen_parser.add_argument("--number", metavar="N", type=int, default=20,
-        help="number of generated objects")
+        help="number of generated objects (default: 20)")
     gen_parser.add_argument("--area", type=int, default=1000,
         help="size of generated area (default: 1000)")
     gen_parser.add_argument("--min", type=float, default=0.01,
@@ -106,12 +106,11 @@ def main():
                 args.min, args.max, window_size)
             algorithm = RectangleSweepline(generator)
 
-
     algorithm.run()
-    algorithm.draw()
-    algorithm.generator.draw()
-
     pprint(algorithm.final_overlaps)
+    algorithm.generator.draw()
+    algorithm.draw()
+
     
 
 
@@ -160,23 +159,17 @@ class RectangleSweepline(Sweepline):
             
             # if there weren't any rectangles starting/ending at x1 before
             if rectangle.x1 not in self.points_dict.keys():
-                self.points_dict[rectangle.x1] = [{"object": rectangle,
-                    "type": "start"}] # add point
+                self.points_dict[rectangle.x1] = [] # make the array
 
-            # if there was another rectangle starting/stopping at x1
-            else:
-                self.points_dict[rectangle.x1].append({"object": rectangle,
-                    "type": "start"}) # add rectangle
+            self.points_dict[rectangle.x1].append({"object": rectangle,
+                "type": "start"}) # add rectangle
             
             # if there weren't any rectangles starting/ending at x2 before
             if rectangle.x2 not in self.points_dict.keys():
-                self.points_dict[rectangle.x2] = [{"object": rectangle,
-                    "type": "end"}] # add point
+                self.points_dict[rectangle.x2] = [] # make the array
 
-            # if there was another rectangle starting/stopping at x2
-            else:
-                self.points_dict[rectangle.x2].append({"object": rectangle,
-                    "type": "end"}) # add rectangle
+            self.points_dict[rectangle.x2].append({"object": rectangle,
+                "type": "end"}) # add rectangle
 
 
         # create list with the points sorted in x axis
@@ -190,9 +183,7 @@ class RectangleSweepline(Sweepline):
         active_overlaps = [] # for overlaps that started and haven't ended
         self.final_overlaps = []  # for overlaps that ended
 
-        for i in range(0, len(self.points_list)): # sweep through points
-
-            current_point = self.points_list[i] # x value of current point
+        for current_point in self.points_list: # sweep through points
 
             # find rects that start/end at current point and perform action
             point_rects = self.points_dict[current_point]
@@ -219,7 +210,8 @@ class RectangleSweepline(Sweepline):
                     del active_rects[rect_object.id_]
 
                     # terminate all overlaps this rectangle was in
-                    for overlap in active_overlaps:
+                    #   reversed to prevent corruption when deleting items
+                    for overlap in reversed(active_overlaps):
                         if (overlap['1'] == rect_object.id_ 
                             or overlap['2'] == rect_object.id_):
 
@@ -248,14 +240,14 @@ class RectangleSweepline(Sweepline):
             if (new_rect.y1 > possible_rect.y1 
                 and new_rect.y1 < possible_rect.y2
                 and new_rect.y2 > possible_rect.y2):
-                # overlapping, new above (and to the right) of old
+                # overlapping, new below (and to the right) of old
 
                 overlap_length = possible_rect.y2 - new_rect.y1
 
             elif (new_rect.y1 < possible_rect.y1 
                 and new_rect.y2 > possible_rect.y1
                 and new_rect.y2 < possible_rect.y2):
-                # overlapping, new below (and to the right) of old
+                # overlapping, new above (and to the right) of old
 
                 overlap_length = new_rect.y2 - possible_rect.y1
 
@@ -289,7 +281,7 @@ class RectangleSweepline(Sweepline):
 
         nx.draw_networkx(
             self.graph,
-            node_size=0.5,
+            node_size=1,
             edge_color="#AAAAAA",
             node_color="black",
             arrows=False)
