@@ -41,6 +41,8 @@ def main():
         help="print results to console")
     load_parser.add_argument("-g", "--graphics", action="store_true",
         help="display graphics and draw results")
+    load_parser.add_argument("-s", "--store", action="store_true",
+        help="store generated data to file")
 
     # else, get generator parameters: object type
     gen_parser.add_argument("type", choices=["interval", "rectangle"],
