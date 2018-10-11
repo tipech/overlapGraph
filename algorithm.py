@@ -14,6 +14,7 @@ from shapes import IntervalObject, RectangleObject
 from generator import IntervalGenerator, RectangleGenerator
 from graphics import Point, Line, Rectangle, Text, GraphWin
 from pprint import pprint
+from time import sleep
 
 
 
@@ -50,6 +51,8 @@ def main():
         help="print results to console")
     gen_parser.add_argument("-g", "--graphics", action="store_true",
         help="display graphics and draw results")
+    gen_parser.add_argument("-s", "--store", action="store_true",
+        help="store generated data to file")
 
     # extra optional arguments: number of objects, area, min & max size ratios
     gen_parser.add_argument("--number", metavar="N", type=int, default=20,
@@ -106,10 +109,20 @@ def main():
                 args.min, args.max, window_size)
             algorithm = RectangleSweepline(generator)
 
+    # run algorithm
     algorithm.run()
-    pprint(algorithm.final_overlaps)
-    algorithm.generator.draw()
-    algorithm.draw()
+
+    
+    if args.print:  # print results
+        print(algorithm.generator)
+        pprint(algorithm.final_overlaps)
+
+    if args.store:  # store results
+        algorithm.generator.export_data()
+
+    if args.graphics: # draw results
+        algorithm.generator.draw(False)
+        algorithm.draw()
 
     
 
@@ -132,6 +145,125 @@ class Sweepline():
         self.generator = generator
 
         self.graph = nx.Graph()
+
+
+    def draw(self):
+        """Draw the generated graph"""
+
+        plt.ion()
+        nx.draw_networkx(
+            self.graph,
+            font_size=14,
+            node_size=1,
+            node_color="black",
+            edge_color="#AAAAAA",
+            width=2,
+            arrows=False)
+        plt.draw()
+
+        # pause drawing for display on screen
+        # Note: this is not a fully stable, production level implementation
+        try:
+            plt.pause(500)
+        except Exception as e:
+            pass
+        
+        
+
+
+
+class IntervalSweepline(Sweepline):
+
+    """Create the overlapping rectangles graph using a sweep-line algorithm.
+    
+    Methods:
+
+    """
+
+    def __init__(self, generator):
+        """Prepare space and initialize sweep-line algorithm"""
+        super().__init__(generator)
+
+        # get all x axis points, store as dictionary with form:
+        #    { <point>: [{"object": <object>, "type": start|end}, ...], ...}
+        # so different objects that start/end at the same point don't conflict
+        self.points_dict = {}
+        for interval in generator.objects_dict.values():
+
+            # add node to graph
+            self.graph.add_node(interval.id_)
+            
+            # if there weren't any intervals starting/ending at x_start before
+            if interval.start not in self.points_dict.keys():
+                self.points_dict[interval.start] = [] # make the array
+
+            self.points_dict[interval.start].append({"object": interval,
+                "type": "start"}) # add interval
+            
+            # if there weren't any intervals starting/ending at x_end before
+            if interval.end not in self.points_dict.keys():
+                self.points_dict[interval.end] = [] # make the array
+
+            self.points_dict[interval.end].append({"object": interval,
+                "type": "end"}) # add interval
+
+
+        # create list with the points sorted in x axis
+        self.points_list = sorted(self.points_dict.keys())
+
+
+    def run(self):
+        """Run the algorithm and generate the overlap graph"""
+        
+        active_intervals = {} # for intervals that started but haven't ended
+        active_overlaps = []  # for overlaps that started and haven't ended
+        self.final_overlaps = []  # for overlaps that ended
+
+        for current_point in self.points_list: # sweep through points
+
+            # find intervals that start/end at current 
+            point_intervals = self.points_dict[current_point]
+            for point_interval in point_intervals:
+
+                interval_object = point_interval['object']
+
+                # if interval just started
+                if point_interval['type'] == "start":
+
+                    # loop through previous active overlaps and add new object
+                    for previous_interval in active_intervals.values():
+
+                        # new overlap details
+                        active_overlaps.append({
+                            '1': interval_object.id_,
+                            '2': previous_interval.id_,
+                            'start': current_point })
+
+                    # start tracking interval
+                    active_intervals[interval_object.id_] = interval_object
+
+                # if interval is ending
+                elif point_interval['type'] == "end":
+
+                    # rect no longer active
+                    del active_intervals[interval_object.id_]
+
+                    # terminate all overlaps this interval was in
+                    #   reversed to prevent corruption when deleting items
+                    for overlap in reversed(active_overlaps):
+                        if (overlap['1'] == interval_object.id_ 
+                            or overlap['2'] == interval_object.id_):
+
+                            # calculate overlap length
+                            overlap['length'] = (current_point
+                                - overlap['start'])
+
+                            # add graph edge for overlap
+                            self.graph.add_edge(overlap['1'], overlap['2'])
+
+                            # store overlap in results, remove from active
+                            self.final_overlaps.append(overlap)
+                            active_overlaps.remove(overlap)
 
 
 
@@ -275,17 +407,6 @@ class RectangleSweepline(Sweepline):
         return new_overlaps
 
 
-
-    def draw(self):
-        """Draw the generated graph"""
-
-        nx.draw_networkx(
-            self.graph,
-            node_size=1,
-            edge_color="#AAAAAA",
-            node_color="black",
-            arrows=False)
-        plt.show()
 
 
 if __name__ == "__main__":

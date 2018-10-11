@@ -59,11 +59,11 @@ def main():
 
     # run generator
     if args.type == "interval":
-        generator = IntervalGenerator.from_params(args.number, args.area, args.min,
-           args.max, window_size)
+        generator = IntervalGenerator.from_params(args.number, args.area,
+            args.min, args.max, window_size)
     elif args.type == "rectangle":
-        generator = RectangleGenerator.from_params(args.number, args.area, args.min,
-           args.max, window_size)
+        generator = RectangleGenerator.from_params(args.number, args.area,
+            args.min, args.max, window_size)
     
     if args.print:  # print results
         print(generator)
@@ -121,9 +121,16 @@ class Generator():
         return (start, end)
 
 
-    def _init_graphics(self):
+    def _init_graphics(self, height_override = False, height = 1000):
         """Initialize the graphics environment"""
-        self.win = GraphWin("Overlap", self.window + 2, self.window + 2)
+
+        # if height override flag false, default size is square
+        if not height_override:
+            self.win = GraphWin("Overlap", self.window + 2, self.window + 2)
+
+        # otherwise manually set height to adjust for few items
+        else:
+            self.win = GraphWin("Overlap", self.window + 2, height + 2)
 
 
     def _pause_graphics(self):
@@ -232,16 +239,17 @@ class IntervalGenerator(Generator):
         return interval
 
 
-    def draw(self):
+    def draw(self, block = True):
         """Draw the generated intervals"""
-        self._init_graphics()
 
-        scale = self.window / self.area           # scaling to window
-        margin = self.window / self.objects_count # margin between each result
+        scale = self.window / self.area # scaling to window
+        margin = 20                     # px margin between each result
+        
+        self._init_graphics(True, margin * (self.objects_count + 2))
 
         # draw each rectangle
         for interval in self.objects_dict.values():
-            y_coord = interval.id_ * margin + 2 # display interval based on id
+            y_coord = interval.id_ * margin + 22 # display interval based on id
 
             # calculate ends and center coordinates and adjust for window
             start = Point(interval.start * scale, y_coord)
@@ -257,7 +265,9 @@ class IntervalGenerator(Generator):
             shape.draw(self.win)
             label.draw(self.win)
 
-        self._pause_graphics()
+        # if block flag is true, wait after drawing for mouse click
+        if block:
+            self._pause_graphics()
 
 
     def export_data(self):
@@ -358,7 +368,7 @@ class RectangleGenerator(Generator):
         return rectangle
 
 
-    def draw(self):
+    def draw(self, block = True):
         """Draw the generated rectangles"""
         self._init_graphics() # init window
 
@@ -381,7 +391,9 @@ class RectangleGenerator(Generator):
             shape.draw(self.win)
             label.draw(self.win)
 
-        self._pause_graphics() # pause window with results until click
+        # if block flag is true, wait after drawing for mouse click
+        if block:
+            self._pause_graphics()
 
 
     def export_data(self):
