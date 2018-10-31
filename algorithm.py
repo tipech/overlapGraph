@@ -89,9 +89,9 @@ def main():
                     generator = RectangleGenerator.from_file(data, window_size)
                     algorithm = RectangleSweepline(generator)
 
-        # if error occured during file reading, print invalid argument error
+        # if error occurred during file reading, print invalid argument error
         except IOError as e:
-            parser.error("Problem occured during file reading: \n\t%s" % e)
+            parser.error("Problem occurred during file reading: \n\t%s" % e)
 
     else: # if we selected to generate new data
 
