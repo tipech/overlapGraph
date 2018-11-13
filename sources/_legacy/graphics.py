@@ -539,12 +539,12 @@ class GraphicsObject:
     def _draw(self, canvas, options):
         """draws appropriate figure on canvas with options provided
         Returns Tk id of item drawn"""
-        pass # must override in subclass
+        raise NotImplementedError # must override in subclass
 
 
     def _move(self, dx, dy):
         """updates internal state of object to move it dx,dy units"""
-        pass # must override in subclass
+        raise NotImplementedError # must override in subclass
 
          
 class Point(GraphicsObject):
