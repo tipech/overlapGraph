@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# region.py - Region class
+# shapes/region.py - Region class
 #
 # This script implements the Region class, a data class that defines a
 # multidimensional region, with an upper and a lower vertex. Each region
@@ -23,10 +23,11 @@ class Region:
   for determining if there is an overlap between two regions and what the
   difference between the two regions is.
 
-  Properties: id, lower, upper, dimension, dimensions
-  Computed Properties: lengths, midpoint, size
-  Methods: __getitem__, contains, __contains__, __eq__, overlaps, difference
-  Class Methods: from_intervals
+  Properties:           id, lower, upper, dimension, dimensions
+  Computed Properties:  lengths, midpoint, size
+  Special Methods:      __init__, __getitem__, __contains__, __eq__
+  Methods:              contains, overlaps, difference
+  Class Methods:        from_intervals
   """
   id: str
   lower: List[float]

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# interval.py - Interval class
+# shapes/interval.py - Interval class
 #
 # This script implements the Interval class, a data class that defines
 # lower and upper bounding values for an interval. Are the building blocks for
@@ -21,9 +21,10 @@ class Interval:
   is an overlap between two intervals and what the intersection length between the
   two intervals is.
 
-  Properties: lower, upper
-  Computed Properties: length, midpoint
-  Methods: contains, overlaps, difference
+  Properties:           lower, upper
+  Computed Properties:  length, midpoint
+  Special Methods:      __init__, __contains__
+  Methods:              contains, overlaps, difference
   """
   lower: float
   upper: float

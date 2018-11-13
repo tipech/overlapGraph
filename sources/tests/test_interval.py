@@ -1,5 +1,16 @@
 #!/usr/bin/env python
-# Unit tests for ../shapes/interval.py
+
+#
+# tests/test_interval.py - Unit tests for shapes/interval.py
+#
+# This script implements the following tests:
+#   - test_create_interval
+#   - test_interval_properties
+#   - test_interval_conversion
+#   - test_interval_contains
+#   - test_interval_overlaps
+#   - test_interval_difference
+#
 
 from dataclasses import asdict, astuple
 from numpy import mean

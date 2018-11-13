@@ -1,5 +1,17 @@
 #!/usr/bin/env python
-# Unit tests for ../shapes/region.py
+
+#
+# tests/test_region.py - Unit tests for shapes/region.py
+#
+# This script implements the following tests:
+#   - test_create_region
+#   - test_dimension_mismatch
+#   - test_region_properties
+#   - test_region_contains
+#   - test_region_equality
+#   - test_region_overlaps
+#   - test_region_difference
+#
 
 from dataclasses import asdict, astuple
 from functools import reduce
