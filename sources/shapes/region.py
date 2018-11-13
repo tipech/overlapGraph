@@ -116,8 +116,9 @@ class Region:
     :param inc_lower:
     :param inc_upper:
     """
-    assert self.dimension == len(point)
+    assert isinstance(point, List)
     assert all([isinstance(x, float) for x in point])
+    assert self.dimension == len(point)
 
     return all([d.contains(point[i], inc_lower, inc_upper) for i, d in enumerate(self.dimensions)])
 
