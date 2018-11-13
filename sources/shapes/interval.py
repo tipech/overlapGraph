@@ -11,6 +11,8 @@
 # intervals is.
 #
 from dataclasses import dataclass
+from typing import List, Callable
+from ..generators.randoms import Randoms, RandomFn, NDArray
 
 @dataclass
 class Interval:
@@ -24,7 +26,7 @@ class Interval:
   Properties:           lower, upper
   Computed Properties:  length, midpoint
   Special Methods:      __init__, __contains__
-  Methods:              contains, overlaps, difference
+  Methods:              contains, overlaps, difference, random_values
   """
   lower: float
   upper: float
@@ -165,3 +167,26 @@ class Interval:
 
     return Interval(max(self.lower, that.lower),
                     min(self.upper, that.upper))
+
+  def random_values(self, nvalues: int = 1, randomng: RandomFn = Randoms.uniform()) -> NDArray:
+    """
+    Randomly draw N samples from a given distribution or random
+    number generation function. Samples are drawn over the interval
+    [lower, upper) specified by this Interval. The given size N specifies
+    the number of values to output. The default nvalues is 1; a single value
+    is returned. Otherwise, a list with the specified number of samples
+    are drawn.
+
+    The default behavior is that samples are uniformly distributed.
+    In other words, any value within the given interval is equally
+    likely to be drawn by uniform. Other distribution or random
+    number generation functions can be substituted via the `randomng`
+    parameter.
+
+    :param nvalues:
+    :param randomng:
+    """
+    assert isinstance(nvalues, int) and nvalues > 0
+    assert isinstance(randomng, Callable)
+
+    return randomng(self.lower, self.upper, nvalues)

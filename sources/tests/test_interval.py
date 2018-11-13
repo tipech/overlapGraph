@@ -104,3 +104,10 @@ class TestInterval(TestCase):
           #print(f'  expect=None')
           #print(f'  actual={difference}')
           self.assertEqual(first.difference(second), None)
+
+  def test_interval_random_values(self):
+    interval = Interval(-5, 15)
+    randoms = interval.random_values(5)
+    #print(f'{interval}: random={randoms}')
+    for value in randoms:
+      self.assertTrue(interval.contains(value, inc_upper=False))
