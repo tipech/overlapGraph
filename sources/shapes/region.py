@@ -6,8 +6,9 @@
 # This script implements the Region class, a data class that defines a
 # multidimensional region, with an upper and a lower vertex. Each region
 # has a defined dimensionality. Provides methods for determining if there
-# is an overlap between two regions and what the difference between the two
-# regions is.
+# is an overlap between two regions, what the intersection or union regions
+# between the two regions are, and randomly generate regions and points
+# within a region.
 #
 from dataclasses import dataclass, field, astuple
 from functools import reduce
@@ -21,13 +22,14 @@ class Region:
   """
   Dataclass that defines a multidimensional region, with an upper and a
   lower vertex. Each region has a defined dimensionality. Provides methods
-  for determining if there is an overlap between two regions and what the
-  difference between the two regions is.
+  for determining if there is an overlap between two regions, what the
+  intersection and union regions between the two regions are, and
+  randomly generate regions and points within a region.
 
   Properties:           id, lower, upper, dimension, dimensions
   Computed Properties:  lengths, midpoint, size
   Special Methods:      __init__, __getitem__, __contains__, __eq__
-  Methods:              contains, encloses, overlaps, difference, 
+  Methods:              contains, encloses, overlaps, intersect, 
                         random_points, random_regions
   Class Methods:        from_intervals
   """
@@ -227,7 +229,7 @@ class Region:
 
     return all([d.overlaps(that[i]) for i, d in enumerate(self.dimensions)])
 
-  def difference(self, that: 'Region') -> 'Region':
+  def intersect(self, that: 'Region') -> 'Region':
     """
     Compute the overlapping Region between this Region and the given Region.
     Return the overlapping Region or None if the Regions do not overlap.
@@ -261,7 +263,7 @@ class Region:
     if not self.overlaps(that):
       return None
 
-    return Region.from_intervals([d.difference(that[i]) for i, d in enumerate(self.dimensions)])
+    return Region.from_intervals([d.intersect(that[i]) for i, d in enumerate(self.dimensions)])
 
   def random_points(self, npoints: int = 1, randomng: RandomFn = Randoms.uniform()) -> NDArray:
     """

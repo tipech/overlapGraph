@@ -9,7 +9,9 @@
 #   - test_interval_conversion
 #   - test_interval_contains
 #   - test_interval_overlaps
-#   - test_interval_difference
+#   - test_interval_intersect
+#   - test_interval_random_values
+#   - test_interval_random_intervals
 #
 
 from dataclasses import asdict, astuple
@@ -100,10 +102,10 @@ class TestInterval(TestCase):
         #print(f'{first} and {second}: expect={self.overlaps[i][j]}, actual={first.overlaps(second)}')
         self.assertEqual(first.overlaps(second), self.overlaps[i][j])
 
-  def test_interval_difference(self):
+  def test_interval_intersect(self):
     for i, first in enumerate(self.test_intervals):
       for j, second in enumerate(self.test_intervals):
-        difference = first.difference(second)
+        intersect = first.intersect(second)
         if self.overlaps[i][j]:
           expected = first if first == second \
                            else Interval(max(first.lower, second.lower), 
@@ -111,14 +113,14 @@ class TestInterval(TestCase):
 
           #print(f'{first} and {second}:')
           #print(f'  expect={expected}')
-          #print(f'  actual={difference}')
-          #print(f'  length={difference.length}')
-          self.assertEqual(difference, expected)
+          #print(f'  actual={intersect}')
+          #print(f'  length={intersect.length}')
+          self.assertEqual(intersect, expected)
         else:
           #print(f'{first} and {second}:')
           #print(f'  expect=None')
-          #print(f'  actual={difference}')
-          self.assertEqual(first.difference(second), None)
+          #print(f'  actual={intersect}')
+          self.assertEqual(intersect, None)
 
   def test_interval_random_values(self):
     interval = Interval(-5, 15)

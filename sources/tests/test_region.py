@@ -10,7 +10,9 @@
 #   - test_region_contains
 #   - test_region_equality
 #   - test_region_overlaps
-#   - test_region_difference
+#   - test_region_intersect
+#   - test_interval_random_points
+#   - test_interval_random_regions
 #
 
 from dataclasses import asdict, astuple
@@ -139,22 +141,22 @@ class TestRegionNoSetup(TestCase):
         #print(f'  actual={overlap}')
         self.assertEqual(overlap, self.overlaps[i][j])
 
-  def test_region_difference(self):
+  def test_region_intersect(self):
     for i, first in enumerate(self.test_regions):
       for j, second in enumerate(self.test_regions):
-        difference = first.difference(second)
+        intersect = first.intersect(second)
         if self.overlaps[i][j]:
           #print(f'{first}\n{second}:')
-          #print(f'  actual={difference}')
-          #print(f'  size={difference.size}')
+          #print(f'  actual={intersect}')
+          #print(f'  size={intersect.size}')
           for x, d in enumerate(first.dimensions):
-            self.assertEqual(d.difference(second.dimensions[x]), 
-                             difference.dimensions[x])
+            self.assertEqual(d.intersect(second.dimensions[x]), 
+                             intersect.dimensions[x])
         else:
           #print(f'{first}\n{second}:')
           #print(f'  expect=None')
-          #print(f'  actual={difference}')
-          self.assertEqual(difference, None)
+          #print(f'  actual={intersect}')
+          self.assertEqual(intersect, None)
 
   def test_region_random_points(self):
     region2d = Region([-5, 0], [15, 10])

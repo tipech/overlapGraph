@@ -7,8 +7,9 @@
 # lower and upper bounding values for an interval. Are the building blocks for
 # representing multi-dimensional regions and computing for overlap between
 # those regions. Provides methods for determining if there is an overlap
-# between two intervals and what the difference interval between the two
-# intervals is.
+# between two intervals, what the intersection interval between the two
+# intervals is, what the union interval between the two intervals is,
+# randomly generate intervals, and randomly choose values within an interval.
 #
 from dataclasses import dataclass
 from numpy import floor
@@ -21,13 +22,14 @@ class Interval:
   Dataclass that defines the lower and upper bounding values for an interval.
   Building block for representing multi-dimensional regions and computing
   for overlap between those regions. Provides methods for determining if there
-  is an overlap between two intervals and what the intersection length between the
-  two intervals is.
+  is an overlap between two intervals, what the intersection length between the
+  two intervals is, what the union interval between the two intervals is,
+  and randomly generate intervals.
 
   Properties:           lower, upper
   Computed Properties:  length, midpoint
   Special Methods:      __init__, __contains__
-  Methods:              contains, encloses, overlaps, difference, 
+  Methods:              contains, encloses, overlaps, intersect,
                         random_values, random_intervals
   """
   lower: float
@@ -163,27 +165,27 @@ class Interval:
     # return any([that.lower in self, that.upper in self, self.lower in that, self.upper in that])
     return max(self.lower, that.lower) <= min(self.upper, that.upper)
 
-  def difference(self, that: 'Interval') -> 'Interval':
+  def intersect(self, that: 'Interval') -> 'Interval':
     """
     Compute the overlapping Interval between this Interval and the given Interval.
     Return the overlapping Interval or None if the Intervals do not overlap.
 
-    Difference:
+    Intersects:
     - |<---- Interval A ---->|
       |<---- Interval B ---->|
-      |<---- Difference ---->|
+      |<---- ########## ---->|
     - |<---- Interval A ---->|
           |<- Interval B ->|
-          |<- Difference ->|
+          |<- ########## ->|
     -    |<- Interval A ->|
       |<---- Interval B ---->|
-          |<- Difference ->|
+          |<- ######### ->|
     - |<- Interval A ->|
             |<- Interval B ->|
-            |<- Diff ->|
+            |<- #### ->|
     -       |<- Interval A ->|
       |<- Interval B ->|
-            |<- Diff ->|
+            |<- #### ->|
 
     :param that:
     """
@@ -231,7 +233,7 @@ class Interval:
     for choosing the position of the Interval and its size percentage are uniform
     distributions, but can be substituted for other distribution or random number
     generation functions via the `posnrng` and `sizerng` parameter. If intonly is
-    True, return the randomly generated Intervals where the lower and upper 
+    True, return the randomly generated Intervals where the lower and upper
     bounding values are floored/truncated into integer values.
 
     :param nintervals:
@@ -257,7 +259,7 @@ class Interval:
       upper = min(lower + length, self.upper)
       if intonly:
         lower = floor(lower)
-        upper = floor(upper)     
+        upper = floor(upper)
       intervals.append(Interval(lower, upper))
 
     return intervals
