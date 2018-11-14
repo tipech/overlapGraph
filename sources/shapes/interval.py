@@ -11,6 +11,7 @@
 # intervals is.
 #
 from dataclasses import dataclass
+from numpy import floor
 from typing import List, Union, Callable
 from ..generators.randoms import Randoms, RandomFn, NDArray
 
@@ -221,19 +222,23 @@ class Interval:
 
   def random_intervals(self, nintervals: int = 1, sizepc_range: 'Interval' = None,
                              posnrng: RandomFn = Randoms.uniform(),
-                             sizerng: RandomFn = Randoms.uniform()) -> List['Interval']:
+                             sizerng: RandomFn = Randoms.uniform(),
+                             intonly: bool = False) -> List['Interval']:
     """
     Randomly generate N Intervals within this Interval, each with a random size
     as a percentage of the total Interval length, bounded by the given size
     percentage Interval (enclosed by Interval(0, 1)). The default distributions
     for choosing the position of the Interval and its size percentage are uniform
     distributions, but can be substituted for other distribution or random number
-    generation functions via the `posnrng` and `sizerng` parameter.
+    generation functions via the `posnrng` and `sizerng` parameter. If intonly is
+    True, return the randomly generated Intervals where the lower and upper 
+    bounding values are floored/truncated into integer values.
 
     :param nintervals:
     :param sizepc_range:
     :param posnrng:
     :param sizerng:
+    :param intonly:
     """
     if sizepc_range == None:
       sizepc_range = Interval(0, 1)
@@ -250,6 +255,9 @@ class Interval:
       position = positions[i]
       lower = position if position <= self.midpoint else max(position - length, self.lower)
       upper = min(lower + length, self.upper)
+      if intonly:
+        lower = floor(lower)
+        upper = floor(upper)     
       intervals.append(Interval(lower, upper))
 
     return intervals

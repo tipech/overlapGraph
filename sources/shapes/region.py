@@ -288,7 +288,8 @@ class Region:
 
   def random_regions(self, nregions: int = 1, sizepc_range: 'Region' = None,
                            posnrng: RandomFn = Randoms.uniform(),
-                           sizerng: RandomFn = Randoms.uniform()) -> List['Region']:
+                           sizerng: RandomFn = Randoms.uniform(),
+                           intonly: bool = False) -> List['Region']:
     """
     Randomly generate N Regions within this Regions, each with a random size
     as a percentage of the total Region dimensions, bounded by the given size
@@ -297,11 +298,14 @@ class Region:
     distributions for choosing the position of the Region and its size percentage
     are uniform distributions, but can be substituted for other distribution or
     random number generation functions via the `posnrng` and `sizerng` parameter.
+    If intonly is True, return the randomly generated Regions where the lower and
+    upper bounding values are floored/truncated into integer values.
 
     :param nregions:
     :param sizepc_range:
     :param posnrng:
     :param sizerng:
+    :param intonly:
     """
     ndunit_region = Region([0] * self.dimension, [1] * self.dimension)
     if sizepc_range == None:
@@ -315,7 +319,7 @@ class Region:
     for _ in range(nregions):
       region = []
       for i, d in enumerate(self.dimensions):
-        dimension = d.random_intervals(1, sizepc_range[i], posnrng, sizerng)[0]
+        dimension = d.random_intervals(1, sizepc_range[i], posnrng, sizerng, intonly)[0]
         region.append(dimension)
       regions.append(Region.from_intervals(region))
     return regions
