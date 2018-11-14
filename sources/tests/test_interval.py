@@ -79,6 +79,21 @@ class TestInterval(TestCase):
     self.assertFalse((interval.lower - 0.1) in interval)
     self.assertFalse((interval.upper + 0.1) in interval)
 
+  def test_interval_encloses(self):
+    interval = Interval(-5, 5)
+    test_intervals = []
+    test_intervals.append(Interval(-6, 4))
+    test_intervals.append(Interval(-4, 4))
+    test_intervals.append(Interval(-2, 2))
+    test_intervals.append(Interval(4, 6))
+    test_intervals.append(Interval(-5, 5))
+    test_intervals.append(Interval(-6, 6))
+
+    for subinterval in test_intervals:
+      comparsion = interval.lower <= subinterval.lower <= subinterval.upper <= interval.upper
+      #print(f'{subinterval} in {interval}: expect={comparsion} actual={subinterval in interval}')
+      self.assertEqual(subinterval in interval, comparsion)
+
   def test_interval_overlaps(self):
     for i, first in enumerate(self.test_intervals):
       for j, second in enumerate(self.test_intervals):

@@ -11,7 +11,7 @@
 # intervals is.
 #
 from dataclasses import dataclass
-from typing import List, Callable
+from typing import List, Union, Callable
 from ..generators.randoms import Randoms, RandomFn, NDArray
 
 @dataclass
@@ -26,7 +26,8 @@ class Interval:
   Properties:           lower, upper
   Computed Properties:  length, midpoint
   Special Methods:      __init__, __contains__
-  Methods:              contains, overlaps, difference, random_values
+  Methods:              contains, encloses, overlaps, 
+                        difference, random_values
   """
   lower: float
   upper: float
@@ -83,16 +84,43 @@ class Interval:
 
     return gte_lower and lte_upper
 
-  def __contains__(self, value: float) -> bool:
+  def encloses(self, that: 'Interval', inc_lower = True, inc_upper = True) -> bool:
     """
-    Determine if the value lies between the lower and upper bounding values (inclusively).
-    Return True if values lies between the lower and upper bounding values, otherwise False.
-    Same as: self.contains(value, inc_lower = True, inc_upper = True)
-    Syntactic Sugar: value in self
+    Determine if the interval lies within the lower and upper bounding values.
+    If inc_lower is True, includes the lower value, otherwise excludes lower value.
+    If inc_upper is True, includes the upper value, otherwise excludes upper value.
+    Return True if interval lies within the lower and upper bounding values, otherwise False.
+
+    :param that:
+    :param inc_lower:
+    :param inc_upper:
+    """
+    assert isinstance(that, Interval)
+
+    return all([self.length >= that.length,
+                self.contains(that.lower, inc_lower, inc_upper),
+                self.contains(that.upper, inc_lower, inc_upper)])
+
+  def __contains__(self, value: Union[float, 'Interval']) -> bool:
+    """
+    For Type value: float
+      Determine if the value lies between the lower and upper bounding values (inclusively).
+      Return True if values lies between the lower and upper bounding values, otherwise False.
+      Same as: self.contains(value, inc_lower = True, inc_upper = True)
+      Syntactic Sugar: value in self
+
+    For Type value: Interval
+      Determine if the interval lies between the lower and upper bounding values (inclusively).
+      Return True if interval lies between the lower and upper bounding values, otherwise False.
+      Same as: self.encloses(value, inc_lower = True, inc_upper = True)
+      Syntactic Sugar: value in self
 
     :param value:
     """
-    return self.contains(value)
+    if isinstance(value, Interval):
+      return self.encloses(value)
+    else:
+      return self.contains(value)
 
   def overlaps(self, that: 'Interval') -> bool:
     """
