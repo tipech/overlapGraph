@@ -39,7 +39,7 @@ class Region:
   dimension: int = field(repr=False)
   dimensions: List[Interval] = field(repr=False)
 
-  def __init__(self, lower: List[float], upper: List[float], dimension: int = 0, id: str = ''):
+  def __init__(self, lower: List[float], upper: List[float], id: str = '', dimension: int = 0):
     """
     Initialize a new Region, with the lower and upper bounding vertices.
     If dimension is specified, the lower and upper vertices must match that number of
