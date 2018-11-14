@@ -10,7 +10,7 @@
 # The only missing parameters is the lower and upper bounds of the
 # values generated and the sample size of the output.
 #
-from typing import List, Union, Callable
+from typing import List, Dict, Union, Callable
 from numpy import random, ndarray
 
 ShapeSize = Union[None,int,List[int]]
@@ -29,6 +29,19 @@ class Randoms:
   """
 
   @classmethod
+  def get(cls, name: str, **args) -> RandomFn:
+    """
+    Returns a function that draws samples from the specified distribution
+    or random number generation function that corresponds with the given
+    method name. Passes the given arguments as parameter for that
+    factory method.
+
+    :param name:
+    :param args:
+    """
+    return getattr(cls, name)(**args)
+
+  @classmethod
   def uniform(cls) -> RandomFn:
     """
     Returns a function that draws samples from a uniform distribution.
@@ -36,7 +49,8 @@ class Randoms:
     (includes low, but excludes high). In other words, any value within the given
     interval is equally likely to be drawn by uniform.
     """
-    return random.uniform
+    return lambda size = 1, low = 0, high = 1: \
+      random.uniform(low, high, size)
 
   @classmethod
   def triangular(cls, mode: float) -> RandomFn:
@@ -47,5 +61,5 @@ class Randoms:
     the other distributions, these parameters directly define the shape of the
     probability distribution function (pdf).
     """
-    return lambda left, right, size: \
+    return lambda size = 1, left = 0, right = mode: \
       random.triangular(left, mode, right, size)

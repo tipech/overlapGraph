@@ -218,7 +218,7 @@ class Interval:
     assert isinstance(nvalues, int) and nvalues > 0
     assert isinstance(randomng, Callable)
 
-    return randomng(self.lower, self.upper, nvalues)
+    return randomng(nvalues, self.lower, self.upper)
 
   def random_intervals(self, nintervals: int = 1, sizepc_range: 'Interval' = None,
                              posnrng: RandomFn = Randoms.uniform(),

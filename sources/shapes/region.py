@@ -284,7 +284,7 @@ class Region:
     assert isinstance(npoints, int) and npoints > 0
     assert isinstance(randomng, Callable)
 
-    return randomng(self.lower, self.upper, [npoints, 2])
+    return randomng([npoints, self.dimension], self.lower, self.upper)
 
   def random_regions(self, nregions: int = 1, sizepc_range: 'Region' = None,
                            posnrng: RandomFn = Randoms.uniform(),
