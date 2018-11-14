@@ -11,6 +11,7 @@
 #   - test_region_equality
 #   - test_region_overlaps
 #   - test_region_intersect
+#   - test_region_union
 #   - test_interval_random_points
 #   - test_interval_random_regions
 #
@@ -157,6 +158,17 @@ class TestRegionNoSetup(TestCase):
           #print(f'  expect=None')
           #print(f'  actual={intersect}')
           self.assertEqual(intersect, None)
+
+  def test_region_union(self):
+    for first in self.test_regions:
+      for second in self.test_regions:
+        union = first.union(second)
+        #print(f'{first},\n{second}:')
+        #print(f'  union={union}')
+        #print(f'  lengths={union.lengths}')
+        #print(f'  size={union.size}')
+        self.assertTrue(first in union)
+        self.assertTrue(second in union)
 
   def test_region_random_points(self):
     region2d = Region([-5, 0], [15, 10])

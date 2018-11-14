@@ -29,7 +29,7 @@ class Region:
   Properties:           id, lower, upper, dimension, dimensions
   Computed Properties:  lengths, midpoint, size
   Special Methods:      __init__, __getitem__, __contains__, __eq__
-  Methods:              contains, encloses, overlaps, intersect, 
+  Methods:              contains, encloses, overlaps, intersect, union,
                         random_points, random_regions
   Class Methods:        from_intervals
   """
@@ -264,6 +264,16 @@ class Region:
       return None
 
     return Region.from_intervals([d.intersect(that[i]) for i, d in enumerate(self.dimensions)])
+
+  def union(self, that: 'Region') -> 'Region':
+    """
+    Compute the Region that encloses both this Region and the given Region.
+    Return the enclosing Region.
+    """
+    assert isinstance(that, Region)
+    assert self.dimension == that.dimension
+
+    return Region.from_intervals([d.union(that[i]) for i, d in enumerate(self.dimensions)])
 
   def random_points(self, npoints: int = 1, randomng: RandomFn = Randoms.uniform()) -> NDArray:
     """
