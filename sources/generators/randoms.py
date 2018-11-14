@@ -25,7 +25,7 @@ class Randoms:
   missing parameters is the lower and upper bounds of the values generated and
   the sample size of the output.
 
-  Class Methods: uniform, triangular
+  Class Methods: get, uniform, triangular
   """
 
   @classmethod
@@ -49,8 +49,10 @@ class Randoms:
     (includes low, but excludes high). In other words, any value within the given
     interval is equally likely to be drawn by uniform.
     """
-    return lambda size = 1, low = 0, high = 1: \
-      random.uniform(low, high, size)
+    def uniform_rng(size: int = 1, low: float = 0, high: float = 1):
+      return random.uniform(low, high, size)
+
+    return uniform_rng
 
   @classmethod
   def triangular(cls, mode: float) -> RandomFn:
@@ -61,5 +63,7 @@ class Randoms:
     the other distributions, these parameters directly define the shape of the
     probability distribution function (pdf).
     """
-    return lambda size = 1, left = 0, right = mode: \
-      random.triangular(left, mode, right, size)
+    def triangular_rng(size: int = 1, left: float = 0, right: float = mode):
+      return random.triangular(left, mode, right, size)
+
+    return triangular_rng
