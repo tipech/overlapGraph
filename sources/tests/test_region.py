@@ -155,3 +155,10 @@ class TestRegionNoSetup(TestCase):
           #print(f'  expect=None')
           #print(f'  actual={difference}')
           self.assertEqual(difference, None)
+
+  def test_region_random_points(self):
+    region = Region([-5, 0], [15, 10])
+    points = region.random_points(5)
+    #print(f'{region}: random={points}')
+    for point in points:
+      self.assertTrue(region.contains(list(point), inc_upper=False))

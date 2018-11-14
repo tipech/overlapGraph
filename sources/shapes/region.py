@@ -11,9 +11,10 @@
 #
 from dataclasses import dataclass, field, astuple
 from functools import reduce
-from typing import List, Union
+from typing import List, Union, Callable
 from uuid import uuid4
 from .interval import Interval
+from ..generators.randoms import Randoms, RandomFn, NDArray
 
 @dataclass
 class Region:
@@ -26,7 +27,7 @@ class Region:
   Properties:           id, lower, upper, dimension, dimensions
   Computed Properties:  lengths, midpoint, size
   Special Methods:      __init__, __getitem__, __contains__, __eq__
-  Methods:              contains, encloses, overlaps, difference
+  Methods:              contains, encloses, overlaps, difference, random_points
   Class Methods:        from_intervals
   """
   id: str
@@ -258,6 +259,29 @@ class Region:
       return None
 
     return Region.from_intervals([d.difference(that[i]) for i, d in enumerate(self.dimensions)])
+
+  def random_points(self, npoints: int = 1, randomng: RandomFn = Randoms.uniform()) -> NDArray:
+    """
+    Randomly draw N samples from a given distribution or random
+    number generation function. Samples are drawn over the interval
+    [lower, upper) specified by this Region. The given size N specifies
+    the number of points to output. The default npoints is 1; a single point
+    is returned. Otherwise, a list with the specified number of samples
+    are drawn. Each point will have the same dimensionality as this Region.
+
+    The default behavior is that samples are uniformly distributed.
+    In other words, any point within the given Region is equally
+    likely to be drawn by uniform. Other distribution or random
+    number generation functions can be substituted via the `randomng`
+    parameter.
+
+    :param npoints:
+    :param randomng:
+    """
+    assert isinstance(npoints, int) and npoints > 0
+    assert isinstance(randomng, Callable)
+
+    return randomng(self.lower, self.upper, [npoints, 2])
 
   @classmethod
   def from_intervals(cls, dimensions: List[Interval]) -> 'Region':
