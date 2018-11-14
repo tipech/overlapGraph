@@ -95,6 +95,24 @@ class TestRegionNoSetup(TestCase):
     self.assertFalse([region.upper[0] + 0.1, region.upper[1]]       in region)
     self.assertFalse([region.upper[0]      , region.upper[1] + 0.1] in region)
 
+  def test_region_encloses(self):
+    region = Region([-5, 5], [0, 10])
+    test_regions = []
+    test_regions.append(Region([-5, 5], [0, 10]))
+    test_regions.append(Region([-6, 4], [1, 11]))
+    test_regions.append(Region([-4, 6], [-1, 9]))
+    test_regions.append(Region([-4, 6], [1, 9]))
+    test_regions.append(Region([-6, 5], [0, 10]))
+    test_regions.append(Region([-2, 7], [-2, 7]))
+
+    for subregion in test_regions:
+      comparsion = all([region.lower[i] <= subregion.lower[i] <= subregion.upper[i] <= region.upper[i] for i in 
+                        range(region.dimension)])
+      #print(f'{subregion} in\n{region}:')
+      #print(f'  expect={comparsion}')
+      #print(f'  actual={subregion in region}')
+      self.assertEqual(subregion in region, comparsion)
+
   def test_region_equality(self):
     test_regions = []
     test_regions.append(Region([-5, 0], [15, 10]))

@@ -11,7 +11,7 @@
 #
 from dataclasses import dataclass, field, astuple
 from functools import reduce
-from typing import List
+from typing import List, Union
 from uuid import uuid4
 from .interval import Interval
 
@@ -26,7 +26,7 @@ class Region:
   Properties:           id, lower, upper, dimension, dimensions
   Computed Properties:  lengths, midpoint, size
   Special Methods:      __init__, __getitem__, __contains__, __eq__
-  Methods:              contains, overlaps, difference
+  Methods:              contains, encloses, overlaps, difference
   Class Methods:        from_intervals
   """
   id: str
@@ -122,16 +122,42 @@ class Region:
 
     return all([d.contains(point[i], inc_lower, inc_upper) for i, d in enumerate(self.dimensions)])
 
-  def __contains__(self, point: List[float]) -> bool:
+  def encloses(self, that: 'Region', inc_lower = True, inc_upper = True) -> bool:
     """
-    Determine if the point lies within the lower and upper bounding vertices (inclusively).
-    Return True if point lies within the lower and upper bounding vertices, otherwise False.
-    Same as: self.contains(point, inc_lower = True, inc_upper = True)
-    Syntactic Sugar: point in self
+    Determine if the region lies within the lower and upper bounding vertices - this Region.
+    If inc_lower is True, includes the lower vertex, otherwise excludes lower vertex.
+    If inc_upper is True, includes the upper vertex, otherwise excludes upper vertex.
+    Return True if region lies within the lower and upper bounding vertices, otherwise False.
 
-    :param point:
+    :param that:
+    :param inc_lower:
+    :param inc_upper:
     """
-    return self.contains(point)
+    assert isinstance(that, Region)
+    assert self.dimension == that.dimension
+
+    return all([d.encloses(that[i], inc_lower, inc_upper) for i, d in enumerate(self.dimensions)])
+
+  def __contains__(self, value: Union['Region', List[float]]) -> bool:
+    """
+    For Type value: List[float]
+      Determine if the point lies within the lower and upper bounding vertices (inclusively).
+      Return True if point lies within the lower and upper bounding vertices, otherwise False.
+      Same as: self.contains(point, inc_lower = True, inc_upper = True)
+      Syntactic Sugar: point in self
+
+    For Type value: Region
+      Determine if the region lies within the lower and upper bounding vertices (inclusively).
+      Return True if region lies within the lower and upper bounding vertices, otherwise False.
+      Same as: self.encloses(that, inc_lower = True, inc_upper = True)
+      Syntactic Sugar: that in self
+
+    :param value:
+    """
+    if isinstance(value, Region):
+      return self.encloses(value)
+    else:
+      return self.contains(value)
 
   def __eq__(self, that: 'Region') -> bool:
     """
