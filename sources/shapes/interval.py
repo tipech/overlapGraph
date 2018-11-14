@@ -26,8 +26,8 @@ class Interval:
   Properties:           lower, upper
   Computed Properties:  length, midpoint
   Special Methods:      __init__, __contains__
-  Methods:              contains, encloses, overlaps, 
-                        difference, random_values
+  Methods:              contains, encloses, overlaps, difference, 
+                        random_values, random_intervals
   """
   lower: float
   upper: float
@@ -218,3 +218,38 @@ class Interval:
     assert isinstance(randomng, Callable)
 
     return randomng(self.lower, self.upper, nvalues)
+
+  def random_intervals(self, nintervals: int = 1, sizepc_range: 'Interval' = None,
+                             posnrng: RandomFn = Randoms.uniform(),
+                             sizerng: RandomFn = Randoms.uniform()) -> List['Interval']:
+    """
+    Randomly generate N Intervals within this Interval, each with a random size
+    as a percentage of the total Interval length, bounded by the given size
+    percentage Interval (enclosed by Interval(0, 1)). The default distributions
+    for choosing the position of the Interval and its size percentage are uniform
+    distributions, but can be substituted for other distribution or random number
+    generation functions via the `posnrng` and `sizerng` parameter.
+
+    :param nintervals:
+    :param sizepc_range:
+    :param posnrng:
+    :param sizerng:
+    """
+    if sizepc_range == None:
+      sizepc_range = Interval(0, 1)
+
+    assert isinstance(sizepc_range, Interval) and Interval(0, 1).encloses(sizepc_range)
+    assert isinstance(posnrng, Callable) and isinstance(sizerng, Callable)
+
+    intervals = []
+    positions = self.random_values(nintervals, posnrng)
+    lengths   = [s * self.length for s in sizepc_range.random_values(nintervals, sizerng)]
+
+    for i in range(nintervals):
+      length = lengths[i]
+      position = positions[i]
+      lower = position if position <= self.midpoint else max(position - length, self.lower)
+      upper = min(lower + length, self.upper)
+      intervals.append(Interval(lower, upper))
+
+    return intervals

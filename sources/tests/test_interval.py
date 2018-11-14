@@ -123,6 +123,15 @@ class TestInterval(TestCase):
   def test_interval_random_values(self):
     interval = Interval(-5, 15)
     randoms = interval.random_values(5)
-    #print(f'{interval}: random={randoms}')
+    #print(f'{interval}:')
     for value in randoms:
+      #print(f'- {value}')
       self.assertTrue(interval.contains(value, inc_upper=False))
+
+  def test_interval_random_interval(self):
+    interval = Interval(-5, 15)
+    randoms = interval.random_intervals(5, Interval(0.25, 0.75))
+    #print(f'{interval}:')
+    for subinterval in randoms:
+      #print(f'- {subinterval}')
+      self.assertTrue(subinterval in interval)
