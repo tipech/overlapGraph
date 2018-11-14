@@ -24,7 +24,7 @@ from unittest import TestCase
 from ..shapes.interval import Interval
 from ..shapes.region import Region
 
-class TestRegionNoSetup(TestCase):
+class TestRegion(TestCase):
 
   test_regions: List[Region]
   overlaps: List[List[bool]]
