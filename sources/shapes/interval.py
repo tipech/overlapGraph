@@ -29,7 +29,7 @@ class Interval:
   Properties:           lower, upper
   Computed Properties:  length, midpoint
   Special Methods:      __init__, __contains__
-  Methods:              contains, encloses, overlaps, intersect,
+  Methods:              contains, encloses, overlaps, intersect, union,
                         random_values, random_intervals
   """
   lower: float
@@ -198,6 +198,33 @@ class Interval:
 
     return Interval(max(self.lower, that.lower),
                     min(self.upper, that.upper))
+
+  def union(self, that: 'Interval') -> 'Interval':
+    """
+    Compute the Interval that encloses both this Interval and the given Interval.
+    Return the enclosing Interval.
+
+    Unions:
+    - |<- Interval A ->|        |<- A ->||<- B ->|
+      |<- Interval B ->|        |<- B ->||<- A ->|
+      |<- ########## ->|        |<- ########## ->|
+    - |<--- Interval A --->|        |<- Interval A ->|
+          |<- Interval B ->|    |<--- Interval B --->|
+      |<- ############## ->|    |<- ############## ->|
+    - |<- Interval A ->|        |<- Interval A ->|
+          |<- Interval B ->|    |<- Interval B ->|
+      |<- ############## ->|    |<- ############## ->|
+    - |<- A ->|    |<- B ->|    |<- B ->|    |<- A ->|
+      |<- ############## ->|    |<- ############## ->|
+
+    :param that:
+    """
+    assert isinstance(that, Interval)
+    assert self._instance_invariant
+    assert that._instance_invariant
+
+    return Interval(min(self.lower, that.lower),
+                    max(self.upper, that.upper))
 
   def random_values(self, nvalues: int = 1, randomng: RandomFn = Randoms.uniform()) -> NDArray:
     """

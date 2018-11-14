@@ -10,6 +10,7 @@
 #   - test_interval_contains
 #   - test_interval_overlaps
 #   - test_interval_intersect
+#   - test_interval_union
 #   - test_interval_random_values
 #   - test_interval_random_intervals
 #
@@ -121,6 +122,16 @@ class TestInterval(TestCase):
           #print(f'  expect=None')
           #print(f'  actual={intersect}')
           self.assertEqual(intersect, None)
+
+  def test_interval_union(self):
+    for first in self.test_intervals:
+      for second in self.test_intervals:
+        union = first.union(second)
+        #print(f'{first} and {second}:')
+        #print(f'  union={union}')
+        #print(f'  length={union.length}')
+        self.assertTrue(first in union)
+        self.assertTrue(second in union)
 
   def test_interval_random_values(self):
     interval = Interval(-5, 15)
