@@ -27,7 +27,8 @@ class Region:
   Properties:           id, lower, upper, dimension, dimensions
   Computed Properties:  lengths, midpoint, size
   Special Methods:      __init__, __getitem__, __contains__, __eq__
-  Methods:              contains, encloses, overlaps, difference, random_points
+  Methods:              contains, encloses, overlaps, difference, 
+                        random_points, random_regions
   Class Methods:        from_intervals
   """
   id: str
@@ -137,6 +138,9 @@ class Region:
     assert isinstance(that, Region)
     assert self.dimension == that.dimension
 
+    if self == that:
+      return True
+
     return all([d.encloses(that[i], inc_lower, inc_upper) for i, d in enumerate(self.dimensions)])
 
   def __contains__(self, value: Union['Region', List[float]]) -> bool:
@@ -169,10 +173,9 @@ class Region:
 
     :param that:
     """
-    assert isinstance(that, Region)
-    assert self.dimension == that.dimension
-
-    return all([d == that[i] for i, d in enumerate(self.dimensions)])
+    return that is not None and \
+           all([isinstance(that, Region), self.dimension == that.dimension]) and \
+           all([d == that[i] for i, d in enumerate(self.dimensions)])
 
   def overlaps(self, that: 'Region') -> bool:
     """
@@ -282,6 +285,40 @@ class Region:
     assert isinstance(randomng, Callable)
 
     return randomng(self.lower, self.upper, [npoints, 2])
+
+  def random_regions(self, nregions: int = 1, sizepc_range: 'Region' = None,
+                           posnrng: RandomFn = Randoms.uniform(),
+                           sizerng: RandomFn = Randoms.uniform()) -> List['Region']:
+    """
+    Randomly generate N Regions within this Regions, each with a random size
+    as a percentage of the total Region dimensions, bounded by the given size
+    percentage Region (enclosed by Region([0, ...], [1, ...])). All subregions
+    must have the same number of dimensions as this Region. The default 
+    distributions for choosing the position of the Region and its size percentage
+    are uniform distributions, but can be substituted for other distribution or
+    random number generation functions via the `posnrng` and `sizerng` parameter.
+
+    :param nregions:
+    :param sizepc_range:
+    :param posnrng:
+    :param sizerng:
+    """
+    ndunit_region = Region([0] * self.dimension, [1] * self.dimension)
+    if sizepc_range == None:
+      sizepc_range = ndunit_region
+
+    assert isinstance(sizepc_range, Region) and self.dimension == sizepc_range.dimension
+    assert ndunit_region.encloses(sizepc_range)
+    assert isinstance(posnrng, Callable) and isinstance(sizerng, Callable)
+
+    regions = []
+    for _ in range(nregions):
+      region = []
+      for i, d in enumerate(self.dimensions):
+        dimension = d.random_intervals(1, sizepc_range[i], posnrng, sizerng)[0]
+        region.append(dimension)
+      regions.append(Region.from_intervals(region))
+    return regions
 
   @classmethod
   def from_intervals(cls, dimensions: List[Interval]) -> 'Region':

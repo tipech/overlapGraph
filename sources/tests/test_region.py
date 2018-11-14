@@ -162,3 +162,11 @@ class TestRegionNoSetup(TestCase):
     #print(f'{region}: random={points}')
     for point in points:
       self.assertTrue(region.contains(list(point), inc_upper=False))
+
+  def test_interval_random_regions(self):
+    region = Region([-5, 0], [15, 10])
+    randoms = region.random_regions(5, Region([0.25, 0.25], [0.75, 0.75]))
+    #print(f'{region}:')
+    for subregion in randoms:
+      #print(f'- {subregion}')
+      self.assertTrue(subregion in region)
