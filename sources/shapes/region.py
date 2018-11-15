@@ -337,9 +337,11 @@ class Region:
     return regions
 
   @classmethod
-  def from_intervals(cls, dimensions: List[Interval]) -> 'Region':
+  def from_intervals(cls, dimensions: List[Interval], id: str = '') -> 'Region':
     """
     Construct a new Region from the given a list of Intervals.
+    If id is specified, sets it as the unique identifier for this Region,
+    otherwise generates a random identifier, UUID v4.
     Returns a Region of dimension X, for a list of Intervals of length X.
 
     :param dimensions:
@@ -348,4 +350,4 @@ class Region:
     assert all([isinstance(d, Interval) for d in dimensions])
 
     return cls([d.lower for d in dimensions],
-               [d.upper for d in dimensions])
+               [d.upper for d in dimensions], id)
