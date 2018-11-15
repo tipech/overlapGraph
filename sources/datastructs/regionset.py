@@ -202,10 +202,12 @@ class RegionSet(Iterable[Region]):
     dimensions as the bounding Region. The default distributions for choosing the
     position of the Region and its size percentage are uniform distributions, but
     can be substituted for other distribution or random number generation functions
-    via the `posnrng` and `sizerng` parameter. If intonly is True, return the
-    randomly generated Regions where the lower and upper bounding values are
-    floored/truncated into integer values. If base26_ids is True, the randonly
-    generated Region will be assign a numeric ID, encoded in Base26 (A - Z).
+    via the `posnrng` and `sizerng` parameter. If precision is given, return the
+    randomly generated Intervals where the lower and upper bounding values are 
+    rounded/truncated to the specified precision (number of digits after the
+    decimal point). If precision is None, the lower and upper bounding values
+    are of arbitrary precision. If base26_ids is True, the randonly generated
+    Region will be assign a numeric ID, encoded in Base26 (A - Z).
 
     :param nregions:
     :param bounds:

@@ -53,14 +53,14 @@ class TestRegionSet(TestCase):
     nregions = 50
     bounds = Region([0]*2, [10]*2)
     sizepc_range = Region([0]*2, [0.5]*2)
-    regionset = RegionSet.from_random(nregions, bounds, sizepc_range = sizepc_range, intonly = True)
+    regionset = RegionSet.from_random(nregions, bounds, sizepc_range = sizepc_range, precision = 1)
     self._test_regionset(regionset, nregions, bounds, regionset)
 
   def test_regionset_tofrom_json(self):
     nregions = 10
     bounds = Region([0]*2, [100]*2)
     sizepc_range = Region([0]*2, [0.5]*2)
-    regionset = RegionSet.from_random(nregions, bounds, sizepc_range = sizepc_range, intonly = True)
+    regionset = RegionSet.from_random(nregions, bounds, sizepc_range = sizepc_range, precision = 1)
 
     with StringIO() as output:
       regionset.to_json(output, compact = True)

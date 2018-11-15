@@ -144,7 +144,7 @@ class TestInterval(TestCase):
   def test_interval_random_interval(self):
     interval = Interval(-5, 15)
     randoms  = interval.random_intervals(5, Interval(0.25, 0.75))
-    randoms += interval.random_intervals(5, Interval(0.25, 0.75), intonly = True)
+    randoms += interval.random_intervals(5, Interval(0.25, 0.75), precision = 0)
     #print(f'{interval}:')
     for subinterval in randoms:
       #print(f'- {subinterval}')

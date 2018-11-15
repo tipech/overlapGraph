@@ -252,25 +252,29 @@ class Interval:
   def random_intervals(self, nintervals: int = 1, sizepc_range: 'Interval' = None,
                              posnrng: RandomFn = Randoms.uniform(),
                              sizerng: RandomFn = Randoms.uniform(),
-                             intonly: bool = False) -> List['Interval']:
+                             precision: int = None) -> List['Interval']:
     """
     Randomly generate N Intervals within this Interval, each with a random size
     as a percentage of the total Interval length, bounded by the given size
     percentage Interval (enclosed by Interval(0, 1)). The default distributions
     for choosing the position of the Interval and its size percentage are uniform
     distributions, but can be substituted for other distribution or random number
-    generation functions via the `posnrng` and `sizerng` parameter. If intonly is
-    True, return the randomly generated Intervals where the lower and upper
-    bounding values are floored/truncated into integer values.
+    generation functions via the `posnrng` and `sizerng` parameter. If precision is
+    given, return the randomly generated Intervals where the lower and upper
+    bounding values are rounded/truncated to the specified precision (number of
+    digits after the decimal point). If precision is None, the lower and upper
+    bounding values are of arbitrary precision.
 
     :param nintervals:
     :param sizepc_range:
     :param posnrng:
     :param sizerng:
-    :param intonly:
+    :param precision:
     """
     if sizepc_range == None:
       sizepc_range = Interval(0, 1)
+    if precision != None:
+      assert isinstance(precision, int)
 
     assert isinstance(sizepc_range, Interval) and Interval(0, 1).encloses(sizepc_range)
     assert isinstance(posnrng, Callable) and isinstance(sizerng, Callable)
@@ -284,9 +288,9 @@ class Interval:
       position = positions[i]
       lower = position if position <= self.midpoint else max(position - length, self.lower)
       upper = min(lower + length, self.upper)
-      if intonly:
-        lower = floor(lower)
-        upper = floor(upper)
+      if precision != None:
+        lower = round(lower, precision)
+        upper = round(upper, precision)
       intervals.append(Interval(lower, upper))
 
     return intervals
