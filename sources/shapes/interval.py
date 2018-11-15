@@ -14,7 +14,7 @@
 from dataclasses import dataclass
 from numpy import floor
 from typing import List, Union, Callable
-from ..generators.randoms import Randoms, RandomFn, NDArray
+from ..helpers.randoms import Randoms, RandomFn, NDArray
 
 @dataclass
 class Interval:

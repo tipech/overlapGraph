@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# generators/randoms.py - Random Number Generators
+# helpers/randoms.py - Random Number Generators
 #
 # This script implements the Randoms class, a static class
 # that provides factory methods that each return Callable (lambdas)

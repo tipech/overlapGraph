@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# generators/regionset.py - Regions Collection
+# shapes/regionset.py - Regions Collection
 #
 # This script implements the RegionSet class, a data class
 # that represents a collection of Regions dataset. Provides
@@ -13,8 +13,8 @@
 from dataclasses import dataclass
 from typing import List, Union, Iterable, Iterator
 from uuid import uuid4
-from ..shapes.region import Region
-from .randoms import Randoms, RandomFn
+from ..helpers.randoms import Randoms, RandomFn
+from .region import Region
 
 @dataclass
 class RegionSet(Iterable[Region]):

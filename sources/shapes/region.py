@@ -15,7 +15,7 @@ from functools import reduce
 from typing import List, Union, Callable
 from uuid import uuid4
 from .interval import Interval
-from ..generators.randoms import Randoms, RandomFn, NDArray
+from ..helpers.randoms import Randoms, RandomFn, NDArray
 
 @dataclass
 class Region:

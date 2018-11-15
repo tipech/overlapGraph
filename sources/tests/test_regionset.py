@@ -12,7 +12,7 @@
 from dataclasses import asdict, astuple
 from typing import List
 from unittest import TestCase
-from ..generators.regionset import RegionSet
+from ..shapes.regionset import RegionSet
 from ..shapes.region import Region
 
 class TestRegionSet(TestCase):
