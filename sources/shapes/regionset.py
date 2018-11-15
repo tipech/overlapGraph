@@ -12,8 +12,8 @@
 #
 from dataclasses import dataclass, asdict, astuple
 from io import TextIOBase
-from json import JSONEncoder
-from typing import List, Union, Iterable, Iterator
+from json import JSONEncoder, load as JSONLoader
+from typing import Dict, List, Union, Iterable, Iterator
 from uuid import uuid4
 from ..helpers.base26 import to_base26
 from ..helpers.randoms import Randoms, RandomFn
@@ -31,7 +31,7 @@ class RegionSet(Iterable[Region]):
   Computed Properties:  size, minbound
   Special Methods:      __init__, __getitem__, __contains__, __iter__
   Methods:              add, get, to_json
-  Class Methods:        from_random
+  Class Methods:        from_random, from_json
   """
   id: str
   dimension: int
@@ -168,19 +168,21 @@ class RegionSet(Iterable[Region]):
     """
     assert output.writable()
 
-    regionset_fields = ['id', 'dimension', 'size', 'bounds', 'regions']
-    region_fields = ['id', 'dimension', 'dimensions']
+    fields = {
+      'RegionSet': ['id', 'dimension', 'size', 'bounds', 'regions'],
+      'Region': ['id', 'dimension', 'dimensions']
+    }
 
-    def pick_fields(value, picks):
-      return [(key, getattr(value, key)) for key in picks]
+    def pick_fields(value):
+      return [(f, getattr(value, f)) for f in fields[value.__class__.__name__]]
 
     def json_encoder(value):
       if isinstance(value, RegionSet):
-        return dict(pick_fields(value, regionset_fields)) if compact else asdict(value)
+        return dict(pick_fields(value)) if compact else asdict(value)
       if isinstance(value, Interval):
         return astuple(value)
       if isinstance(value, Region):
-        return dict(pick_fields(value, region_fields)) if compact else asdict(value)
+        return dict(pick_fields(value)) if compact else asdict(value)
       raise TypeError(f'{value}')
 
     encoder = JSONEncoder(indent = 2, default = json_encoder, **options)
@@ -221,3 +223,50 @@ class RegionSet(Iterable[Region]):
       regionset.add(region)
 
     return regionset
+
+  @classmethod
+  def from_json(cls, source: TextIOBase) -> 'RegionSet':
+    """
+    Load a new collection of Regions in the JSON serialization 
+    format from the given source input readable IO stream. Construct and 
+    return the serialized RegionSet.
+
+      with open('input.csv', 'r') as f:
+        regionset = RegionSet.from_json(f)
+
+    :param source:
+    """
+    assert source.readable()
+
+    fields = {
+      'RegionSet': ['id', 'dimension', 'size', 'bounds', 'regions'],
+      'Region': ['id', 'dimension', 'dimensions'],
+      'Interval': ['lower', 'upper']
+    }
+
+    def check_fields(object, clazz):
+      return all([f in object for f in fields[clazz.__name__]])
+
+    def decode_interval(object):
+      if isinstance(object, Dict):
+        assert check_fields(object, Interval)
+        return Interval(**object)
+      else:
+        assert isinstance(object, List) and len(object) == 2
+        return Interval(*object)
+
+    def decode_region(object):
+      assert check_fields(object, Region)
+      assert isinstance(object['dimensions'], List)
+      dimensions = [decode_interval(d) for d in object['dimensions']]
+      return Region.from_intervals(dimensions, object['id'])
+
+    def decode_regionset(object):
+      assert check_fields(object, RegionSet)
+      assert isinstance(object['regions'], List)
+      regionset = RegionSet(object['id'], decode_region(object['bounds']), object['dimension'])
+      for region in object['regions']:
+        regionset.add(decode_region(region))
+      return regionset
+
+    return decode_regionset(JSONLoader(source))

@@ -8,15 +8,28 @@
 #   - test_regionset_dimension_mismatch
 #   - test_regionset_outofbounds
 #   - test_regionset_from_random
+#   - test_regionset_to_json
 #
 
-from dataclasses import asdict, astuple
-from typing import List
+from io import StringIO
+from typing import List, Iterable
 from unittest import TestCase
 from ..shapes.regionset import RegionSet
 from ..shapes.region import Region
 
 class TestRegionSet(TestCase):
+
+  def _test_regionset(self, regionset: RegionSet, nregions: int, bounds: Region, regions: Iterable[Region]):
+    #print(f'{regionset}')
+    self.assertEqual(regionset.size, nregions)
+    self.assertTrue(bounds.encloses(regionset.minbounds))
+    for i, region in enumerate(regions):
+      #print(f'{region}')
+      self.assertEqual(region, regionset[i])
+      self.assertEqual(region, regionset[region.id])
+      self.assertTrue(region in regionset)
+      self.assertTrue(region.id in regionset)
+      self.assertTrue(bounds.encloses(region))
 
   def test_create_regionset(self):
     bounds = Region([0, 0], [100, 100])
@@ -24,16 +37,7 @@ class TestRegionSet(TestCase):
     regions = bounds.random_regions(10)
     for region in regions:
       regionset.add(region)
-
-    #print(f'{regionset}')
-    self.assertEqual(regionset.size, len(regions))
-    self.assertTrue(bounds.encloses(regionset.minbounds))
-    for i, region in enumerate(regions):
-      self.assertEqual(region, regionset[i])
-      self.assertEqual(region, regionset[region.id])
-      self.assertTrue(region in regionset)
-      self.assertTrue(region.id in regionset)
-      self.assertTrue(bounds.encloses(region))
+    self._test_regionset(regionset, len(regions), bounds, regions)
 
   def test_regionset_dimension_mismatch(self):
     regionset = RegionSet(dimension = 2)
@@ -50,13 +54,25 @@ class TestRegionSet(TestCase):
     bounds = Region([0]*2, [10]*2)
     sizepc_range = Region([0]*2, [0.5]*2)
     regionset = RegionSet.from_random(nregions, bounds, sizepc_range = sizepc_range, intonly = True)
-    self.assertEqual(regionset.size, nregions)
-    self.assertEqual(regionset.dimension, bounds.dimension)
-    self.assertTrue(bounds.encloses(regionset.minbounds))
-    for i, region in enumerate(regionset):
-      #print(f'{region}')
-      self.assertEqual(region, regionset[i])
-      self.assertEqual(region, regionset[region.id])
-      self.assertTrue(region in regionset)
-      self.assertTrue(region.id in regionset)
-      self.assertTrue(bounds.encloses(region))
+    self._test_regionset(regionset, nregions, bounds, regionset)
+
+  def test_regionset_tofrom_json(self):
+    nregions = 10
+    bounds = Region([0]*2, [100]*2)
+    sizepc_range = Region([0]*2, [0.5]*2)
+    regionset = RegionSet.from_random(nregions, bounds, sizepc_range = sizepc_range, intonly = True)
+
+    with StringIO() as output:
+      regionset.to_json(output, compact = True)
+      before = output.getvalue()
+      #print(before)
+      output.seek(0)
+      newregionset = RegionSet.from_json(output)
+      self._test_regionset(newregionset, nregions, bounds, regionset)
+
+      output.truncate(0)
+      output.seek(0)
+      newregionset.to_json(output, compact = True)
+      after = output.getvalue()
+      #print(after)
+      self.assertEqual(before, after)
