@@ -7,6 +7,7 @@
 #   - test_create_regionset
 #   - test_regionset_dimension_mismatch
 #   - test_regionset_outofbounds
+#   - test_regionset_from_random
 #
 
 from dataclasses import asdict, astuple
@@ -43,3 +44,19 @@ class TestRegionSet(TestCase):
     regionset = RegionSet(bounds = Region([0, 0], [10, 10]))
     with self.assertRaises(AssertionError):
       regionset.add(Region([-1, -1],[5, 5]))
+
+  def test_regionset_from_random(self):
+    nregions = 50
+    bounds = Region([0]*2, [10]*2)
+    sizepc_range = Region([0]*2, [0.5]*2)
+    regionset = RegionSet.from_random(nregions, bounds, sizepc_range = sizepc_range, intonly = True)
+    self.assertEqual(regionset.size, nregions)
+    self.assertEqual(regionset.dimension, bounds.dimension)
+    self.assertTrue(bounds.encloses(regionset.minbounds))
+    for i, region in enumerate(regionset):
+      #print(f'{region}')
+      self.assertEqual(region, regionset[i])
+      self.assertEqual(region, regionset[region.id])
+      self.assertTrue(region in regionset)
+      self.assertTrue(region.id in regionset)
+      self.assertTrue(bounds.encloses(region))

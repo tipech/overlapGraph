@@ -13,6 +13,7 @@
 from dataclasses import dataclass
 from typing import List, Union, Iterable, Iterator
 from uuid import uuid4
+from ..helpers.base26 import to_base26
 from ..helpers.randoms import Randoms, RandomFn
 from .region import Region
 
@@ -145,3 +146,38 @@ class RegionSet(Iterable[Region]):
       assert self.bounds.encloses(region)
 
     self.regions.append(region)
+
+  @classmethod
+  def from_random(cls, nregions: int, bounds: Region, 
+                       id: str = '', base26_ids: bool = True,
+                       **args) -> 'RegionSet':
+    """
+    Construct a new RegionSet with N randomly generated Regions.
+    All randomly generated Regions must be enclosed by the given bounding Region.
+    Each Region has a random size as a percentage of the total bounding Region 
+    dimensions, bounded by the given size percentage Region (enclosed by 
+    Region([0, ...], [1, ...])). All subregions must have the same number of
+    dimensions as the bounding Region. The default distributions for choosing the
+    position of the Region and its size percentage are uniform distributions, but
+    can be substituted for other distribution or random number generation functions
+    via the `posnrng` and `sizerng` parameter. If intonly is True, return the
+    randomly generated Regions where the lower and upper bounding values are
+    floored/truncated into integer values. If base26_ids is True, the randonly
+    generated Region will be assign a numeric ID, encoded in Base26 (A - Z).
+
+    :param nregions:
+    :param bounds:
+    :param id:
+    :param base26_ids:
+    :param args:
+    """
+    assert isinstance(nregions, int) and nregions > 0
+
+    regionset = cls(id, bounds)
+    regions = bounds.random_regions(nregions, **args)
+    for n, region in enumerate(regions):
+      if base26_ids:
+        region.id = to_base26(n + 1)
+      regionset.add(region)
+
+    return regionset
