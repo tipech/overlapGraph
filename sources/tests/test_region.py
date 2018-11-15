@@ -5,7 +5,7 @@
 #
 # This script implements the following tests:
 #   - test_create_region
-#   - test_dimension_mismatch
+#   - test_region_dimension_mismatch
 #   - test_region_properties
 #   - test_region_contains
 #   - test_region_equality
@@ -58,7 +58,7 @@ class TestRegion(TestCase):
       self.assertTrue(all([d == 0 for d in region.lower]))
       self.assertTrue(all([d == 5 for d in region.upper]))
 
-  def test_dimension_mismatch(self):
+  def test_region_dimension_mismatch(self):
     with self.assertRaises(AssertionError):
       Region([0, 0], [10, 10], dimension = 3)
     with self.assertRaises(AssertionError):
