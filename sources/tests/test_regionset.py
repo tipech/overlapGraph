@@ -32,6 +32,7 @@ class TestRegionSet(TestCase):
       self.assertEqual(region, regionset[region.id])
       self.assertTrue(region in regionset)
       self.assertTrue(region.id in regionset)
+      self.assertTrue(bounds.encloses(region))
 
   def test_regionset_dimension_mismatch(self):
     regionset = RegionSet(dimension = 2)
