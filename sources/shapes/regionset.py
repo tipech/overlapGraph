@@ -10,11 +10,14 @@
 # collection of Regions is then passed to the Intersection
 # Graph construction algorithm.
 #
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict, astuple
+from io import TextIOBase
+from json import JSONEncoder
 from typing import List, Union, Iterable, Iterator
 from uuid import uuid4
 from ..helpers.base26 import to_base26
 from ..helpers.randoms import Randoms, RandomFn
+from .interval import Interval
 from .region import Region
 
 @dataclass
@@ -27,13 +30,13 @@ class RegionSet(Iterable[Region]):
   Properties:           name, dimension, regions, bounds
   Computed Properties:  size, minbound
   Special Methods:      __init__, __getitem__, __contains__, __iter__
-  Methods:              add, get
+  Methods:              add, get, to_json
   Class Methods:        from_random
   """
   id: str
   dimension: int
-  regions: List[Region]
   bounds: Region
+  regions: List[Region]
 
   def __init__(self, id: str = '', bounds: Region = None, dimension: int = 1):
     """
@@ -147,6 +150,42 @@ class RegionSet(Iterable[Region]):
       assert self.bounds.encloses(region)
 
     self.regions.append(region)
+
+  def to_json(self, output: TextIOBase, compact: bool = False, **options):
+    """
+    Output this collection of Regions in the JSON serialization 
+    format to the given output writable IO stream. If compact is 
+    True, output abbreviated JSON data structure, otherwise output
+    all fields in full.
+
+      regionset = RegionSet.from_random(100, Region([0]*2, [100]*2))
+      with open('output.csv', 'w') as f:
+        regionset.to_json(f, compact = True)
+
+    :param output:
+    :param compact:
+    :param options:
+    """
+    assert output.writable()
+
+    regionset_fields = ['id', 'dimension', 'size', 'bounds', 'regions']
+    region_fields = ['id', 'dimension', 'dimensions']
+
+    def pick_fields(value, picks):
+      return [(key, getattr(value, key)) for key in picks]
+
+    def json_encoder(value):
+      if isinstance(value, RegionSet):
+        return dict(pick_fields(value, regionset_fields)) if compact else asdict(value)
+      if isinstance(value, Interval):
+        return astuple(value)
+      if isinstance(value, Region):
+        return dict(pick_fields(value, region_fields)) if compact else asdict(value)
+      raise TypeError(f'{value}')
+
+    encoder = JSONEncoder(indent = 2, default = json_encoder, **options)
+    for chunk in encoder.iterencode(self):
+      output.write(chunk)
 
   @classmethod
   def from_random(cls, nregions: int, bounds: Region, 
