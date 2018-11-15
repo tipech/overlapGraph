@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# tests/test_interval.py - Unit tests for shapes/interval.py
+# tests/test_interval.py - Unit tests for datastructs/interval.py
 #
 # This script implements the following tests:
 #   - test_create_interval
@@ -19,7 +19,7 @@ from dataclasses import asdict, astuple
 from numpy import mean
 from typing import List
 from unittest import TestCase
-from ..shapes.interval import Interval
+from ..datastructs.interval import Interval
 
 class TestInterval(TestCase):
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# tests/test_regionset.py - Unit tests for generators/regionet.py
+# tests/test_regionset.py - Unit tests for datastructs/regionet.py
 #
 # This script implements the following tests:
 #   - test_create_regionset
@@ -14,8 +14,8 @@
 from io import StringIO
 from typing import List, Iterable
 from unittest import TestCase
-from ..shapes.regionset import RegionSet
-from ..shapes.region import Region
+from ..datastructs.regionset import RegionSet
+from ..datastructs.region import Region
 
 class TestRegionSet(TestCase):
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# shapes/interval.py - Interval class
+# datastructs/interval.py - Interval class
 #
 # This script implements the Interval class, a data class that defines
 # lower and upper bounding values for an interval. Are the building blocks for

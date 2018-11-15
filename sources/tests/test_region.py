@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# tests/test_region.py - Unit tests for shapes/region.py
+# tests/test_region.py - Unit tests for datastructs/region.py
 #
 # This script implements the following tests:
 #   - test_create_region
@@ -21,8 +21,8 @@ from functools import reduce
 from numpy import mean
 from typing import List
 from unittest import TestCase
-from ..shapes.interval import Interval
-from ..shapes.region import Region
+from ..datastructs.interval import Interval
+from ..datastructs.region import Region
 
 class TestRegion(TestCase):
 
