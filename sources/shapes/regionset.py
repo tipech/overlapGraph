@@ -24,10 +24,11 @@ class RegionSet(Iterable[Region]):
   Provides methods for generating new datasets, and loading from or
   saving to a file, in the JSON or CSV file formats.
 
-  Properties:           name, dimension, regions
-  Computed Properties:  size, bound
+  Properties:           name, dimension, regions, bounds
+  Computed Properties:  size, minbound
   Special Methods:      __init__, __getitem__, __contains__, __iter__
   Methods:              add, get
+  Class Methods:        from_random
   """
   id: str
   dimension: int
