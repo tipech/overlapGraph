@@ -16,7 +16,7 @@ from numpy import floor
 from typing import List, Union, Callable
 from ..helpers.randoms import Randoms, RandomFn, NDArray
 
-@dataclass
+@dataclass(order = True)
 class Interval:
   """
   Dataclass that defines the lower and upper bounding values for an interval.
