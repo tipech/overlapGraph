@@ -15,6 +15,7 @@
 #   - test_region_project
 #   - test_interval_random_points
 #   - test_interval_random_regions
+#   - test_interval_from_intervals
 #   - test_interval_from_interval
 #
 
@@ -203,6 +204,19 @@ class TestRegion(TestCase):
     for subregion in randoms:
       #print(f'- {subregion}')
       self.assertTrue(subregion in region)
+
+  def test_interval_from_intervals(self):
+    ndimens = 5
+    base_interval = Interval(1, 5)
+    intervals = [Interval(base_interval.lower + d,
+                          base_interval.upper + d) for d in range(ndimens)]
+    region = Region.from_intervals(intervals)
+    #print(f'{region}')
+    self.assertEqual(region.dimension, ndimens)
+    self.assertEqual(region.lower, [base_interval.lower + d for d in range(ndimens)])
+    self.assertEqual(region.upper, [base_interval.upper + d for d in range(ndimens)])
+    for d, dimension in enumerate(region.dimensions):
+      self.assertEqual(dimension, intervals[d])
 
   def test_interval_from_interval(self):
     ndimens = 5
