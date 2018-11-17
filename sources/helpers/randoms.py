@@ -10,8 +10,10 @@
 # The only missing parameters is the lower and upper bounds of the
 # values generated and the sample size of the output.
 #
-from typing import List, Dict, Union, Callable
-from numpy import random, ndarray
+
+from typing import Callable, Dict, List, Union
+
+from numpy import ndarray, random
 
 ShapeSize = Union[None,int,List[int]]
 NDArray   = ndarray

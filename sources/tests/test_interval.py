@@ -16,10 +16,13 @@
 #
 
 from dataclasses import asdict, astuple
-from numpy import mean
 from typing import List
 from unittest import TestCase
+
+from numpy import mean
+
 from ..datastructs.interval import Interval
+
 
 class TestInterval(TestCase):
 

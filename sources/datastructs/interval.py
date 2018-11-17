@@ -11,10 +11,14 @@
 # intervals is, what the union interval between the two intervals is,
 # randomly generate intervals, and randomly choose values within an interval.
 #
+
 from dataclasses import dataclass
+from typing import Callable, List, Union
+
 from numpy import floor
-from typing import List, Union, Callable
-from ..helpers.randoms import Randoms, RandomFn, NDArray
+
+from ..helpers.randoms import NDArray, RandomFn, Randoms
+
 
 @dataclass(order = True)
 class Interval:

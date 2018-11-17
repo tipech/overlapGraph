@@ -10,15 +10,19 @@
 # collection of Regions is then passed to the Intersection
 # Graph construction algorithm.
 #
-from dataclasses import dataclass, asdict, astuple
+
+from dataclasses import asdict, astuple, dataclass
 from io import TextIOBase
-from json import JSONEncoder, load as JSONLoader
-from typing import Dict, List, Union, Iterable, Iterator
+from json import JSONEncoder
+from json import load as JSONLoader
+from typing import Dict, Iterable, Iterator, List, Union
 from uuid import uuid4
+
 from ..helpers.base26 import to_base26
-from ..helpers.randoms import Randoms, RandomFn
+from ..helpers.randoms import RandomFn, Randoms
 from .interval import Interval
 from .region import Region
+
 
 @dataclass
 class RegionSet(Iterable[Region]):

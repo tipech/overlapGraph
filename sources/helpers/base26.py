@@ -12,8 +12,10 @@
 # 
 #   A, B, C, ..., X, Y, Z, AA, AB, ...
 #
+
 from functools import reduce
 from string import ascii_uppercase as alphabet
+
 
 def _divmod_base26(n):
   a, b = divmod(n, 26)

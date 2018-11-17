@@ -12,10 +12,12 @@
 #
 
 from io import StringIO
-from typing import List, Iterable
+from typing import Iterable, List
 from unittest import TestCase
-from ..datastructs.regionset import RegionSet
+
 from ..datastructs.region import Region
+from ..datastructs.regionset import RegionSet
+
 
 class TestRegionSet(TestCase):
 

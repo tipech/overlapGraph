@@ -21,11 +21,14 @@
 
 from dataclasses import asdict, astuple
 from functools import reduce
-from numpy import mean
 from typing import List
 from unittest import TestCase
+
+from numpy import mean
+
 from ..datastructs.interval import Interval
 from ..datastructs.region import Region
+
 
 class TestRegion(TestCase):
 

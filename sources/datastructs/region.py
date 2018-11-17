@@ -10,12 +10,15 @@
 # between the two regions are, and randomly generate regions and points
 # within a region.
 #
-from dataclasses import dataclass, field, astuple
+
+from dataclasses import astuple, dataclass, field
 from functools import reduce
-from typing import List, Union, Callable
+from typing import Callable, List, Union
 from uuid import uuid4
+
+from ..helpers.randoms import NDArray, RandomFn, Randoms
 from .interval import Interval
-from ..helpers.randoms import Randoms, RandomFn, NDArray
+
 
 @dataclass
 class Region:
