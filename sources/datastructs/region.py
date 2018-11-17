@@ -390,6 +390,7 @@ class Region:
     Returns a Region of dimension X, for a list of Intervals of length X.
 
     :param dimensions:
+    :param id:
     """
     assert isinstance(dimensions, List)
     assert all([isinstance(d, Interval) for d in dimensions])
