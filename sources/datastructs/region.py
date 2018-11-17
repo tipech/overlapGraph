@@ -30,7 +30,7 @@ class Region:
   Computed Properties:  lengths, midpoint, size
   Special Methods:      __init__, __getitem__, __contains__, __eq__
   Methods:              contains, encloses, overlaps, intersect, union,
-                        random_points, random_regions
+                        project, random_points, random_regions
   Class Methods:        from_intervals
   """
   id: str
@@ -298,6 +298,26 @@ class Region:
 
     return Region.from_intervals([d.union(that[i]) for i, d in enumerate(self.dimensions)])
 
+  def project(self, dimension: int) -> 'Region':
+    """
+    Project this Region to the specified number of dimensions. If the given
+    number of dimensions is greater than this Region's dimensionality, output
+    a Region with additional dimensions with [0, 0] intervals. If the given
+    number of dimensions is less than this Region's dimensionality, output a
+    Region with the additional dimensions removed. If the given number of
+    dimensions is less than this Region's dimensionality, outputs a copy of
+    this Region.
+
+    :param dimension:
+    """
+    assert dimension > 0
+
+    if dimension == self.dimension:
+      return Region.from_intervals(self.dimensions)
+    else:
+      return Region.from_intervals([(Interval(0, 0) if d >= self.dimension \
+                                                    else self[d]) for d in range(dimension)])
+
   def random_points(self, npoints: int = 1, randomng: RandomFn = Randoms.uniform()) -> NDArray:
     """
     Randomly draw N samples from a given distribution or random
@@ -329,12 +349,12 @@ class Region:
     Randomly generate N Regions within this Regions, each with a random size
     as a percentage of the total Region dimensions, bounded by the given size
     percentage Region (enclosed by Region([0, ...], [1, ...])). All subregions
-    must have the same number of dimensions as this Region. The default 
+    must have the same number of dimensions as this Region. The default
     distributions for choosing the position of the Region and its size percentage
     are uniform distributions, but can be substituted for other distribution or
     random number generation functions via the `posnrng` and `sizerng` parameter.
     If precision is given, return the randomly generated Intervals where the lower
-    and upper bounding values are rounded/truncated to the specified precision 
+    and upper bounding values are rounded/truncated to the specified precision
     (number of digits after the decimal point). If precision is None, the lower
     and upper bounding values are of arbitrary precision.
 

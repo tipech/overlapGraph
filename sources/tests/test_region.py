@@ -12,6 +12,7 @@
 #   - test_region_overlaps
 #   - test_region_intersect
 #   - test_region_union
+#   - test_region_project
 #   - test_interval_random_points
 #   - test_interval_random_regions
 #
@@ -169,6 +170,17 @@ class TestRegion(TestCase):
         #print(f'  size={union.size}')
         self.assertTrue(first in union)
         self.assertTrue(second in union)
+
+  def test_region_project(self):
+    dimlimit = 7
+    region = Region([-5, 5, 0], [15, 10, 50])
+    for d in range(1, dimlimit):
+      new_region = region.project(d)
+      #print(f'{new_region}')
+      self.assertEqual(new_region.dimension, d)
+      for i in range(0, d):
+        interval = region[i] if i < region.dimension else Interval(0, 0)
+        self.assertEqual(new_region[i], interval)
 
   def test_region_random_points(self):
     region2d = Region([-5, 0], [15, 10])
