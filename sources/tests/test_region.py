@@ -15,6 +15,7 @@
 #   - test_region_project
 #   - test_interval_random_points
 #   - test_interval_random_regions
+#   - test_interval_from_interval
 #
 
 from dataclasses import asdict, astuple
@@ -202,3 +203,13 @@ class TestRegion(TestCase):
     for subregion in randoms:
       #print(f'- {subregion}')
       self.assertTrue(subregion in region)
+
+  def test_interval_from_interval(self):
+    ndimens = 5
+    interval = Interval(-5, 5)
+    for d in range(1, ndimens):
+      region = Region.from_interval(interval, d)
+      #print(f'{region}')
+      self.assertEqual(region.dimension, d)
+      for dimen in region.dimensions:
+        self.assertEqual(dimen, interval)

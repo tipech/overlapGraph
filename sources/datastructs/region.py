@@ -396,3 +396,22 @@ class Region:
 
     return cls([d.lower for d in dimensions],
                [d.upper for d in dimensions], id)
+
+  @classmethod
+  def from_interval(cls, interval: Interval, dimension: int = 1, id: str = '') -> 'Region':
+    """
+    Construct a new Region from a given Intervals and the specified
+    number of dimensions. Returns a Region contains the specified
+    dimensionality with each dimension have the same Interval.
+    If id is specified, sets it as the unique identifier for this Region,
+    otherwise generates a random identifier, UUID v4.
+
+    :param interval:
+    :param dimension:
+    :param id:
+    """
+    assert isinstance(interval, Interval)
+    assert isinstance(dimension, int) and dimension > 0
+
+    return cls([interval.lower] * dimension,
+               [interval.upper] * dimension, id)
