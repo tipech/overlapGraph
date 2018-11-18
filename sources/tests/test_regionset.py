@@ -9,6 +9,7 @@
 #   - test_regionset_outofbounds
 #   - test_regionset_from_random
 #   - test_regionset_to_json
+#   - test_regionset_filter
 #
 
 from io import StringIO
@@ -78,3 +79,19 @@ class TestRegionSet(TestCase):
       after = output.getvalue()
       #print(after)
       self.assertEqual(before, after)
+
+  def test_regionset_filter(self):
+    nregions = 50
+    bounds = Region([0]*2, [10]*2)
+    sizepc_range = Region([0]*2, [0.5]*2)
+    regionset = RegionSet.from_random(nregions, bounds, sizepc_range = sizepc_range, precision = 1)    
+    filter_bound = Region([5]*2, [10]*2)
+    filtered = regionset.filter(filter_bound)
+
+    self.assertEqual(filter_bound, filtered.bounds)
+    for region in regionset:
+      #print(f'{region}: {region in filtered}')
+      self.assertEqual(filter_bound.encloses(region), region in filtered)
+    for region in filtered:
+      #print(f'{region}')
+      self.assertTrue(filter_bound.encloses(region))

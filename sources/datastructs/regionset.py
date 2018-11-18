@@ -39,7 +39,7 @@ class RegionSet(Iterable[Region]):
   Properties:           name, dimension, regions, bounds
   Computed Properties:  size, minbound, timeline
   Special Methods:      __init__, __getitem__, __contains__, __iter__
-  Methods:              add, get, to_json
+  Methods:              add, get, filter, to_json
   Class Methods:        from_random, from_json
   """
   id: str
@@ -174,6 +174,24 @@ class RegionSet(Iterable[Region]):
       assert self.bounds.encloses(region)
 
     self.regions.append(region)
+
+  def filter(self, bounds: Region) -> 'RegionSet':
+    """
+    Returns a new filtered RegionSet with the only the Regions
+    within the given, more restricted Region bounds.
+
+    :param bounds:
+    """
+    assert bounds.dimension == self.dimension
+    if self.bounds != None:
+      assert self.bounds.encloses(bounds)
+
+    regionset = RegionSet(bounds = bounds)
+    for region in self.regions:
+      if bounds.encloses(region):
+        regionset.add(region)
+
+    return regionset
 
   def to_json(self, output: TextIOBase, compact: bool = False, **options):
     """
