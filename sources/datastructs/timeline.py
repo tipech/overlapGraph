@@ -65,6 +65,8 @@ class Event:
     if isinstance(kind, str):
       kind = EventKind[kind]
 
+    assert isinstance(kind, EventKind)
+
     self.kind = kind
     self.when = when
     self.context = context
