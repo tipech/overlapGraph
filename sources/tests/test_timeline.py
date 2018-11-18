@@ -36,7 +36,6 @@ class TestRegionSet(TestCase):
     regions.add(Region([0, 0], [3, 5]))
     regions.add(Region([3, 1], [5, 5]))
     regions.add(Region([2, 5], [6, 5]))
-    timeline = regions.timeline()
     oracle = [
       [("Begin", 0, regions[0]), ("Begin", 2, regions[2]),
        ("End"  , 3, regions[0]), ("Begin", 3, regions[1]),
@@ -46,8 +45,9 @@ class TestRegionSet(TestCase):
        ("Begin", 5, regions[2]), ("End"  , 5, regions[2])]
     ]
 
+    self.assertEqual(regions.timeline, regions.timeline)
     for d in range(regions.dimension):
-      for i, event in enumerate(timeline[d]):
+      for i, event in enumerate(regions.timeline[d]):
         #print(f'{d},{i}: {event}')
         self.assertEqual(event.kind, EventKind[oracle[d][i][0]])
         self.assertEqual(event.when, float(oracle[d][i][1]))

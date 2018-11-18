@@ -37,9 +37,9 @@ class RegionSet(Iterable[Region]):
   saving to a file, in the JSON or CSV file formats.
 
   Properties:           name, dimension, regions, bounds
-  Computed Properties:  size, minbound
+  Computed Properties:  size, minbound, timeline
   Special Methods:      __init__, __getitem__, __contains__, __iter__
-  Methods:              add, get, timeline, to_json
+  Methods:              add, get, to_json
   Class Methods:        from_random, from_json
   """
   id: str
@@ -98,6 +98,21 @@ class RegionSet(Iterable[Region]):
                      else bound.union(region)
 
     return bound
+
+  @property
+  def timeline(self) -> 'Timeline':
+    """
+    Return a Timeline instance binded to this RegionSet. The Timeline
+    provides methods for generating sorted iterations of Events for 
+    each dimension in the Regions within this RegionSet; each Region
+    results in a beginning and an ending event. Each RegionSet may only
+    have one Timeline instance, once created always returns the same
+    instance.
+    """
+    if not hasattr(self, '_timeline'):
+      self._timeline = Timeline(self)
+
+    return self._timeline
 
   def get(self, id: str) -> Region:
     """
@@ -159,15 +174,6 @@ class RegionSet(Iterable[Region]):
       assert self.bounds.encloses(region)
 
     self.regions.append(region)
-
-  def timeline(self) -> 'Timeline':
-    """
-    Return a Timeline instance binded to this RegionSet. The Timeline
-    provides methods for generating sorted iterations of Events for 
-    each dimension in the Regions within this RegionSet; each Region
-    results in a beginning and an ending event.
-    """
-    return Timeline(self)
 
   def to_json(self, output: TextIOBase, compact: bool = False, **options):
     """
