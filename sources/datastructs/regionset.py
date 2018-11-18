@@ -23,6 +23,11 @@ from ..helpers.randoms import RandomFn, Randoms
 from .interval import Interval
 from .region import Region
 
+try: # cyclic codependency
+  from .timeline import Timeline
+except ImportError:
+  pass
+
 
 @dataclass
 class RegionSet(Iterable[Region]):
@@ -34,7 +39,7 @@ class RegionSet(Iterable[Region]):
   Properties:           name, dimension, regions, bounds
   Computed Properties:  size, minbound
   Special Methods:      __init__, __getitem__, __contains__, __iter__
-  Methods:              add, get, to_json
+  Methods:              add, get, timeline, to_json
   Class Methods:        from_random, from_json
   """
   id: str
@@ -154,6 +159,15 @@ class RegionSet(Iterable[Region]):
       assert self.bounds.encloses(region)
 
     self.regions.append(region)
+
+  def timeline(self) -> 'Timeline':
+    """
+    Return a Timeline instance binded to this RegionSet. The Timeline
+    provides methods for generating sorted iterations of Events for 
+    each dimension in the Regions within this RegionSet; each Region
+    results in a beginning and an ending event.
+    """
+    return Timeline(self)
 
   def to_json(self, output: TextIOBase, compact: bool = False, **options):
     """
