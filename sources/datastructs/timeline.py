@@ -95,7 +95,7 @@ class Event:
     """
     if self == that:                 return False
     if self.when != that.when:       return self.when < that.when
-    if self.context == that.context: return self.kind < that.kind
+    if self.context is that.context: return self.kind < that.kind
 
     return self.kind > that.kind
 
