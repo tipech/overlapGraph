@@ -104,7 +104,7 @@ class SweeplineAlg:
 
   def addoverlap(self, regionpair: RegionPair):
     """
-    Add the given pair of Region to the list of overlaps.
+    Add the given pair of Regions to the list of overlaps.
     This method should be overridden in subclasses to implement:
     
     - The addition of a edge in the intersection graph between the given

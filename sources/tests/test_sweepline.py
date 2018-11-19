@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# tests/test_sweepline.py - Unit tests for datastructs/sweepline.py
+# tests/test_sweepline.py - Unit tests for algorithms/sweepline.py
 #
 # This script implements the following tests:
 #   - test_sweepline_simple
