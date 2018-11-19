@@ -21,7 +21,8 @@ from uuid import uuid4
 from ..helpers.base26 import to_base26
 from ..helpers.randoms import RandomFn, Randoms
 from .interval import Interval
-from .region import Region
+from .region import Region, RegionPair
+from .timeline import EventKind
 
 try: # cyclic codependency
   from .timeline import Timeline
@@ -39,7 +40,7 @@ class RegionSet(Iterable[Region]):
   Properties:           name, dimension, regions, bounds
   Computed Properties:  size, minbound, timeline
   Special Methods:      __init__, __getitem__, __contains__, __iter__
-  Methods:              add, get, filter, to_json
+  Methods:              add, get, filter, overlaps, to_json
   Class Methods:        from_random, from_json
   """
   id: str
@@ -192,6 +193,31 @@ class RegionSet(Iterable[Region]):
         regionset.add(region)
 
     return regionset
+
+  def overlaps(self, dimension: int = 0) -> List[RegionPair]:
+    """
+    List all of overlaps between the Regions within this set.
+    This is a Naive implementation for finding all overlapping Region pairs.
+    Returns a list of overlapping pairs, ordered based on the lower bounds
+    of the Regions along the specified dimension.
+
+    :param dimension:
+    """
+    ordered_regions = []
+    for event in self.timeline.events(dimension):
+      if event.kind == EventKind.Begin:
+        ordered_regions.append(event.context)
+
+    overlaps = []
+    for first in ordered_regions:
+      for second in ordered_regions:
+        if first is second: continue
+        if first[dimension].lower > second[dimension].lower: continue
+        if (second, first) in overlaps: continue
+        if first.overlaps(second):
+          overlaps.append((first, second))
+
+    return overlaps
 
   def to_json(self, output: TextIOBase, compact: bool = False, **options):
     """

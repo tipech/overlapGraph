@@ -19,24 +19,6 @@ from ..datastructs.timeline import Event, EventKind, Timeline
 
 class TestSweepline(TestCase):
 
-  def _findoverlaps(self, regionset: RegionSet, dimension: int) -> List[RegionPair]:
-    """Naive implementation for finding all overlapping Region pairs."""
-    ordered_region = []
-    for event in regionset.timeline.events(dimension):
-      if event.kind == EventKind.Begin:
-        ordered_region.append(event.context)
-
-    overlaps = []
-    for first in ordered_region:
-      for second in ordered_region:
-        if first is second: continue
-        if first[dimension].lower > second[dimension].lower: continue
-        if (second, first) in overlaps: continue
-        if first.overlaps(second):
-          overlaps.append((first, second))
-
-    return overlaps
-
   def test_sweepline_simple(self):
     regionset = RegionSet(dimension = 2)
     regionset.add(Region([0, 0], [3, 5]))
@@ -47,7 +29,7 @@ class TestSweepline(TestCase):
     sweepline.put(SweeplineAlg())
 
     for i in range(regionset.dimension):
-      expect = self._findoverlaps(regionset, i)
+      expect = regionset.overlaps(i)
       actual = sweepline.evaluate(i)[0]
       #for pair in expect: print(f'Expect:\t{pair[0]}\n\t{pair[1]}')
       #for pair in actual: print(f'Actual:\t{pair[0]}\n\t{pair[1]}')
@@ -63,7 +45,7 @@ class TestSweepline(TestCase):
     #for region in regionset: print(f'{region}')
     for i in range(regionset.dimension):
       #print(f'Dimension: {i}')
-      expect = self._findoverlaps(regionset, i)
+      expect = regionset.overlaps(i)
       actual = sweepline.evaluate(i)[0]
       #for pair in expect: print(f'Expect: {pair[0].id} {pair[1].id}')
       #for pair in actual: print(f'Actual: {pair[0].id} {pair[1].id}')
