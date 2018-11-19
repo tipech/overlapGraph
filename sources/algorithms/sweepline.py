@@ -229,6 +229,8 @@ class SweeplineRT:
     assert 0 <= dimension < self.regionset.dimension
     assert len(self.evaluators) > 0
 
+    results = []
+
     # Initialization
     for evaluator in self.evaluators:
       evaluator.oninit(dimension)
@@ -243,4 +245,7 @@ class SweeplineRT:
           evaluator.onend(event)
 
     # Finalization
-    return [evaluator.onfinalize() for evaluator in self.evaluators]
+    for evaluator in self.evaluators:
+      results.append(evaluator.onfinalize())
+
+    return results
