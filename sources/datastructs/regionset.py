@@ -275,7 +275,7 @@ class RegionSet(Iterable[Region]):
     format from the given source input readable IO stream. Construct and 
     return the serialized RegionSet.
 
-      with open('input.csv', 'r') as f:
+      with open('input.json', 'r') as f:
         regionset = RegionSet.from_json(f)
 
     :param source:
@@ -308,7 +308,8 @@ class RegionSet(Iterable[Region]):
     def decode_regionset(object):
       assert check_fields(object, RegionSet)
       assert isinstance(object['regions'], List)
-      regionset = RegionSet(object['id'], decode_region(object['bounds']), object['dimension'])
+      regionset = RegionSet(object['id'], bounds = decode_region(object['bounds'])) if object['bounds'] != None else \
+                  RegionSet(object['id'], dimension = object['dimension'])
       for region in object['regions']:
         regionset.add(decode_region(region))
       return regionset
