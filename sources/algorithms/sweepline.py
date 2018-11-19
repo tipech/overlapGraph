@@ -144,10 +144,11 @@ class SweeplineAlg:
 
     :param event:
     """
-    assert self.binded and self.initialized
-    assert event.context.id not in self.actives
-
     region = event.context
+
+    assert self.binded and self.initialized
+    assert region.id not in self.actives
+
     for regionpair in self.findoverlaps(region): 
       self.addoverlap(regionpair)
     
@@ -161,10 +162,12 @@ class SweeplineAlg:
 
     :param event:
     """
-    assert self.binded and self.initialized
-    assert event.context.id in self.actives
+    region_id = event.context.id
 
-    del self.actives[event.context.id]
+    assert self.binded and self.initialized
+    assert region_id in self.actives
+
+    del self.actives[region_id]
 
   def onfinalize(self) -> List[RegionPair]:
     """
