@@ -13,12 +13,14 @@
 
 from dataclasses import astuple, dataclass, field
 from functools import reduce
-from typing import Callable, List, Union
+from typing import Callable, List, Tuple, Union
 from uuid import uuid4
 
 from ..helpers.randoms import NDArray, RandomFn, Randoms
 from .interval import Interval
 
+
+RegionPair = Tuple['Region', 'Region']
 
 @dataclass
 class Region:
