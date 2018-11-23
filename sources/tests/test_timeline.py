@@ -22,9 +22,9 @@ class TestRegionSet(TestCase):
     self.assertEqual(EventKind.End,   EventKind['End'])
     
     region = Region([0]*2, [1]*2)
-    lower = [Event(EventKind.Begin, d.lower, region) for d in region.dimensions]
-    upper = [Event(EventKind.End,   d.upper, region) for d in region.dimensions]
-    
+    lower = [Event(EventKind.Begin, d.lower, region, i) for i, d in enumerate(region.dimensions)]
+    upper = [Event(EventKind.End,   d.upper, region, i) for i, d in enumerate(region.dimensions)]
+
     self.assertTrue(all([EventKind.Begin == e.kind for e in lower]))
     self.assertTrue(all([EventKind.End   == e.kind for e in upper]))
     self.assertTrue(all([e.when == region[i].lower for i, e in enumerate(lower)]))
