@@ -299,7 +299,7 @@ class RegionSet(Iterable[Region]):
     """
     Load a new collection of Regions in the JSON serialization 
     format from the given source input readable IO stream. Construct and 
-    return the serialized RegionSet.
+    return the de-serialized RegionSet.
 
       with open('input.json', 'r') as f:
         regionset = RegionSet.from_json(f)
