@@ -13,6 +13,7 @@
 #   - test_interval_union
 #   - test_interval_random_values
 #   - test_interval_random_intervals
+#   - test_interval_from_object
 #
 
 from dataclasses import asdict, astuple
@@ -152,3 +153,13 @@ class TestInterval(TestCase):
     for subinterval in randoms:
       #print(f'- {subinterval}')
       self.assertTrue(subinterval in interval)
+
+  def test_interval_from_object(self):
+    test_interval = Interval(10.5, 20)
+    intervals = []
+    intervals.append(Interval.from_object([10.5, 20]))
+    intervals.append(Interval.from_object((10.5, 20)))
+    intervals.append(Interval.from_object({'lower': 10.5, 'upper': 20}))
+
+    for interval in intervals:
+      self.assertEqual(test_interval, interval)

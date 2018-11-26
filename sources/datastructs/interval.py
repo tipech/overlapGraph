@@ -13,7 +13,8 @@
 #
 
 from dataclasses import dataclass
-from typing import Callable, List, Union
+from numbers import Real
+from typing import Any, Callable, Dict, List, Tuple, Union
 
 from numpy import floor
 
@@ -35,6 +36,7 @@ class Interval:
   Special Methods:      __init__, __contains__
   Methods:              contains, encloses, overlaps, intersect, union,
                         random_values, random_intervals
+  Class Methods:        from_object
   """
   lower: float
   upper: float
@@ -59,8 +61,8 @@ class Interval:
 
   @property
   def _instance_invariant(self) -> bool:
-    return all([isinstance(self.lower, float),
-                isinstance(self.upper, float),
+    return all([isinstance(self.lower, Real),
+                isinstance(self.upper, Real),
                 self.lower <= self.upper])
 
   @property
@@ -298,3 +300,23 @@ class Interval:
       intervals.append(Interval(lower, upper))
 
     return intervals
+
+  @classmethod
+  def from_object(cls, object: Any) -> 'Interval':
+    """
+    Construct a new Interval from the conversion of the given
+    object. The object may be a Dict, List or Tuple. If it is a
+    Dict contains fields: lower and upper bounding values. If it
+    is a List or Tuple contains 2 values, first for the lower bound
+    and second for the upper bound. Returns the new Interval.
+
+    :param object:
+    """
+    if isinstance(object, Dict):
+      assert 'lower' in object and isinstance(object['lower'], Real)
+      assert 'upper' in object and isinstance(object['upper'], Real)
+      return Interval(**object)
+    else:
+      assert isinstance(object, (List, Tuple)) and len(object) == 2
+      assert all([isinstance(item, Real) for item in object])
+      return Interval(*object)
