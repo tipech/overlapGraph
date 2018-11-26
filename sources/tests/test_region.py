@@ -17,6 +17,7 @@
 #   - test_region_random_regions
 #   - test_region_from_intervals
 #   - test_region_from_interval
+#   - test_region_from_dict
 #
 
 from dataclasses import asdict, astuple
@@ -115,7 +116,7 @@ class TestRegion(TestCase):
     test_regions.append(Region([-2, 7], [-2, 7]))
 
     for subregion in test_regions:
-      comparsion = all([region.lower[i] <= subregion.lower[i] <= subregion.upper[i] <= region.upper[i] for i in 
+      comparsion = all([region.lower[i] <= subregion.lower[i] <= subregion.upper[i] <= region.upper[i] for i in
                         range(region.dimension)])
       #print(f'{subregion} in\n{region}:')
       #print(f'  expect={comparsion}')
@@ -157,7 +158,7 @@ class TestRegion(TestCase):
           #print(f'  actual={intersect}')
           #print(f'  size={intersect.size}')
           for x, d in enumerate(first.dimensions):
-            self.assertEqual(d.intersect(second.dimensions[x]), 
+            self.assertEqual(d.intersect(second.dimensions[x]),
                              intersect.dimensions[x])
         else:
           #print(f'{first}\n{second}:')
@@ -230,3 +231,21 @@ class TestRegion(TestCase):
       self.assertEqual(region.dimension, d)
       for dimen in region.dimensions:
         self.assertEqual(dimen, interval)
+
+  def test_region_from_dict(self):
+    test_region = Region([10]*3, [50]*3)
+    objects = []
+    objects.append({"lower": [10]*3, "upper": [50]*3})
+    objects.append({"dimension": 3, "lower": 10, "upper": [50]*3})
+    objects.append({"dimension": 3, "lower": 10, "upper": 50})
+    objects.append({"dimension": 3, "lower": [10]*3, "upper": 50})
+    objects.append({"dimension": 3, "interval": [10, 50]})
+    objects.append({"dimension": 3, "interval": (10, 50)})
+    objects.append({"dimension": 3, "interval": {"lower": 10, "upper": 50}})
+    objects.append({"intervals": [[10, 50]]*3})
+    objects.append({"intervals": [(10, 50)]*3})
+    objects.append({"intervals": [{"lower": 10, "upper": 50}]*3})
+
+    for object in objects:
+      #print(f'{object}')
+      self.assertEqual(test_region, Region.from_dict(object))

@@ -13,7 +13,8 @@
 
 from dataclasses import astuple, dataclass, field
 from functools import reduce
-from typing import Callable, List, Tuple, Union
+from numbers import Real
+from typing import Any, Callable, Dict, List, Tuple, Union
 from uuid import uuid4
 
 from ..helpers.randoms import NDArray, RandomFn, Randoms
@@ -36,7 +37,7 @@ class Region:
   Special Methods:      __init__, __getitem__, __contains__, __eq__
   Methods:              contains, encloses, overlaps, intersect, union,
                         project, random_points, random_regions
-  Class Methods:        from_intervals, from_interval
+  Class Methods:        from_intervals, from_interval, from_dict
   """
   id: str
   lower: List[float]
@@ -421,3 +422,46 @@ class Region:
 
     return cls([interval.lower] * dimension,
                [interval.upper] * dimension, id)
+
+  @classmethod
+  def from_dict(cls, object: Dict, id: str = '') -> 'Region':
+    """
+    Construct a new Region from the conversion of the given Dict.
+    The Dict must contains one of the following combinations of fields:
+
+    - lower (List[float]) and upper (List[float])
+    - intervals (List[Interval-equivalent])
+    - dimension (int) and interval (Interval-equivalent)
+    - dimension (int), lower (float or List[float]) and upper (float or List[float])
+
+    Interval-equivalent means parseable by Interval.from_object.
+    If object does not have one of the above combinations of fields, raises ValueError
+    Returns the newly constructed Region.
+
+    :param object:
+    :param id:
+    """
+    assert isinstance(object, Dict)
+
+    if 'id' in object:
+      id = object['id']
+
+    if 'dimension' in object and any([k in object for k in ['lower', 'upper']]):
+      assert isinstance(object['dimension'], int) and 0 < object['dimension']
+      for k in ['lower', 'upper']:
+        if isinstance(object[k], Real):
+          object[k] = [object[k]] * object['dimension']
+
+    if all([k in object for k in ['lower', 'upper']]):
+      assert isinstance(object['lower'], List) and all([isinstance(x, Real) for x in object['lower']])
+      assert isinstance(object['upper'], List) and all([isinstance(x, Real) for x in object['upper']])
+      assert len(object['lower']) == len(object['upper'])
+      return cls(object['lower'], object['upper'], id)
+    elif all([k in object for k in ['dimension', 'interval']]):
+      assert isinstance(object['dimension'], int) and 0 < object['dimension']
+      return cls.from_interval(Interval.from_object(object['interval']), object['dimension'], id)
+    elif all([k in object for k in ['intervals']]):
+      assert isinstance(object['intervals'], List)
+      return cls.from_intervals(list(map(Interval.from_object, object['intervals'])), id)
+    else:
+      raise ValueError('Unrecognized Region representation')
