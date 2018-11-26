@@ -14,6 +14,7 @@
 #   - test_interval_random_values
 #   - test_interval_random_intervals
 #   - test_interval_from_object
+#   - test_interval_from_text
 #
 
 from dataclasses import asdict, astuple
@@ -160,6 +161,19 @@ class TestInterval(TestCase):
     intervals.append(Interval.from_object([10.5, 20]))
     intervals.append(Interval.from_object((10.5, 20)))
     intervals.append(Interval.from_object({'lower': 10.5, 'upper': 20}))
+
+    for interval in intervals:
+      self.assertEqual(test_interval, interval)
+
+  def test_interval_from_text(self):
+    test_interval = Interval(10.5, 20)
+    intervals = []
+    intervals.append(Interval.from_text('[10.5,20]', 'json'))
+    intervals.append(Interval.from_text('[10.5,20]', 'literal'))
+    intervals.append(Interval.from_text('(10.5,20)', 'literal'))
+    intervals.append(Interval.from_text('{"lower":10.5,"upper":20}', 'json'))
+    intervals.append(Interval.from_text('{"lower":10.5,"upper":20}', 'literal'))
+    intervals.append(Interval.from_text("{'lower':10.5,'upper':20}", 'literal'))
 
     for interval in intervals:
       self.assertEqual(test_interval, interval)
