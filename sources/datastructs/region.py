@@ -36,7 +36,7 @@ class Region:
   Special Methods:      __init__, __getitem__, __contains__, __eq__
   Methods:              contains, encloses, overlaps, intersect, union,
                         project, random_points, random_regions
-  Class Methods:        from_intervals
+  Class Methods:        from_intervals, from_interval
   """
   id: str
   lower: List[float]
