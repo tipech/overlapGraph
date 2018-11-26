@@ -13,10 +13,10 @@
 #   - test_region_intersect
 #   - test_region_union
 #   - test_region_project
-#   - test_interval_random_points
-#   - test_interval_random_regions
-#   - test_interval_from_intervals
-#   - test_interval_from_interval
+#   - test_region_random_points
+#   - test_region_random_regions
+#   - test_region_from_intervals
+#   - test_region_from_interval
 #
 
 from dataclasses import asdict, astuple
@@ -199,7 +199,7 @@ class TestRegion(TestCase):
     for point in points3d:
       self.assertTrue(region3d.contains(list(point), inc_upper=False))
 
-  def test_interval_random_regions(self):
+  def test_region_random_regions(self):
     region = Region([-5, 0], [15, 10])
     randoms  = region.random_regions(5, Region([0.25, 0.25], [0.75, 0.75]))
     randoms += region.random_regions(5, Region([0.25, 0.25], [0.75, 0.75]), precision = 0)
@@ -208,7 +208,7 @@ class TestRegion(TestCase):
       #print(f'- {subregion}')
       self.assertTrue(subregion in region)
 
-  def test_interval_from_intervals(self):
+  def test_region_from_intervals(self):
     ndimens = 5
     base_interval = Interval(1, 5)
     intervals = [Interval(base_interval.lower + d,
@@ -221,7 +221,7 @@ class TestRegion(TestCase):
     for d, dimension in enumerate(region.dimensions):
       self.assertEqual(dimension, intervals[d])
 
-  def test_interval_from_interval(self):
+  def test_region_from_interval(self):
     ndimens = 5
     interval = Interval(-5, 5)
     for d in range(1, ndimens):
