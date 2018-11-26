@@ -114,7 +114,7 @@ class TestInterval(TestCase):
         intersect = first.intersect(second)
         if self.overlaps[i][j]:
           expected = first if first == second \
-                           else Interval(max(first.lower, second.lower), 
+                           else Interval(max(first.lower, second.lower),
                                          min(first.upper, second.upper))
 
           #print(f'{first} and {second}:')
@@ -157,23 +157,26 @@ class TestInterval(TestCase):
 
   def test_interval_from_object(self):
     test_interval = Interval(10.5, 20)
-    intervals = []
-    intervals.append(Interval.from_object([10.5, 20]))
-    intervals.append(Interval.from_object((10.5, 20)))
-    intervals.append(Interval.from_object({'lower': 10.5, 'upper': 20}))
+    objects = []
+    objects.append([10.5, 20])
+    objects.append((10.5, 20))
+    objects.append({'lower': 10.5, 'upper': 20})
 
-    for interval in intervals:
-      self.assertEqual(test_interval, interval)
+    for object in objects:
+      #print(f'{object}')
+      self.assertEqual(test_interval, Interval.from_object(object))
 
   def test_interval_from_text(self):
     test_interval = Interval(10.5, 20)
-    intervals = []
-    intervals.append(Interval.from_text('[10.5,20]', 'json'))
-    intervals.append(Interval.from_text('[10.5,20]', 'literal'))
-    intervals.append(Interval.from_text('(10.5,20)', 'literal'))
-    intervals.append(Interval.from_text('{"lower":10.5,"upper":20}', 'json'))
-    intervals.append(Interval.from_text('{"lower":10.5,"upper":20}', 'literal'))
-    intervals.append(Interval.from_text("{'lower':10.5,'upper':20}", 'literal'))
+    texts = []
+    texts.append(('[10.5,20]', 'json'))
+    texts.append(('[10.5,20]', 'literal'))
+    texts.append(('(10.5,20)', 'literal'))
+    texts.append(('{"lower":10.5,"upper":20}', 'json'))
+    texts.append(('{"lower":10.5,"upper":20}', 'literal'))
+    texts.append(("{'lower':10.5,'upper':20}", 'literal'))
 
-    for interval in intervals:
-      self.assertEqual(test_interval, interval)
+    for text in texts:
+      #print(f'text="{text[0]}"' if "'" in text else f"text='{text[0]}'")
+      #print(f'format={text[1]}')
+      self.assertEqual(test_interval, Interval.from_text(*text))
