@@ -18,6 +18,7 @@
 #   - test_region_from_intervals
 #   - test_region_from_interval
 #   - test_region_from_dict
+#   - test_region_from_object
 #
 
 from dataclasses import asdict, astuple
@@ -249,3 +250,27 @@ class TestRegion(TestCase):
     for object in objects:
       #print(f'{object}')
       self.assertEqual(test_region, Region.from_dict(object))
+
+  def test_region_from_object(self):
+    test_region = Region([10]*3, [50]*3)
+    objects = []
+    objects.append({"lower": [10]*3, "upper": [50]*3})
+    objects.append({"dimension": 3, "lower": 10, "upper": [50]*3})
+    objects.append({"dimension": 3, "lower": 10, "upper": 50})
+    objects.append({"dimension": 3, "lower": [10]*3, "upper": 50})
+    objects.append({"dimension": 3, "interval": [10, 50]})
+    objects.append({"dimension": 3, "interval": (10, 50)})
+    objects.append({"dimension": 3, "interval": {"lower": 10, "upper": 50}})
+    objects.append({"intervals": [[10, 50]]*3})
+    objects.append({"intervals": [(10, 50)]*3})
+    objects.append({"intervals": [{"lower": 10, "upper": 50}]*3})
+    objects.append([[10, 50]]*3)
+    objects.append([(10, 50)]*3)
+    objects.append([{"lower": 10, "upper": 50}]*3)
+    objects.append((3, [10, 50]))
+    objects.append((3, (10, 50)))
+    objects.append((3, {"lower": 10, "upper": 50}))
+
+    for object in objects:
+      #print(f'{object}')
+      self.assertEqual(test_region, Region.from_object(object))

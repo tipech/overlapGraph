@@ -435,8 +435,9 @@ class Region:
     - dimension (int), lower (float or List[float]) and upper (float or List[float])
 
     Interval-equivalent means parseable by Interval.from_object.
-    If object does not have one of the above combinations of fields, raises ValueError
-    Returns the newly constructed Region.
+    If id is specified, sets it as the unique identifier for this Region, otherwise
+    generates a random identifier, UUID v4. If object does not have one of the above
+    combinations of fields, raises ValueError. Returns the newly constructed Region.
 
     :param object:
     :param id:
@@ -463,5 +464,36 @@ class Region:
     elif all([k in object for k in ['intervals']]):
       assert isinstance(object['intervals'], List)
       return cls.from_intervals(list(map(Interval.from_object, object['intervals'])), id)
+    else:
+      raise ValueError('Unrecognized Region representation')
+
+  @classmethod
+  def from_object(cls, object: Any, id: str = '') -> 'Region':
+    """
+    Construct a new Region from the conversion of the given object.
+    The object must contains one of the following representations:
+
+    - A Dict that is parseable by the from_dict method.
+    - A List of objects that are parseable by Interval.from_object,
+      to be passed to the from_intervals method.
+    - A Tuple containing 2 values: (1) an int as the number of dimension,
+      to be passed to from_interval and (2) an object that is parseable by
+      the Interval.from_object method.
+
+    If id is specified, sets it as the unique identifier for this Region, otherwise
+    generates a random identifier, UUID v4. If object does not have one of the above
+    combinations of fields, raises ValueError. Returns the newly constructed Region.
+
+    :param object:
+    :param id:
+    """
+    if isinstance(object, Dict):
+      return cls.from_dict(object, id)
+    elif isinstance(object, List):
+      return cls.from_intervals(list(map(Interval.from_object, object)), id)
+    elif isinstance(object, Tuple):
+      assert len(object) == 2
+      assert isinstance(object[0], int) and 0 < object[0]
+      return cls.from_interval(Interval.from_object(object[1]), object[0], id)
     else:
       raise ValueError('Unrecognized Region representation')
