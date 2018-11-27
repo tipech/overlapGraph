@@ -13,20 +13,20 @@ from networkx import Graph
 
 from ..datastructs.region import Region, RegionPair
 from ..datastructs.regionset import RegionSet
-from .sweepline import SweeplineAlg, SweeplineRT
+from .sweepln import SweeplnAlg, SweeplnRT
 
 
-class IsectGraph(SweeplineAlg, SweeplineRT):
+class IsectGraph(SweeplnAlg, SweeplnRT):
   """
   Implementation of the Intersection Graph Construction Algoritm based on a
   single-pass sweepline algorithm. This algorithm builds an undirected, weighted
   graph of all the pair-wise intersections or overlapping regions within a RegionSet.
-  Inherits from: SweeplineAlg and SweeplineRT.
+  Inherits from: SweeplnAlg and SweeplnRT.
 
   Properties:         graph
   Overridden Methods:
     Special Methods:  __init__
-    SweeplineAlg:
+    SweeplnAlg:
       Methods:        oninit, addoverlap, onfinalize
   """
   graph: Graph
@@ -38,20 +38,20 @@ class IsectGraph(SweeplineAlg, SweeplineRT):
 
     :param regionset:
     """
-    SweeplineAlg.__init__(self)
-    SweeplineRT.__init__(self, regionset)
-    SweeplineRT.put(self, self)
+    SweeplnAlg.__init__(self)
+    SweeplnRT.__init__(self, regionset)
+    SweeplnRT.put(self, self)
 
   def oninit(self, dimension: int):
     """
-    Initialize the evaluation of the RegionSet in the SweeplineRT
+    Initialize the evaluation of the RegionSet in the SweeplnRT
     with the given dimensions. Create a new intersection Graph and
     populate it with nodes for each Region. This method extends
     the superclass implementation.
 
     :param dimension:
     """
-    SweeplineAlg.oninit(self, dimension)
+    SweeplnAlg.oninit(self, dimension)
 
     self.graph = Graph()
 
@@ -75,6 +75,6 @@ class IsectGraph(SweeplineAlg, SweeplineRT):
     Returns the newly constructed intersection Graph.
     This method extends the superclass implementation.
     """
-    SweeplineAlg.onfinalize(self)
+    SweeplnAlg.onfinalize(self)
 
     return self.graph

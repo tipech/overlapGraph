@@ -1,14 +1,14 @@
 #!/usr/env/python
 
 #
-# algorithms/sweepline.py - The Sweepline Algorithm
+# algorithms/sweepln.py - The Sweepline Algorithm
 #
 # This script implements a generalized version of a single-pass
-# sweepline algorithm. Implements SweeplineAlg and SweeplineRT classes, where
-# the SweeplineRT (the runtime) drives the evaluation by initializing each
-# SweeplineAlgs' oninit methods, looping over the sorted Events and executing
-# each SweeplineAlgs' onbegin and onend handlers, and finally, invoking each
-# SweeplineAlgs' onfinalize methods. The SweeplineAlg (evaluator) is a base
+# sweepline algorithm. Implements SweeplnAlg and SweeplnRT classes, where
+# the SweeplnRT (the runtime) drives the evaluation by initializing each
+# SweeplnAlgs' oninit methods, looping over the sorted Events and executing
+# each SweeplnAlgs' onbegin and onend handlers, and finally, invoking each
+# SweeplnAlgs' onfinalize methods. The SweeplnAlg (evaluator) is a base
 # class for implementations that implement these handlers and maintain the
 # necessary, associated interval state of the evaluation.
 #
@@ -20,10 +20,10 @@ from ..datastructs.regionset import RegionSet
 from ..datastructs.timeline import Event, EventKind
 
 
-class SweeplineAlg:
+class SweeplnAlg:
   """
-  Base class for implementing a SweeplineAlg (evaluator) that is
-  binded to and evaluated when the SweeplineRT evaluates a single-pass,
+  Base class for implementing a SweeplnAlg (evaluator) that is
+  binded to and evaluated when the SweeplnRT evaluates a single-pass,
   sweepline along a dimension on a set of Regions.
 
   Properties:           runtime, regionset, dimension, actives, overlaps
@@ -32,14 +32,14 @@ class SweeplineAlg:
   Methods:              bind, unbind, findoverlaps, addoverlap,
                         oninit, onbegin, onend, onfinalize
   """
-  runtime   : 'SweeplineRT'
+  runtime   : 'SweeplnRT'
   regionset : RegionSet
   dimension : int
   actives   : Dict[str, Region]
   overlaps  : List[RegionPair]
 
   def __init__(self):
-    """Initialize this SweeplineAlg with None values."""
+    """Initialize this SweeplnAlg with None values."""
     self.runtime = None
     self.regionset = None
     self.dimension = None
@@ -47,24 +47,24 @@ class SweeplineAlg:
   @property
   def binded(self) -> bool:
     """
-    Determine if this SweeplineAlg is binded to a SweeplineRT.
+    Determine if this SweeplnAlg is binded to a SweeplnRT.
     Return True if it is binded otherwise False.
     """
-    return isinstance(self.runtime, SweeplineRT)
+    return isinstance(self.runtime, SweeplnRT)
 
   @property
   def initialized(self) -> bool:
     """
-    Determine if this SweeplineAlg has been initialized for evaluation.
+    Determine if this SweeplnAlg has been initialized for evaluation.
     Return True if it is initialized otherwise False.
     """
     return isinstance(self.dimension, int)
 
-  def bind(self, runtime: 'SweeplineRT', unbind: bool = False):
+  def bind(self, runtime: 'SweeplnRT', unbind: bool = False):
     """
-    Bind or attach this SweeplineAlg to the given SweeplineRT.
-    If the unbind flag is True, unbinds the previous SweeplineRT if this
-    SweeplineAlg is currently binded to it.
+    Bind or attach this SweeplnAlg to the given SweeplnRT.
+    If the unbind flag is True, unbinds the previous SweeplnRT if this
+    SweeplnAlg is currently binded to it.
 
     :param runtime:
     :param unbind:
@@ -79,8 +79,8 @@ class SweeplineAlg:
 
   def unbind(self):
     """
-    Unbind or detach this SweeplineAlg from its currently 
-    atteched SweeplineRT.
+    Unbind or detach this SweeplnAlg from its currently 
+    atteched SweeplnRT.
     """
     if self.binded:
       self.runtime = None
@@ -118,7 +118,7 @@ class SweeplineAlg:
 
   def oninit(self, dimension: int):
     """
-    Initialize the evaluation of the RegionSet in the SweeplineRT
+    Initialize the evaluation of the RegionSet in the SweeplnRT
     with the given dimensions. This method should be overridden in
     subclasses to implement:
 
@@ -137,7 +137,7 @@ class SweeplineAlg:
 
   def onbegin(self, event: Event):
     """
-    When a Begin Event is encountered in the SweeplineRT evaluation, this
+    When a Begin Event is encountered in the SweeplnRT evaluation, this
     method is invoked with that Event. Invokes findoverlaps and 
     addoverlap methods from here. Adds the newly active Region to the
     set of active Regions.
@@ -156,7 +156,7 @@ class SweeplineAlg:
 
   def onend(self, event: Event):
     """
-    When an End Event is encountered in the SweeplineRT evaluation, this
+    When an End Event is encountered in the SweeplnRT evaluation, this
     method is invoked with that Event. Removes the ending Region from
     to the set of active Regions.
 
@@ -171,8 +171,8 @@ class SweeplineAlg:
 
   def onfinalize(self) -> List[RegionPair]:
     """
-    When the SweeplineRT evaluation is complete, the sweep is complete,
-    this method is invoked. Uninitialized this SweeplineAlg. Returns
+    When the SweeplnRT evaluation is complete, the sweep is complete,
+    this method is invoked. Uninitialized this SweeplnAlg. Returns
     the result of the sweepline algorithm; for this base implementation
     returns the list of Region overlapping pairs.
 
@@ -189,13 +189,13 @@ class SweeplineAlg:
     self.dimension = None
     return self.overlaps
 
-class SweeplineRT:
+class SweeplnRT:
   """
   Runtime for the generalized single-pass sweepline algorithm.
   This class implements the sorting and determining the overlapping
-  Regions along a specified dimension via one or more SweeplineAlg
+  Regions along a specified dimension via one or more SweeplnAlg
   instances. Loops over that event generated by the RegionSet's
-  timeline, calls the onbegin or onend methods of the SweeplineAlgs
+  timeline, calls the onbegin or onend methods of the SweeplnAlgs
   depending on EventKind.
 
   Properties:       regionset, evaluators
@@ -203,21 +203,21 @@ class SweeplineRT:
   Methods:          put, evaluate
   """
   regionset: RegionSet
-  evaluators: List[SweeplineAlg]
+  evaluators: List[SweeplnAlg]
 
   def __init__(self, regionset: RegionSet):
     """
-    Initialize the Sweepline Runtime with the given RegionSet
-    and an empty list of SweeplineAlgs.
+    Initialize the sweepline runtime with the given RegionSet
+    and an empty list of SweeplnAlgs.
 
     :param regionset:
     """
     self.regionset = regionset
     self.evaluators = []
 
-  def put(self, evaluator: SweeplineAlg):
+  def put(self, evaluator: SweeplnAlg):
     """
-    Adds the given SweeplineAlg to the list of evaluators for
+    Adds the given SweeplnAlg to the list of evaluators for
     this sweepline algorithm Runtime to bind and execute
     when evaluating the input Regions.
 
@@ -232,10 +232,10 @@ class SweeplineRT:
   def evaluate(self, dimension: int) -> List[Any]:
     """
     Execute the sweepline algorithm on the set of Regions
-    along the given dimension. Invokes the SweeplineAlg at the initialization phase,
+    along the given dimension. Invokes the SweeplnAlg at the initialization phase,
     when encountering the beginning of an overlap and ending of an overlap Events,
     and at the finalization phase of the algorithm. Returns a list of results, one
-    result for each SweeplineAlg.
+    result for each SweeplnAlg.
 
     :param dimension:
     """
