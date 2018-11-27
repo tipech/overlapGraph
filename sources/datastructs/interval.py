@@ -12,19 +12,18 @@
 # randomly generate intervals, and randomly choose values within an interval.
 #
 
-from ast import literal_eval as PythonParse
 from dataclasses import dataclass
-from json import loads as JsonParse
 from numbers import Real
 from typing import Any, Callable, Dict, List, Tuple, Union
 
 from numpy import floor
 
 from ..helpers.randoms import NDArray, RandomFn, Randoms
+from .loadable import Loadable
 
 
 @dataclass(order = True)
-class Interval:
+class Interval(Loadable):
   """
   Dataclass that defines the lower and upper bounding values for an interval.
   Building block for representing multi-dimensional regions and computing
@@ -38,7 +37,10 @@ class Interval:
   Special Methods:      __init__, __contains__
   Methods:              contains, encloses, overlaps, intersect, union,
                         random_values, random_intervals
-  Class Methods:        from_object, from_text
+
+  Inherited from Loadable:
+    Class Methods:      from_text, from_source
+      Overridden:       from_object
   """
   lower: float
   upper: float
@@ -322,23 +324,3 @@ class Interval:
       assert isinstance(object, (List, Tuple)) and len(object) == 2
       assert all([isinstance(item, Real) for item in object])
       return Interval(*object)
-
-  @classmethod
-  def from_text(cls, text: str, format: str = 'json') -> 'Interval':
-    """
-    Construct a new Interval from the conversion of the given input text.
-    The given input text can be either JSON or Python literal (parseable
-    by ast.literal_eval). The parsed text is that passed to from_object
-    to be converted into a Interval object; thus, must have the necessary
-    data structure and fields to be converted. Allowed formats are: 'json'
-    and 'literal'. Unknown formats will raise NotImplementedError.
-
-    :param text:
-    :param format:
-    """
-    if format == 'json':
-      return cls.from_object(JsonParse(text))
-    elif format == 'literal':
-      return cls.from_object(PythonParse(text))
-    else:
-      raise NotImplementedError

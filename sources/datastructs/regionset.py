@@ -11,18 +11,16 @@
 # Graph construction algorithm.
 #
 
-from ast import literal_eval as PythonParse
 from dataclasses import asdict, astuple, dataclass
 from io import TextIOBase
 from json import JSONEncoder
-from json import load as JSONLoader
-from json import loads as JsonParse
 from typing import Any, Dict, Iterable, Iterator, List, Union
 from uuid import uuid4
 
 from ..helpers.base26 import to_base26
 from ..helpers.randoms import RandomFn, Randoms
 from .interval import Interval
+from .loadable import Loadable
 from .region import Region, RegionPair
 from .timeline import EventKind
 
@@ -33,7 +31,7 @@ except ImportError:
 
 
 @dataclass
-class RegionSet(Iterable[Region]):
+class RegionSet(Iterable[Region], Loadable):
   """
   Data class that represents a collection of Regions dataset.
   Provides methods for generating new datasets, and loading from or
@@ -43,8 +41,11 @@ class RegionSet(Iterable[Region]):
   Computed Properties:  size, minbound, timeline
   Special Methods:      __init__, __getitem__, __contains__, __iter__
   Methods:              add, get, filter, overlaps, to_json
-  Class Methods:        from_random, from_dict, from_object, 
-                        from_text, from_source
+  Class Methods:        from_random, from_dict
+
+  Inherited from Loadable:
+    Class Methods:      from_text, from_source
+      Overridden:       from_object
   """
   id: str
   dimension: int
@@ -362,52 +363,3 @@ class RegionSet(Iterable[Region]):
       return cls.from_dict({'regions': regions, 'dimension': dimension}, id)
     else:
       raise ValueError('Unrecognized RegionSet representation')
-
-  @classmethod
-  def from_text(cls, text: str, format: str = 'json', id: str = '') -> 'RegionSet':
-    """
-    Construct a new RegionSet from the conversion of the given input text.
-    The given input text can be either JSON or Python literal (parseable
-    by ast.literal_eval). The parsed text is that passed to from_object
-    to be converted into a RegionSet object; thus, must have the necessary
-    data structure and fields to be converted. Allowed formats are: 'json'
-    and 'literal'. Unknown formats will raise NotImplementedError.
-    If id is specified, sets it as the unique identifier for this Region,
-    otherwise generates a random identifier, UUID v4. Returns the newly
-    constructed RegionSet.
-
-    :param text:
-    :param format:
-    :param id:
-    """
-    if format == 'json':
-      return cls.from_object(JsonParse(text), id)
-    elif format == 'literal':
-      return cls.from_object(PythonParse(text), id)
-    else:
-      raise NotImplementedError
-
-  @classmethod
-  def from_source(cls, source: TextIOBase, format: str = 'json', id: str = '') -> 'RegionSet':
-    """
-    Construct a new RegionSet from the conversion of the text from the given
-    text input source. The given input source text can be either JSON or
-    Python literal (parseable by ast.literal_eval). The parsed text is that
-    passed to from_object to be converted into a RegionSet object; thus, must
-    have the necessary data structure and fields to be converted. Allowed
-    formats are: 'json' and 'literal'. Unknown formats will raise NotImplementedError.
-    If id is specified, sets it as the unique identifier for this Region,
-    otherwise generates a random identifier, UUID v4. Returns the newly
-    constructed RegionSet.
-
-    :param source:
-    :param format:
-    :param id:
-    """
-    assert source.readable()
-    if format == 'json':
-      return cls.from_object(JSONLoader(source), id)
-    elif format == 'literal':
-      return cls.from_object(PythonParse(source.read()), id)
-    else:
-      raise NotImplementedError
