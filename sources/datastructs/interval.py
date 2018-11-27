@@ -329,7 +329,7 @@ class Interval:
     Construct a new Interval from the conversion of the given input text.
     The given input text can be either JSON or Python literal (parseable
     by ast.literal_eval). The parsed text is that passed to from_object
-    to be converted into a Interval object; thus, may have the necessary
+    to be converted into a Interval object; thus, must have the necessary
     data structure and fields to be converted. Allowed formats are: 'json'
     and 'literal'. Unknown formats will raise NotImplementedError.
 
