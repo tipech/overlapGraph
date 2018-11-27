@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
 #
-# algorithms/isectgraph.py - Intersection Graph
+# algorithms/sweepln_graph.py - Intersection Graph By Sweepline Algorithm
 #
-# This script implements the IsectGraph (or Intersection Graph Construction
-# Algoritm). This algorithm builds an undirected, weighted (labelled) graph of
-# all the pair-wise intersections or overlapping regions between a collection
-# of regions with the same dimensionality.
+# This script implements the SweeplnGraph (or intersection graph construction
+# by sweepline algorithm). This algorithm builds an undirected, weighted (labelled)
+# graph of all the pair-wise intersections or overlapping regions between a
+# collection of regions with the same dimensionality.
 #
 
 from networkx import Graph
@@ -16,12 +16,12 @@ from ..datastructs.regionset import RegionSet
 from .sweepln import SweeplnAlg, SweeplnRT
 
 
-class IsectGraph(SweeplnAlg, SweeplnRT):
+class SweeplnGraph(SweeplnAlg, SweeplnRT):
   """
-  Implementation of the Intersection Graph Construction Algoritm based on a
-  single-pass sweepline algorithm. This algorithm builds an undirected, weighted
-  graph of all the pair-wise intersections or overlapping regions within a RegionSet.
-  Inherits from: SweeplnAlg and SweeplnRT.
+  Implementation of intersection graph construction based on a 
+  single-pass sweepline algorithm. This algorithm builds an undirected, 
+  weighted graph of all the pair-wise intersections or overlapping
+  regions within a RegionSet. Inherits from: SweeplnAlg and SweeplnRT.
 
   Properties:         graph
   Overridden Methods:
@@ -33,8 +33,8 @@ class IsectGraph(SweeplnAlg, SweeplnRT):
 
   def __init__(self, regionset: RegionSet):
     """
-    Initialize the Intersection Graph Construction Algorithm
-    with the given RegionSet.
+    Initialize the intersection graph construction
+    by sweepline algorithm with the given RegionSet.
 
     :param regionset:
     """
