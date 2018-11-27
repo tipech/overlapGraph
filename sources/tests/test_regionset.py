@@ -70,7 +70,7 @@ class TestRegionSet(TestCase):
       before = output.getvalue()
       #print(before)
       output.seek(0)
-      newregionset = RegionSet.from_json(output)
+      newregionset = RegionSet.from_source(output, 'json')
       self._test_regionset(newregionset, nregions, bounds, regionset)
 
       output.truncate(0)

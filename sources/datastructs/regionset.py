@@ -11,11 +11,13 @@
 # Graph construction algorithm.
 #
 
+from ast import literal_eval as PythonParse
 from dataclasses import asdict, astuple, dataclass
 from io import TextIOBase
 from json import JSONEncoder
 from json import load as JSONLoader
-from typing import Dict, Iterable, Iterator, List, Union
+from json import loads as JsonParse
+from typing import Any, Dict, Iterable, Iterator, List, Union
 from uuid import uuid4
 
 from ..helpers.base26 import to_base26
@@ -41,7 +43,8 @@ class RegionSet(Iterable[Region]):
   Computed Properties:  size, minbound, timeline
   Special Methods:      __init__, __getitem__, __contains__, __iter__
   Methods:              add, get, filter, overlaps, to_json
-  Class Methods:        from_random, from_json
+  Class Methods:        from_random, from_dict, from_object, 
+                        from_text, from_source
   """
   id: str
   dimension: int
@@ -295,49 +298,116 @@ class RegionSet(Iterable[Region]):
     return regionset
 
   @classmethod
-  def from_json(cls, source: TextIOBase) -> 'RegionSet':
+  def from_dict(cls, object: Dict, id: str = '') -> 'RegionSet':
     """
-    Load a new collection of Regions in the JSON serialization 
-    format from the given source input readable IO stream. Construct and 
-    return the de-serialized RegionSet.
+    Construct a new set of Region from the conversion of the given Dict.
+    The Dict must contains one of the following combinations of fields:
 
-      with open('input.json', 'r') as f:
-        regionset = RegionSet.from_json(f)
+    - regions (List[Region-equivalent]) and bounds (Region-equivalent)
+    - regions (List[Region-equivalent]) and dimension (int)
+
+    Region-equivalent means parseable by Region.from_object.
+    If id is specified, sets it as the unique identifier for this RegionSet, otherwise
+    generates a random identifier, UUID v4. If object does not have one of the above
+    combinations of fields, raises ValueError. Returns the newly constructed RegionSet.
+
+    :param object:
+    :param id:
+    """
+    assert isinstance(object, Dict)
+    assert 'regions' in object and isinstance(object['regions'], List)
+
+    if 'id' in object:
+      id = object['id']
+
+    if 'size' in object:
+      assert isinstance(object['size'], int) and 0 < object['size']
+      assert len(object['regions']) == object['size']
+
+    if 'bounds' in object and object['bounds'] != None:
+      regionset = cls(id, bounds = Region.from_object(object['bounds']))
+    elif 'dimension' in object:
+      assert isinstance(object['dimension'], int) and 0 < object['dimension']
+      regionset = cls(id, dimension = object['dimension'])
+    else:
+      raise ValueError('Unrecognized RegionSet representation')
+
+    for region in object['regions']:
+      regionset.add(Region.from_object(region))
+
+    return regionset
+
+  @classmethod
+  def from_object(cls, object: Any, id: str = '') -> 'RegionSet':
+    """
+    Construct a new set of Region from the conversion of the given object.
+    The object must contains one of the following representations:
+
+    - A Dict that is parseable by the from_dict method.
+    - A List of objects that are parseable by Region.from_object
+
+    If id is specified, sets it as the unique identifier for this RegionSet, otherwise
+    generates a random identifier, UUID v4. If object does not have one of the above
+    combinations of fields, raises ValueError. Returns the newly constructed RegionSet.
+
+    :param object:
+    :param id:
+    """
+    if isinstance(object, Dict):
+      return cls.from_dict(object, id)
+    elif isinstance(object, List):
+      regions = list(map(Region.from_object, object))
+      dimension = regions[0].dimension
+      assert all([r.dimension == dimension for r in regions])
+      return cls.from_dict({'regions': regions, 'dimension': dimension}, id)
+    else:
+      raise ValueError('Unrecognized RegionSet representation')
+
+  @classmethod
+  def from_text(cls, text: str, format: str = 'json', id: str = '') -> 'RegionSet':
+    """
+    Construct a new RegionSet from the conversion of the given input text.
+    The given input text can be either JSON or Python literal (parseable
+    by ast.literal_eval). The parsed text is that passed to from_object
+    to be converted into a RegionSet object; thus, must have the necessary
+    data structure and fields to be converted. Allowed formats are: 'json'
+    and 'literal'. Unknown formats will raise NotImplementedError.
+    If id is specified, sets it as the unique identifier for this Region,
+    otherwise generates a random identifier, UUID v4. Returns the newly
+    constructed RegionSet.
+
+    :param text:
+    :param format:
+    :param id:
+    """
+    if format == 'json':
+      return cls.from_object(JsonParse(text), id)
+    elif format == 'literal':
+      return cls.from_object(PythonParse(text), id)
+    else:
+      raise NotImplementedError
+
+  @classmethod
+  def from_source(cls, source: TextIOBase, format: str = 'json', id: str = '') -> 'RegionSet':
+    """
+    Construct a new RegionSet from the conversion of the text from the given
+    text input source. The given input source text can be either JSON or
+    Python literal (parseable by ast.literal_eval). The parsed text is that
+    passed to from_object to be converted into a RegionSet object; thus, must
+    have the necessary data structure and fields to be converted. Allowed
+    formats are: 'json' and 'literal'. Unknown formats will raise NotImplementedError.
+    If id is specified, sets it as the unique identifier for this Region,
+    otherwise generates a random identifier, UUID v4. Returns the newly
+    constructed RegionSet.
 
     :param source:
+    :param format:
+    :param id:
     """
     assert source.readable()
-
-    fields = {
-      'RegionSet': ['id', 'dimension', 'size', 'bounds', 'regions'],
-      'Region': ['id', 'dimension', 'dimensions'],
-      'Interval': ['lower', 'upper']
-    }
-
-    def check_fields(object, clazz):
-      return all([f in object for f in fields[clazz.__name__]])
-
-    def decode_interval(object):
-      if isinstance(object, Dict):
-        assert check_fields(object, Interval)
-        return Interval(**object)
-      else:
-        assert isinstance(object, List) and len(object) == 2
-        return Interval(*object)
-
-    def decode_region(object):
-      assert check_fields(object, Region)
-      assert isinstance(object['dimensions'], List)
-      dimensions = [decode_interval(d) for d in object['dimensions']]
-      return Region.from_intervals(dimensions, object['id'])
-
-    def decode_regionset(object):
-      assert check_fields(object, RegionSet)
-      assert isinstance(object['regions'], List)
-      regionset = RegionSet(object['id'], bounds = decode_region(object['bounds'])) if object['bounds'] != None else \
-                  RegionSet(object['id'], dimension = object['dimension'])
-      for region in object['regions']:
-        regionset.add(decode_region(region))
-      return regionset
-
-    return decode_regionset(JSONLoader(source))
+    if format == 'json':
+      return cls.from_object(JSONLoader(source), id)
+    elif format == 'literal':
+      return cls.from_object(PythonParse(source.read()), id)
+    else:
+      raise NotImplementedError
