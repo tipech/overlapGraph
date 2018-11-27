@@ -433,7 +433,7 @@ class Region:
     The Dict must contains one of the following combinations of fields:
 
     - lower (List[float]) and upper (List[float])
-    - intervals (List[Interval-equivalent])
+    - dimensions (List[Interval-equivalent])
     - dimension (int) and interval (Interval-equivalent)
     - dimension (int), lower (float or List[float]) and upper (float or List[float])
 
@@ -464,9 +464,9 @@ class Region:
     elif all([k in object for k in ['dimension', 'interval']]):
       assert isinstance(object['dimension'], int) and 0 < object['dimension']
       return cls.from_interval(Interval.from_object(object['interval']), object['dimension'], id)
-    elif all([k in object for k in ['intervals']]):
-      assert isinstance(object['intervals'], List)
-      return cls.from_intervals(list(map(Interval.from_object, object['intervals'])), id)
+    elif all([k in object for k in ['dimensions']]):
+      assert isinstance(object['dimensions'], List)
+      return cls.from_intervals(list(map(Interval.from_object, object['dimensions'])), id)
     else:
       raise ValueError('Unrecognized Region representation')
 
