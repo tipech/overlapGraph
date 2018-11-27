@@ -11,7 +11,9 @@
 # within a region.
 #
 
+from ast import literal_eval as PythonParse
 from dataclasses import astuple, dataclass, field
+from json import loads as JsonParse
 from functools import reduce
 from numbers import Real
 from typing import Any, Callable, Dict, List, Tuple, Union
@@ -37,7 +39,8 @@ class Region:
   Special Methods:      __init__, __getitem__, __contains__, __eq__
   Methods:              contains, encloses, overlaps, intersect, union,
                         project, random_points, random_regions
-  Class Methods:        from_intervals, from_interval, from_dict
+  Class Methods:        from_intervals, from_interval, from_dict, 
+                        from_object, from_text
   """
   id: str
   lower: List[float]
@@ -497,3 +500,26 @@ class Region:
       return cls.from_interval(Interval.from_object(object[1]), object[0], id)
     else:
       raise ValueError('Unrecognized Region representation')
+
+  @classmethod
+  def from_text(cls, text: str, format: str = 'json', id: str = '') -> 'Region':
+    """
+    Construct a new Region from the conversion of the given input text.
+    The given input text can be either JSON or Python literal (parseable
+    by ast.literal_eval). The parsed text is that passed to from_object
+    to be converted into a Region object; thus, must have the necessary
+    data structure and fields to be converted. Allowed formats are: 'json'
+    and 'literal'. Unknown formats will raise NotImplementedError.
+    If id is specified, sets it as the unique identifier for this Region,
+    otherwise generates a random identifier, UUID v4. Returns the newly
+    constructed Region.
+
+    :param text:
+    :param format:
+    """
+    if format == 'json':
+      return cls.from_object(JsonParse(text))
+    elif format == 'literal':
+      return cls.from_object(PythonParse(text))
+    else:
+      raise NotImplementedError

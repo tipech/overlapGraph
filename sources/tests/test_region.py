@@ -19,6 +19,7 @@
 #   - test_region_from_interval
 #   - test_region_from_dict
 #   - test_region_from_object
+#   - test_region_from_text
 #
 
 from dataclasses import asdict, astuple
@@ -274,3 +275,25 @@ class TestRegion(TestCase):
     for object in objects:
       #print(f'{object}')
       self.assertEqual(test_region, Region.from_object(object))
+
+  def test_region_from_text(self):
+    test_region = Region([10]*3, [50]*3)
+    texts = []
+    texts.append(('{"lower": [10,10,10], "upper": [50,50,50]}', 'json'))
+    texts.append(('{"dimension": 3, "lower": 10, "upper": 50}', 'literal'))
+    texts.append(('{"dimension": 3, "lower": 10, "upper": 50}', 'json'))
+    texts.append(('{"dimension": 3, "interval": [10, 50]}', 'json'))
+    texts.append(('{"dimension": 3, "interval": [10, 50]}', 'literal'))
+    texts.append(('{"dimension": 3, "interval": (10, 50)}', 'literal'))
+    texts.append(('[[10, 50],[10, 50],[10, 50]]', 'json'))
+    texts.append(('[[10, 50],[10, 50],[10, 50]]', 'literal'))
+    texts.append(('[(10, 50),(10, 50),(10, 50)]', 'literal'))
+    texts.append(('[{"lower": 10, "upper": 50},{"lower": 10, "upper": 50},{"lower": 10, "upper": 50}]', 'json'))
+    texts.append(('[{"lower": 10, "upper": 50},{"lower": 10, "upper": 50},{"lower": 10, "upper": 50}]', 'literal'))
+    texts.append(('(3, [10, 50])', 'literal'))
+    texts.append(('(3, (10, 50))', 'literal'))
+
+    for text in texts:
+      #print(f'text="{text[0]}"' if "'" in text else f"text='{text[0]}'")
+      #print(f'format={text[1]}')
+      self.assertEqual(test_region, Region.from_text(*text))
