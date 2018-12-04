@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 #
-# algorithms/sweepln_graph.py - Intersection Graph By Sweepline Algorithm
+# algorithms/sligraph.py - Intersection Graph By Sweepline Algorithm
 #
-# This script implements the SweeplnGraph (or intersection graph construction
+# This script implements the SLIGraph (or intersection graph construction
 # by sweepline algorithm). This algorithm builds an undirected, weighted (labelled)
 # graph of all the pair-wise intersections or overlapping regions between a
 # collection of regions with the same dimensionality.
@@ -16,7 +16,7 @@ from ..datastructs.regionset import RegionSet
 from .sweepln import SweeplnAlg, SweeplnRT
 
 
-class SweeplnGraph(SweeplnAlg, SweeplnRT):
+class SLIGraph(SweeplnAlg, SweeplnRT):
   """
   Implementation of intersection graph construction based on a 
   single-pass sweepline algorithm. This algorithm builds an undirected, 
