@@ -7,6 +7,7 @@
 #   - test_create_region
 #   - test_region_dimension_mismatch
 #   - test_region_properties
+#   - test_region_getsetitem
 #   - test_region_contains
 #   - test_region_equality
 #   - test_region_overlaps
@@ -24,7 +25,7 @@
 
 from dataclasses import asdict, astuple
 from functools import reduce
-from typing import List
+from typing import List, Tuple
 from unittest import TestCase
 
 from numpy import mean
@@ -86,6 +87,34 @@ class TestRegion(TestCase):
       self.assertEqual(region.lengths, [d.upper - d.lower for d in region.dimensions])
       self.assertEqual(region.midpoint, [mean([d.lower, d.upper]) for d in region.dimensions])
       self.assertEqual(region.size, reduce(lambda x, y: x*y, region.lengths))
+
+  def test_region_getsetitem(self):
+    data = {'data': 'value', 'datalist': ['list', 'of', 'items'], 'dataprop': 'dataprop'}
+    intervals = [Interval(0, 10)]*3
+    region = Region.from_intervals(intervals, dataprop = data['dataprop'])
+
+    def check_region(region: Region, intervals: List[Interval]):
+      self.assertTrue(all([region[i] == interval for i, interval in enumerate(intervals)]))
+      self.assertEqual(list(map(lambda i: i.lower, intervals)), region.lower)
+      self.assertEqual(list(map(lambda i: i.upper, intervals)), region.upper)
+
+    check_region(region, intervals)
+    #print(f'{region}')
+    #print(f'{region.data}')
+    #print(f'{asdict(region)}')
+    intervals = [Interval(interval.lower, interval.upper + i) for i, interval in enumerate(intervals)]
+    for i, interval in enumerate(intervals): region[i] = interval
+    check_region(region, intervals)
+
+    region['data'] = data['data']
+    region['datalist'] = data['datalist']
+    #print(f'{region}')
+    #print(f'{region.data}')
+    #print(f'{asdict(region)}')
+    self.assertEqual(data['data'], region['data'])
+    self.assertEqual(data['datalist'], region['datalist'])
+    self.assertEqual(data['dataprop'], region['dataprop'])
+    self.assertDictEqual(data, region.data)
 
   def test_region_contains(self):
     region = Region([-5, 0], [15, 10])

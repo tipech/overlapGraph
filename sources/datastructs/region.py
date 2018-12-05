@@ -33,9 +33,9 @@ class Region(Loadable):
   intersection and union regions between the two regions are, and
   randomly generate regions and points within a region.
 
-  Properties:           id, lower, upper, dimension, dimensions
+  Properties:           id, lower, upper, dimension, dimensions, data
   Computed Properties:  lengths, midpoint, size
-  Special Methods:      __init__, __getitem__, __contains__, __eq__
+  Special Methods:      __init__, __getitem__, __setitem__, __contains__, __eq__
   Methods:              contains, encloses, overlaps, intersect, union,
                         project, random_points, random_regions
   Class Methods:        from_intervals, from_interval, from_dict
@@ -49,8 +49,9 @@ class Region(Loadable):
   upper: List[float]
   dimension: int = field(repr=False)
   dimensions: List[Interval] = field(repr=False)
+  data: Dict = field(repr=False)
 
-  def __init__(self, lower: List[float], upper: List[float], id: str = '', dimension: int = 0):
+  def __init__(self, lower: List[float], upper: List[float], id: str = '', dimension: int = 0, **kvargs):
     """
     Initialize a new Region, with the lower and upper bounding vertices.
     If dimension is specified, the lower and upper vertices must match that number of
@@ -58,14 +59,16 @@ class Region(Loadable):
     upper vertices, which must have matching number of dimensions.
     If id is specified, sets it as the unique identifier for this Region,
     otherwise generates a random identifier, UUID v4.
+    Additional named arguments given will be assigned to as data properties.
     Generates the dimensions (list of Intervals) from the lower and upper vertices.
     If lower vertex has values greater than its corresponding upper values,
     swaps the lower and upper values.
 
     :param lower:
     :param upper:
-    :param dimension:
     :param id:
+    :param dimension:
+    :param kvargs:
     """
     if len(id) == 0:
       id = str(uuid4())
@@ -81,6 +84,9 @@ class Region(Loadable):
     self.dimensions = [Interval(*i) for i in zip(lower, upper)]
     self.lower = [d.lower for d in self.dimensions]
     self.upper = [d.upper for d in self.dimensions]
+    self.data = {}
+    for k, v in kvargs.items():
+      self.data[k] = v
 
   @property
   def _instance_invariant(self) -> bool:
@@ -111,14 +117,48 @@ class Region(Loadable):
        together."""
     return reduce(lambda x, y: x * y, self.lengths)
 
-  def __getitem__(self, dimension: int) -> Interval:
+  def __getitem__(self, index: Union[int, str]) -> Union[Interval, Any]:
     """
-    Given a dimension (index), returns the Interval for that dimension.
-    Syntactic sugar: self[dimension] -> Interval
+    For Type index: int
+      Given a dimension (index) as int, returns the Interval for that dimension.
+      Syntactic sugar: self[dimension] -> Interval
+    
+    For Type index: str
+      Given a datakey (index) as string, returns the datavalue for that datakey.
+      Syntactic sugar: self[datakey] -> datavalue
 
-    :param dimension:
+    :param index:
     """
-    return self.dimensions[dimension]
+    if isinstance(index, int):
+      return self.dimensions[index]
+    elif index in self.data:
+      return self.data[index]
+
+  def __setitem__(self, index: Union[int, str], value: Union[Interval, Any]):
+    """
+    For Type index: int
+      Given a dimension (index) as int and the Interval for that dimension, updates
+      the dimensions as well as the lower and upper values.
+      Syntactic sugar: self[dimension] = Interval
+
+    For Type index: str
+      Given a datakey (index) as string and the datavalue for that datakey,
+      assigns or updates the data key with the given data value.
+      Syntactic sugar: self[datakey] = datavalue
+
+    :param index:
+    :param value:
+    """
+    if isinstance(index, str):
+      self.data[index] = value
+    else:
+      assert isinstance(index, int)
+      assert isinstance(value, Interval)
+      assert 0 <= index < self.dimension
+
+      self.dimensions[index] = value
+      self.lower[index] = value.lower
+      self.upper[index] = value.upper
 
   def contains(self, point: List[float], inc_lower = True, inc_upper = True) -> bool:
     """
@@ -309,7 +349,7 @@ class Region(Loadable):
 
     return Region.from_intervals([d.union(that[i]) for i, d in enumerate(self.dimensions)])
 
-  def project(self, dimension: int) -> 'Region':
+  def project(self, dimension: int, **kvargs) -> 'Region':
     """
     Project this Region to the specified number of dimensions. If the given
     number of dimensions is greater than this Region's dimensionality, output
@@ -317,17 +357,18 @@ class Region(Loadable):
     number of dimensions is less than this Region's dimensionality, output a
     Region with the additional dimensions removed. If the given number of
     dimensions is less than this Region's dimensionality, outputs a copy of
-    this Region.
+    this Region. Additional arguments passed through to Region.from_intervals.
 
     :param dimension:
+    :param kvargs:
     """
     assert dimension > 0
 
     if dimension == self.dimension:
-      return Region.from_intervals(self.dimensions)
+      return Region.from_intervals(self.dimensions, **kvargs)
     else:
       return Region.from_intervals([(Interval(0, 0) if d >= self.dimension \
-                                                    else self[d]) for d in range(dimension)])
+                                                    else self[d]) for d in range(dimension)], **kvargs)
 
   def random_points(self, npoints: int = 1, randomng: RandomFn = Randoms.uniform()) -> NDArray:
     """
@@ -355,7 +396,8 @@ class Region(Loadable):
   def random_regions(self, nregions: int = 1, sizepc_range: 'Region' = None,
                            posnrng: RandomFn = Randoms.uniform(),
                            sizerng: RandomFn = Randoms.uniform(),
-                           precision: int = None) -> List['Region']:
+                           precision: int = None,
+                           **kvargs) -> List['Region']:
     """
     Randomly generate N Regions within this Regions, each with a random size
     as a percentage of the total Region dimensions, bounded by the given size
@@ -367,13 +409,15 @@ class Region(Loadable):
     If precision is given, return the randomly generated Intervals where the lower
     and upper bounding values are rounded/truncated to the specified precision
     (number of digits after the decimal point). If precision is None, the lower
-    and upper bounding values are of arbitrary precision.
+    and upper bounding values are of arbitrary precision. Additional arguments
+    passed through to Region.from_intervals.
 
     :param nregions:
     :param sizepc_range:
     :param posnrng:
     :param sizerng:
     :param precision:
+    :param kvargs:
     """
     ndunit_region = Region([0] * self.dimension, [1] * self.dimension)
     if sizepc_range == None:
@@ -389,44 +433,48 @@ class Region(Loadable):
       for i, d in enumerate(self.dimensions):
         dimension = d.random_intervals(1, sizepc_range[i], posnrng, sizerng, precision)[0]
         region.append(dimension)
-      regions.append(Region.from_intervals(region))
+      regions.append(Region.from_intervals(region, **kvargs))
     return regions
 
   @classmethod
-  def from_intervals(cls, dimensions: List[Interval], id: str = '') -> 'Region':
+  def from_intervals(cls, dimensions: List[Interval], id: str = '', **kvargs) -> 'Region':
     """
     Construct a new Region from the given a list of Intervals.
     If id is specified, sets it as the unique identifier for this Region,
     otherwise generates a random identifier, UUID v4.
+    Additional arguments passed through to Region.__init__.
     Returns a Region of dimension X, for a list of Intervals of length X.
 
     :param dimensions:
     :param id:
+    :param kvargs:
     """
     assert isinstance(dimensions, List)
     assert all([isinstance(d, Interval) for d in dimensions])
 
     return cls([d.lower for d in dimensions],
-               [d.upper for d in dimensions], id)
+               [d.upper for d in dimensions], id, **kvargs)
 
   @classmethod
-  def from_interval(cls, interval: Interval, dimension: int = 1, id: str = '') -> 'Region':
+  def from_interval(cls, interval: Interval, dimension: int = 1, id: str = '', **kvargs) -> 'Region':
     """
     Construct a new Region from a given Intervals and the specified
     number of dimensions. Returns a Region contains the specified
     dimensionality with each dimension have the same Interval.
     If id is specified, sets it as the unique identifier for this Region,
     otherwise generates a random identifier, UUID v4.
+    Additional arguments passed through to Region.__init__.
 
     :param interval:
     :param dimension:
     :param id:
+    :param kvargs:
     """
     assert isinstance(interval, Interval)
     assert isinstance(dimension, int) and dimension > 0
 
     return cls([interval.lower] * dimension,
-               [interval.upper] * dimension, id)
+               [interval.upper] * dimension, id, **kvargs)
 
   @classmethod
   def from_dict(cls, object: Dict, id: str = '') -> 'Region':
@@ -441,7 +489,7 @@ class Region(Loadable):
 
     Interval-equivalent means parseable by Interval.from_object.
     If id is specified, sets it as the unique identifier for this Region, otherwise
-    generates a random identifier, UUID v4. If object does not have one of the above
+    generates a random identifier, UUID v4. If object does not have one of the above 
     combinations of fields, raises ValueError. Returns the newly constructed Region.
 
     :param object:
@@ -451,6 +499,11 @@ class Region(Loadable):
 
     if 'id' in object:
       id = object['id']
+    
+    data = {}
+    if 'data' in object:
+      assert isinstance(object['data'], Dict)
+      data = object['data']
 
     if 'dimension' in object and any([k in object for k in ['lower', 'upper']]):
       assert isinstance(object['dimension'], int) and 0 < object['dimension']
@@ -462,13 +515,13 @@ class Region(Loadable):
       assert isinstance(object['lower'], List) and all([isinstance(x, Real) for x in object['lower']])
       assert isinstance(object['upper'], List) and all([isinstance(x, Real) for x in object['upper']])
       assert len(object['lower']) == len(object['upper'])
-      return cls(object['lower'], object['upper'], id)
+      return cls(object['lower'], object['upper'], id, **data)
     elif all([k in object for k in ['dimension', 'interval']]):
       assert isinstance(object['dimension'], int) and 0 < object['dimension']
-      return cls.from_interval(Interval.from_object(object['interval']), object['dimension'], id)
+      return cls.from_interval(Interval.from_object(object['interval']), object['dimension'], id, **data)
     elif all([k in object for k in ['dimensions']]):
       assert isinstance(object['dimensions'], List)
-      return cls.from_intervals(list(map(Interval.from_object, object['dimensions'])), id)
+      return cls.from_intervals(list(map(Interval.from_object, object['dimensions'])), id, **data)
     else:
       raise ValueError('Unrecognized Region representation')
 
