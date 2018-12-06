@@ -280,9 +280,14 @@ class Region(Loadable):
 
     return all([d.overlaps(that[i]) for i, d in enumerate(self.dimensions)])
 
-  def intersect(self, that: 'Region') -> 'Region':
+  def intersect(self, that: 'Region', linked: Union[bool, str] = False) -> 'Region':
     """
     Compute the overlapping Region between this Region and the given Region.
+    If linked is given, adds a data property 'intersect' that either:
+    
+    - 'reference': Holds the reference to this Region and its intersecting (that) Region, or
+    - 'aggregate': Holds all references to the intersecting Regions, including previous intersections.
+
     Return the overlapping Region or None if the Regions do not overlap.
 
     - |---Region A---|          -        |---Region B---|
@@ -307,6 +312,7 @@ class Region(Loadable):
             |--------------|      |===Region B===|
 
     :param that:
+    :param linked:
     """
     assert isinstance(that, Region)
     assert self.dimension == that.dimension
@@ -314,11 +320,27 @@ class Region(Loadable):
     if not self.overlaps(that):
       return None
 
-    return Region.from_intervals([d.intersect(that[i]) for i, d in enumerate(self.dimensions)])
+    data = {}
+    if any([linked == True, linked == 'reference', \
+            linked == 'aggregate' and 'intersect' not in self.data]):
+      data['intersect'] = [self, that]
+    elif 'intersect' in self.data:
+      assert isinstance(self['intersect'], List)
+      data['intersect'] = self['intersect'].copy()
+      data['intersect'].append(that)
+    elif linked != False:
+      raise ValueError(f'Invalid linked "{linked}" mode')
 
-  def union(self, that: 'Region') -> 'Region':
+    return Region.from_intervals([d.intersect(that[i]) for i, d in enumerate(self.dimensions)], **data)
+
+  def union(self, that: 'Region', linked: Union[bool, str] = False) -> 'Region':
     """
     Compute the Region that encloses both this Region and the given Region.
+    If linked is given, adds a data property 'union' that either:
+    
+    - 'reference': Holds the reference to this Region and its uniting (that) Region, or
+    - 'aggregate': Holds all references to the enclosing Regions, including previous unions.
+
     Return the enclosing Region.
 
     - |## Region A ##|`````;    - |`````|:::Region B:::|
@@ -343,11 +365,23 @@ class Region(Loadable):
       |......|%%%%%%%%%%%%%%|     |## Region B ##|
 
     :param that:
+    :param linked:
     """
     assert isinstance(that, Region)
     assert self.dimension == that.dimension
 
-    return Region.from_intervals([d.union(that[i]) for i, d in enumerate(self.dimensions)])
+    data = {}
+    if any([linked == True, linked == 'reference', \
+            linked == 'aggregate' and 'union' not in self.data]):
+      data['union'] = [self, that]
+    elif linked == 'aggregate':
+      assert isinstance(self['union'], List)
+      data['union'] = self['union'].copy()
+      data['union'].append(that)
+    elif linked != False:
+      raise ValueError(f'Invalid linked "{linked}" mode')
+
+    return Region.from_intervals([d.union(that[i]) for i, d in enumerate(self.dimensions)], **data)
 
   def project(self, dimension: int, **kvargs) -> 'Region':
     """

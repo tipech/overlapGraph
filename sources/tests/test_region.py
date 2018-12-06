@@ -13,6 +13,8 @@
 #   - test_region_overlaps
 #   - test_region_intersect
 #   - test_region_union
+#   - test_region_linked_intersect
+#   - test_region_linked_union
 #   - test_region_project
 #   - test_region_random_points
 #   - test_region_random_regions
@@ -207,6 +209,40 @@ class TestRegion(TestCase):
         #print(f'  size={union.size}')
         self.assertTrue(first in union)
         self.assertTrue(second in union)
+
+  def test_region_linked_intersect(self):
+    base_region = Region([0]*2, [10]*2)
+    regions = [Region([0]*2, [i]*2) for i in range(5, 1, -1)]
+    ref_region = base_region
+    agg_region = base_region
+    agg_regions = [base_region]
+
+    for region in regions:
+      old_region = ref_region
+      agg_regions.append(region)
+      ref_region = ref_region.intersect(region, 'reference')
+      agg_region = agg_region.intersect(region, 'aggregate')
+      #print(f'{asdict(ref_region)}')
+      #print(f'{asdict(agg_region)}')
+      self.assertListEqual([old_region, region], ref_region['intersect'])
+      self.assertListEqual(agg_regions, agg_region['intersect'])
+
+  def test_region_linked_union(self):
+    base_region = Region([0]*2, [1]*2)
+    regions = [Region([0, i], [1, i + 1]) for i in range(1, 5)]
+    ref_region = base_region
+    agg_region = base_region
+    agg_regions = [base_region]
+
+    for region in regions:
+      old_region = ref_region
+      agg_regions.append(region)
+      ref_region = ref_region.union(region, 'reference')
+      agg_region = agg_region.union(region, 'aggregate')
+      #print(f'{asdict(ref_region)}')
+      #print(f'{asdict(agg_region)}')
+      self.assertListEqual([old_region, region], ref_region['union'])
+      self.assertListEqual(agg_regions, agg_region['union'])
 
   def test_region_project(self):
     dimlimit = 7
