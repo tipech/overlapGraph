@@ -92,9 +92,10 @@ class Event:
     Determine if this Event is less than the given other Event;
     ordered before the other Event. Order between the Events is
     defined as: (1) lesser `when` first, (2) if same context then
-    beginning Events first, (3) context with length 0 first,
-    otherwise (4) ending Events first. Return True if less than
-    the given other Event, otherwise False.
+    beginning Events first, (3) and (4) context with length 0 first,
+    otherwise (5) ending Events first. The ordering within the same
+    'when': <End>... <0-length Begin><0-length End> <Begin>...
+    Return True if less than the given other Event, otherwise False.
 
     :param that:
     """
@@ -104,6 +105,8 @@ class Event:
       return self.when < that.when
     if self.context is that.context:
       return self.kind < that.kind
+    if self.context[self.dimension].length == 0:
+      return that.kind == EventKind.Begin
     if self.kind == EventKind.End:
       return that.context[that.dimension].length == 0
     if self.kind == EventKind.Begin:
