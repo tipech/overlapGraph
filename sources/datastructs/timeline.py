@@ -92,8 +92,9 @@ class Event:
     Determine if this Event is less than the given other Event;
     ordered before the other Event. Order between the Events is
     defined as: (1) lesser `when` first, (2) if same context then
-    beginning Events first, (3) and (4) context with length 0 first,
-    otherwise (5) ending Events first. The ordering within the same
+    beginning Events first, (3) if both context are length 0, order
+    by context.id, (4) and (5) context with length 0 first,
+    otherwise (6) ending Events first. The ordering within the same
     'when': <End>... <0-length Begin><0-length End> <Begin>...
     Return True if less than the given other Event, otherwise False.
 
@@ -105,6 +106,8 @@ class Event:
       return self.when < that.when
     if self.context is that.context:
       return self.kind < that.kind
+    if self.context[self.dimension].length == 0 and that.context[that.dimension].length == 0:
+      return self.context.id < that.context.id
     if self.context[self.dimension].length == 0:
       return that.kind == EventKind.Begin
     if self.kind == EventKind.End:
