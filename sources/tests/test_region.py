@@ -20,6 +20,8 @@
 #   - test_region_random_regions
 #   - test_region_from_intervals
 #   - test_region_from_interval
+#   - test_region_from_intersect
+#   - test_region_from_union
 #   - test_region_from_dict
 #   - test_region_from_object
 #   - test_region_from_text
@@ -298,6 +300,34 @@ class TestRegion(TestCase):
       self.assertEqual(region.dimension, d)
       for dimen in region.dimensions:
         self.assertEqual(dimen, interval)
+
+  def test_region_from_intersect(self):
+    regions = [Region([-i]*2, [i]*2) for i in range(5, 1, -1)]
+    for i in range(1, len(regions)):
+      expected_intersect = reduce(lambda a, b: a.intersect(b, 'aggregate'), regions[0:i+1])
+      intersect = Region.from_intersect(regions[0:i+1], True)
+      #print(f'Expected: {expected_intersect}')
+      #print(f'Expected["intersect"]: {expected_intersect["intersect"]}')
+      #print(f'Actual: {intersect}')
+      #print(f'Actual["intersect"]: {intersect["intersect"]}')
+      self.assertEqual(regions[i], intersect)
+      self.assertListEqual(regions[0:i+1], intersect['intersect'])
+      self.assertEqual(expected_intersect, intersect)
+      self.assertListEqual(expected_intersect['intersect'], intersect['intersect'])
+
+  def test_region_from_union(self):
+    region = Region([0]*2, [100]*2)
+    regions = region.random_regions(5, Region([0.1]*2, [0.25]*2), precision = 0)
+    expected_union = reduce(lambda a, b: a.union(b, 'aggregate'), regions)
+    union = Region.from_union(regions, True)
+    #print(f'Expected: {expected_union}')
+    #print(f'Actual: {union}')
+    #print(f'Expected["union"]: {expected_union["union"]}')
+    #print(f'Actual["union"]: {union["union"]}')
+    self.assertEqual(expected_union, union)
+    self.assertListEqual(expected_union['union'], union['union'])
+    self.assertTrue(all([union.encloses(r) for r in regions]))
+    self.assertTrue(region.encloses(union))
 
   def test_region_from_dict(self):
     test_region = Region([10]*3, [50]*3)

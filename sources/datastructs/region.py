@@ -38,7 +38,8 @@ class Region(Loadable):
   Special Methods:      __init__, __getitem__, __setitem__, __contains__, __eq__
   Methods:              contains, encloses, overlaps, intersect, union,
                         project, random_points, random_regions
-  Class Methods:        from_intervals, from_interval, from_dict
+  Class Methods:        from_intervals, from_interval,
+                        from_intersect, from_union, from_dict
 
   Inherited from Loadable:
     Class Methods:      from_text, from_source
@@ -509,6 +510,56 @@ class Region(Loadable):
 
     return cls([interval.lower] * dimension,
                [interval.upper] * dimension, id, **kvargs)
+
+  @classmethod
+  def from_intersect(cls, regions: List['Region'], linked: bool = False, id: str = '') -> Union['Region', None]:
+    """
+    Constructs a new Region from the intersection of the given Regions.
+    If linked is True, adds a data property 'intersect' that holds the
+    references to its given intersecting Regions. If id is specified,
+    sets it as the unique identifier for this Region, otherwise generates
+    a random identifier, UUID v4. Return the overlapping Region or None
+    if the Regions do not all overlap.
+
+    :param regions:
+    :param linked:
+    :param id:
+    """
+    assert isinstance(regions, List) and len(regions) > 1
+    assert all([isinstance(r, Region) for r in regions])
+    assert all([regions[0].dimension == r.dimension for r in regions])
+    
+    dimensions = zip(*list(map(lambda r: r.dimensions, regions)))
+    dimensions = [Interval.from_intersect(list(d)) for d in dimensions]
+    if any([d == None for d in dimensions]):
+      return None
+
+    data = {'intersect': regions.copy()} if linked else {}
+
+    return cls.from_intervals(dimensions, id, **data)
+
+  @classmethod
+  def from_union(cls, regions: List['Region'], linked: bool = False, id: str = '') -> 'Region':
+    """
+    Constructs a new Region from the union of the given Regions.
+    If linked is True, adds a data property 'union' that holds the
+    references to its given uniting Regions. If id is specified,
+    sets it as the unique identifier for this Region, otherwise generates
+    a random identifier, UUID v4. Return the enclosing Region.
+
+    :param regions:
+    :param linked:
+    :param id:
+    """
+    assert isinstance(regions, List) and len(regions) > 1
+    assert all([isinstance(r, Region) for r in regions])
+    assert all([regions[0].dimension == r.dimension for r in regions])
+
+    dimensions = zip(*list(map(lambda r: r.dimensions, regions)))
+    dimensions = [Interval.from_union(list(d)) for d in dimensions]
+    data = {'union': regions.copy()} if linked else {}
+
+    return cls.from_intervals(dimensions, id, **data)
 
   @classmethod
   def from_dict(cls, object: Dict, id: str = '') -> 'Region':
