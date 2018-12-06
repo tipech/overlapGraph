@@ -13,6 +13,8 @@
 #   - test_interval_union
 #   - test_interval_random_values
 #   - test_interval_random_intervals
+#   - test_interval_from_intersect
+#   - test_interval_from_union
 #   - test_interval_from_object
 #   - test_interval_from_text
 #
@@ -154,6 +156,25 @@ class TestInterval(TestCase):
     for subinterval in randoms:
       #print(f'- {subinterval}')
       self.assertTrue(subinterval in interval)
+
+  def test_interval_from_intersect(self):
+    intervals = [Interval(-x, x) for x in range(5, 1, -1)]
+    for i in range(1, len(intervals)):
+      intersect = Interval.from_intersect(intervals[0:i+1])
+      #print(f'{intersect}')
+      self.assertEqual(intervals[i], intersect)
+
+    intervals = [Interval(x, x + 1) for x in range(5)]
+    intersect = Interval.from_intersect(intervals)
+    #print(f'{intersect}')
+    self.assertEqual(None, intersect)
+
+  def test_interval_from_union(self):
+    intervals = [Interval(x, x + 1) for x in range(5)]
+    for i in range(1, len(intervals)):
+      union = Interval.from_union(intervals[0:i+1])
+      #print(f'{union}')
+      self.assertEqual(union, Interval(0, i + 1))
 
   def test_interval_from_object(self):
     test_interval = Interval(10.5, 20)

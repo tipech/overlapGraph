@@ -13,6 +13,7 @@
 #
 
 from dataclasses import dataclass
+from functools import reduce
 from numbers import Real
 from typing import Any, Callable, Dict, List, Tuple, Union
 
@@ -37,6 +38,7 @@ class Interval(Loadable):
   Special Methods:      __init__, __contains__
   Methods:              contains, encloses, overlaps, intersect, union,
                         random_values, random_intervals
+  Class Methods:        from_intersect, from_union
 
   Inherited from Loadable:
     Class Methods:      from_text, from_source
@@ -304,6 +306,42 @@ class Interval(Loadable):
       intervals.append(Interval(lower, upper))
 
     return intervals
+
+  @classmethod
+  def from_intersect(cls, intervals: List['Interval']) -> Union['Interval', None]:
+    """
+    Construct a new Interval from the intersection of the given list of
+    Intervals. If not all the Intervals intersect, return None, otherwise
+    return the Interval that intersects with all of the given Intervals.
+
+    :param intervals:
+    """
+    assert isinstance(intervals, List) and len(intervals) > 1
+    assert all([isinstance(interval, Interval) for interval in intervals])
+
+    def intersect(a: Interval, b: Interval) -> Interval:
+      assert a != None and b != None
+      assert a.overlaps(b)      
+      return a.intersect(b)
+
+    try:
+      return reduce(intersect, intervals)
+    except AssertionError:
+      return None
+
+  @classmethod
+  def from_union(cls, intervals: List['Interval']) -> 'Interval':
+    """
+    Construct a new Interval from the union of the given list of
+    Intervals. Return the Interval that encloses all of the given
+    Intervals.
+
+    :param intervals:
+    """
+    assert isinstance(intervals, List) and len(intervals) > 1
+    assert all([isinstance(interval, Interval) for interval in intervals])
+
+    return reduce(lambda a, b: a.union(b), intervals)
 
   @classmethod
   def from_object(cls, object: Any) -> 'Interval':
