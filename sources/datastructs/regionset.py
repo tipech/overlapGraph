@@ -96,13 +96,7 @@ class RegionSet(Iterable[Region], Loadable):
     Regions in this collection within it.
     """
     assert self._instance_invariant
-
-    bound = None
-    for region in self.regions:
-      bound = region if bound == None \
-                     else bound.union(region)
-
-    return bound
+    return Region.from_union(self.regions)
 
   @property
   def timeline(self) -> 'Timeline':
