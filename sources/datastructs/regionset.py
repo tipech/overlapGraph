@@ -236,7 +236,7 @@ class RegionSet(Iterable[Region], Loadable):
 
     fields = {
       'RegionSet': ['id', 'dimension', 'size', 'bounds', 'regions'],
-      'Region': ['id', 'dimension', 'dimensions']
+      'Region': ['id', 'dimension', 'dimensions', 'data']
     }
 
     def pick_fields(value):
