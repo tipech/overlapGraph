@@ -20,7 +20,7 @@ from uuid import uuid4
 from ..helpers.base26 import to_base26
 from ..helpers.randoms import RandomFn, Randoms
 from .interval import Interval
-from .loadable import Loadable
+from .ioable import IOable
 from .region import Region, RegionPair
 from .timeline import EventKind
 
@@ -31,7 +31,7 @@ except ImportError:
 
 
 @dataclass
-class RegionSet(Iterable[Region], Loadable):
+class RegionSet(Iterable[Region], IOable):
   """
   Data class that represents a collection of Regions dataset.
   Provides methods for generating new datasets, and loading from or
@@ -43,9 +43,9 @@ class RegionSet(Iterable[Region], Loadable):
   Methods:              add, get, filter, overlaps, to_json
   Class Methods:        from_random, from_dict
 
-  Inherited from Loadable:
-    Class Methods:      from_text, from_source
-      Overridden:       from_object
+  Inherited from IOable:
+    Class Methods:      to_output, from_text, from_source
+      Overridden:       to_object, from_object
   """
   id: str
   dimension: int

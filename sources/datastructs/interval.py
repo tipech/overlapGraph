@@ -20,11 +20,11 @@ from typing import Any, Callable, Dict, List, Tuple, Union
 from numpy import floor
 
 from ..helpers.randoms import NDArray, RandomFn, Randoms
-from .loadable import Loadable
+from .ioable import IOable
 
 
 @dataclass(order = True)
-class Interval(Loadable):
+class Interval(IOable):
   """
   Dataclass that defines the lower and upper bounding values for an interval.
   Building block for representing multi-dimensional regions and computing
@@ -40,9 +40,9 @@ class Interval(Loadable):
                         random_values, random_intervals
   Class Methods:        from_intersect, from_union
 
-  Inherited from Loadable:
-    Class Methods:      from_text, from_source
-      Overridden:       from_object
+  Inherited from IOable:
+    Class Methods:      to_output, from_text, from_source
+      Overridden:       to_object, from_object
   """
   lower: float
   upper: float

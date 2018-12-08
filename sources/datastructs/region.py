@@ -19,13 +19,13 @@ from uuid import uuid4
 
 from ..helpers.randoms import NDArray, RandomFn, Randoms
 from .interval import Interval
-from .loadable import Loadable
+from .ioable import IOable
 
 
 RegionPair = Tuple['Region', 'Region']
 
 @dataclass
-class Region(Loadable):
+class Region(IOable):
   """
   Dataclass that defines a multidimensional region, with an upper and a
   lower vertex. Each region has a defined dimensionality. Provides methods
@@ -41,9 +41,9 @@ class Region(Loadable):
   Class Methods:        from_intervals, from_interval,
                         from_intersect, from_union, from_dict
 
-  Inherited from Loadable:
-    Class Methods:      from_text, from_source
-      Overridden:       from_object
+  Inherited from IOable:
+    Class Methods:      to_output, from_text, from_source
+      Overridden:       to_object, from_object
   """
   id: str
   lower: List[float]
