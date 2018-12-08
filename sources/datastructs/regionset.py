@@ -40,11 +40,12 @@ class RegionSet(Iterable[Region], IOable):
   Properties:           name, dimension, regions, bounds
   Computed Properties:  size, minbound, timeline
   Special Methods:      __init__, __getitem__, __contains__, __iter__
-  Methods:              add, get, filter, overlaps, to_json
+  Methods:              add, get, filter, overlaps
   Class Methods:        from_random, from_dict
 
   Inherited from IOable:
-    Class Methods:      to_output, from_text, from_source
+    Methods:            to_output
+    Class Methods:      from_text, from_source
       Overridden:       to_object, from_object
   """
   id: str
@@ -217,44 +218,6 @@ class RegionSet(Iterable[Region], IOable):
 
     return overlaps
 
-  def to_json(self, output: TextIOBase, compact: bool = False, **options):
-    """
-    Output this collection of Regions in the JSON serialization 
-    format to the given output writable IO stream. If compact is 
-    True, output abbreviated JSON data structure, otherwise output
-    all fields in full.
-
-      regionset = RegionSet.from_random(100, Region([0]*2, [100]*2))
-      with open('output.csv', 'w') as f:
-        regionset.to_json(f, compact = True)
-
-    :param output:
-    :param compact:
-    :param options:
-    """
-    assert output.writable()
-
-    fields = {
-      'RegionSet': ['id', 'dimension', 'size', 'bounds', 'regions'],
-      'Region': ['id', 'dimension', 'dimensions', 'data']
-    }
-
-    def pick_fields(value):
-      return [(f, getattr(value, f)) for f in fields[value.__class__.__name__]]
-
-    def json_encoder(value):
-      if isinstance(value, RegionSet):
-        return dict(pick_fields(value)) if compact else asdict(value)
-      if isinstance(value, Interval):
-        return astuple(value)
-      if isinstance(value, Region):
-        return dict(pick_fields(value)) if compact else asdict(value)
-      raise TypeError(f'{value}')
-
-    encoder = JSONEncoder(indent = 2, default = json_encoder, **options)
-    for chunk in encoder.iterencode(self):
-      output.write(chunk)
-
   @classmethod
   def from_random(cls, nregions: int, bounds: Region, 
                        id: str = '', base26_ids: bool = True,
@@ -331,6 +294,27 @@ class RegionSet(Iterable[Region], IOable):
       regionset.add(Region.from_object(region))
 
     return regionset
+
+  @classmethod
+  def to_object(cls, object: 'RegionSet', format: str = 'json', **kwargs) -> Any:
+    """
+    Generates an object (dict, list, or tuple) from the given RegionSet object that
+    can be converted or serialized as the specified data format: 'json'. Additional
+    arguments passed via kwargs are used to the customize and tweak the object
+    generation process.
+
+    :param object:
+    :param format:
+    :param kwargs:
+    """
+    assert isinstance(object, RegionSet)
+
+    fieldnames = ['id', 'dimension', 'size', 'bounds', 'regions']
+
+    if 'compact' in kwargs and kwargs['compact']:
+      return dict(map(lambda f: (f, getattr(object, f)), fieldnames))
+    else:
+      return asdict(object)
 
   @classmethod
   def from_object(cls, object: Any, id: str = '') -> 'RegionSet':

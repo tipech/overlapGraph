@@ -12,7 +12,7 @@
 # randomly generate intervals, and randomly choose values within an interval.
 #
 
-from dataclasses import dataclass
+from dataclasses import asdict, astuple, dataclass
 from functools import reduce
 from numbers import Real
 from typing import Any, Callable, Dict, List, Tuple, Union
@@ -41,7 +41,8 @@ class Interval(IOable):
   Class Methods:        from_intersect, from_union
 
   Inherited from IOable:
-    Class Methods:      to_output, from_text, from_source
+    Methods:            to_output
+    Class Methods:      from_text, from_source
       Overridden:       to_object, from_object
   """
   lower: float
@@ -342,6 +343,25 @@ class Interval(IOable):
     assert all([isinstance(interval, Interval) for interval in intervals])
 
     return reduce(lambda a, b: a.union(b), intervals)
+
+  @classmethod
+  def to_object(cls, object: 'Interval', format: str = 'json', **kwargs) -> Any:
+    """
+    Generates an object (dict, list, or tuple) from the given Interval object that
+    can be converted or serialized as the specified data format: 'json'. Additional
+    arguments passed via kwargs are used to the customize and tweak the object
+    generation process.
+
+    :param object:
+    :param format:
+    :param kwargs:
+    """
+    assert isinstance(object, Interval)
+
+    if 'compact' in kwargs and kwargs['compact']:
+      return astuple(object)
+    else:
+      return asdict(object)
 
   @classmethod
   def from_object(cls, object: Any) -> 'Interval':

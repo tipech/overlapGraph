@@ -11,7 +11,7 @@
 # within a region.
 #
 
-from dataclasses import astuple, dataclass, field
+from dataclasses import asdict, astuple, dataclass, field
 from functools import reduce
 from numbers import Real
 from typing import Any, Callable, Dict, List, Tuple, Union
@@ -42,7 +42,8 @@ class Region(IOable):
                         from_intersect, from_union, from_dict
 
   Inherited from IOable:
-    Class Methods:      to_output, from_text, from_source
+    Methods:            to_output
+    Class Methods:      from_text, from_source
       Overridden:       to_object, from_object
   """
   id: str
@@ -52,7 +53,7 @@ class Region(IOable):
   dimensions: List[Interval] = field(repr=False)
   data: Dict = field(repr=False)
 
-  def __init__(self, lower: List[float], upper: List[float], id: str = '', dimension: int = 0, **kvargs):
+  def __init__(self, lower: List[float], upper: List[float], id: str = '', dimension: int = 0, **kwargs):
     """
     Initialize a new Region, with the lower and upper bounding vertices.
     If dimension is specified, the lower and upper vertices must match that number of
@@ -69,7 +70,7 @@ class Region(IOable):
     :param upper:
     :param id:
     :param dimension:
-    :param kvargs:
+    :param kwargs:
     """
     if len(id) == 0:
       id = str(uuid4())
@@ -86,7 +87,7 @@ class Region(IOable):
     self.lower = [d.lower for d in self.dimensions]
     self.upper = [d.upper for d in self.dimensions]
     self.data = {}
-    for k, v in kvargs.items():
+    for k, v in kwargs.items():
       self.data[k] = v
 
   @property
@@ -384,7 +385,7 @@ class Region(IOable):
 
     return Region.from_intervals([d.union(that[i]) for i, d in enumerate(self.dimensions)], **data)
 
-  def project(self, dimension: int, **kvargs) -> 'Region':
+  def project(self, dimension: int, **kwargs) -> 'Region':
     """
     Project this Region to the specified number of dimensions. If the given
     number of dimensions is greater than this Region's dimensionality, output
@@ -395,15 +396,15 @@ class Region(IOable):
     this Region. Additional arguments passed through to Region.from_intervals.
 
     :param dimension:
-    :param kvargs:
+    :param kwargs:
     """
     assert dimension > 0
 
     if dimension == self.dimension:
-      return Region.from_intervals(self.dimensions, **kvargs)
+      return Region.from_intervals(self.dimensions, **kwargs)
     else:
       return Region.from_intervals([(Interval(0, 0) if d >= self.dimension \
-                                                    else self[d]) for d in range(dimension)], **kvargs)
+                                                    else self[d]) for d in range(dimension)], **kwargs)
 
   def random_points(self, npoints: int = 1, randomng: RandomFn = Randoms.uniform()) -> NDArray:
     """
@@ -432,7 +433,7 @@ class Region(IOable):
                            posnrng: RandomFn = Randoms.uniform(),
                            sizerng: RandomFn = Randoms.uniform(),
                            precision: int = None,
-                           **kvargs) -> List['Region']:
+                           **kwargs) -> List['Region']:
     """
     Randomly generate N Regions within this Regions, each with a random size
     as a percentage of the total Region dimensions, bounded by the given size
@@ -452,7 +453,7 @@ class Region(IOable):
     :param posnrng:
     :param sizerng:
     :param precision:
-    :param kvargs:
+    :param kwargs:
     """
     ndunit_region = Region([0] * self.dimension, [1] * self.dimension)
     if sizepc_range == None:
@@ -468,11 +469,11 @@ class Region(IOable):
       for i, d in enumerate(self.dimensions):
         dimension = d.random_intervals(1, sizepc_range[i], posnrng, sizerng, precision)[0]
         region.append(dimension)
-      regions.append(Region.from_intervals(region, **kvargs))
+      regions.append(Region.from_intervals(region, **kwargs))
     return regions
 
   @classmethod
-  def from_intervals(cls, dimensions: List[Interval], id: str = '', **kvargs) -> 'Region':
+  def from_intervals(cls, dimensions: List[Interval], id: str = '', **kwargs) -> 'Region':
     """
     Construct a new Region from the given a list of Intervals.
     If id is specified, sets it as the unique identifier for this Region,
@@ -482,16 +483,16 @@ class Region(IOable):
 
     :param dimensions:
     :param id:
-    :param kvargs:
+    :param kwargs:
     """
     assert isinstance(dimensions, List)
     assert all([isinstance(d, Interval) for d in dimensions])
 
     return cls([d.lower for d in dimensions],
-               [d.upper for d in dimensions], id, **kvargs)
+               [d.upper for d in dimensions], id, **kwargs)
 
   @classmethod
-  def from_interval(cls, interval: Interval, dimension: int = 1, id: str = '', **kvargs) -> 'Region':
+  def from_interval(cls, interval: Interval, dimension: int = 1, id: str = '', **kwargs) -> 'Region':
     """
     Construct a new Region from a given Intervals and the specified
     number of dimensions. Returns a Region contains the specified
@@ -503,13 +504,13 @@ class Region(IOable):
     :param interval:
     :param dimension:
     :param id:
-    :param kvargs:
+    :param kwargs:
     """
     assert isinstance(interval, Interval)
     assert isinstance(dimension, int) and dimension > 0
 
     return cls([interval.lower] * dimension,
-               [interval.upper] * dimension, id, **kvargs)
+               [interval.upper] * dimension, id, **kwargs)
 
   @classmethod
   def from_intersect(cls, regions: List['Region'], linked: bool = False, id: str = '') -> Union['Region', None]:
@@ -560,6 +561,39 @@ class Region(IOable):
     data = {'union': regions.copy()} if linked else {}
 
     return cls.from_intervals(dimensions, id, **data)
+
+  @classmethod
+  def to_object(cls, object: 'Region', format: str = 'json', **kwargs) -> Any:
+    """
+    Generates an object (dict, list, or tuple) from the given Region object that
+    can be converted or serialized as the specified data format: 'json'. Additional
+    arguments passed via kwargs are used to the customize and tweak the object
+    generation process.
+
+    :param object:
+    :param format:
+    :param kwargs:
+    """
+    assert isinstance(object, Region)
+
+    fieldnames = ['id', 'dimension', 'dimensions', 'data']
+
+    if 'compact' in kwargs and kwargs['compact']:
+      dictobj = dict(map(lambda f: (f, getattr(object, f)), fieldnames))
+
+      if 'data' in dictobj:
+        if dictobj['data'] is object.data:
+          dictobj['data'] = dictobj['data'].copy()
+        if 'intersect' in dictobj['data']:
+          dictobj['data']['intersect'] = map(lambda r: r.id, dictobj['data']['intersect'])
+        if 'union' in dictobj['data']:
+          dictobj['data']['union'] = map(lambda r: r.id, dictobj['data']['union'])
+        if len(dictobj['data']) == 0:
+          del dictobj['data']
+
+      return dictobj
+    else:
+      return asdict(object)
 
   @classmethod
   def from_dict(cls, object: Dict, id: str = '') -> 'Region':
