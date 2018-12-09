@@ -35,7 +35,7 @@ class Region(IOable):
 
   Properties:           id, lower, upper, dimension, dimensions, data
   Computed Properties:  lengths, midpoint, size
-  Special Methods:      __init__, __getitem__, __setitem__, __contains__, __eq__
+  Special Methods:      __init__, __getitem__, __setitem__, __repr__, __contains__, __eq__
   Methods:              contains, encloses, overlaps, intersect, union,
                         project, random_points, random_regions
   Class Methods:        from_intervals, from_interval,
@@ -161,6 +161,24 @@ class Region(IOable):
       self.dimensions[index] = value
       self.lower[index] = value.lower
       self.upper[index] = value.upper
+
+  def __repr__(self) -> str:
+    """
+    Called by the repr() built-in function to compute the “official” string
+    representation of an object. If at all possible, this should look like a
+    valid Python expression that could be used to recreate an object with the
+    same value (given an appropriate environment).
+    """
+    dictobj = {
+      'id': self.id[0:8] if len(self.id) > 8 else self.id,
+      'lower': self.lower,
+      'upper': self.upper
+    }
+
+    dicttopairs = lambda item: f'{item[0]}={item[1]}'
+    dictkvpairs = ', '.join(map(dicttopairs, dictobj.items()))
+
+    return f'{self.__class__.__name__}({dictkvpairs})'
 
   def contains(self, point: List[float], inc_lower = True, inc_upper = True) -> bool:
     """
