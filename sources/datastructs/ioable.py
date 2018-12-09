@@ -54,6 +54,8 @@ class IOable:
         raise TypeError(f'{value}')
 
     if format == 'json':
+      if 'indent' not in kwargs:
+        kwargs['indent'] = 2
       encoder = JSONEncoder(default = generator, **kwargs)
       for chunk in encoder.iterencode(self):
         output.write(chunk)
