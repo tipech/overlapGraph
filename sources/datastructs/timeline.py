@@ -39,20 +39,17 @@ class Event:
   Data class for an Event. Each event has a value for when the event
   occurs, a specified event type, the Region context associated with
   the Event, and dimension along which the event occurs. Events are ordered
-  by when the event occurs and the kind of Event. If the contexts are for
-  the same Region (i.e.: Region of zero length, begin == end), begin is
-  ordered before end. If the contexts are different Regions and if the
-  kind is the same, no change in order. But if the contexts and kind are
-  different (i.e.: the Regions are adjacent), the ending events are ordered
-  before the beginning events.
+  by when the event occurs, the kind of Event and if the Region is zero-length
+  or non-zero length along the timeline dimension.
 
-  Properties:       when, kind, context, dimension
+  Properties:       when, kind, context, dimension, order
   Special Methods:  __init__, __eq__, __lt__
   """
   when:       float
   kind:       EventKind
   context:    Region
   dimension:  int
+  order:      int
 
   def __init__(self, kind: Union[EventKind, str], when: float, context: Region, dimension: int = 0):
     """
@@ -74,46 +71,46 @@ class Event:
     self.when = when
     self.context = context
     self.dimension = dimension
+    self.order = (0 if context[dimension].length == 0 else 1) * \
+                 (-1 if kind == EventKind.End else 1)
 
   def __eq__(self, that: 'Event') -> bool:
     """
     Determine if the events are equal. Equality between Events
-    is defined as equal when and equal kind. Return True if
+    is defined as equal when, kind and same context. Return True if
     equal otherwise False.
 
     :param that:
     """
     return all([isinstance(that, Event),
                 self.when == that.when,
-                self.kind == that.kind])
+                self.kind == that.kind,
+                self.context is that.context])
 
   def __lt__(self, that: 'Event') -> bool:
     """
     Determine if this Event is less than the given other Event;
     ordered before the other Event. Order between the Events is
-    defined as: (1) lesser `when` first, (2) if same context then
-    beginning Events first, (3) if both context are length 0, order
-    by context.id, (4) and (5) context with length 0 first,
-    otherwise (6) ending Events first. The ordering within the same
-    'when': <End>... <0-length Begin><0-length End> <Begin>...
+    defined as: (1) lesser `when` first, (2) order by 'order': 
+    -1 for non-zero-length Region End events, 0 for zero-length
+    Region Begin and End events, and 1 for non-zero-length Region
+    Begin events, (3) if same context then beginning Events first,
+    and (4) same 'order' order by context.id. The ordering within 
+    the same 'when': <End>... <0-length Begin><0-length End> <Begin>...
     Return True if less than the given other Event, otherwise False.
 
     :param that:
     """
     if self == that:
       return False
-    if self.when != that.when:
+    elif self.when != that.when:
       return self.when < that.when
-    if self.context is that.context:
+    elif self.order != that.order:
+      return self.order < that.order
+    elif self.context is that.context or self.context.id == that.context.id:
       return self.kind < that.kind
-    if self.context[self.dimension].length == 0 and that.context[that.dimension].length == 0:
+    else:
       return self.context.id < that.context.id
-    if self.context[self.dimension].length == 0:
-      return that.kind == EventKind.Begin
-    if self.kind == EventKind.End:
-      return that.context[that.dimension].length == 0
-    if self.kind == EventKind.Begin:
-      return self.kind > that.kind
 
 @dataclass
 class Timeline:
