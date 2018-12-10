@@ -11,6 +11,7 @@ results in a beginning and an ending event.
 
 from dataclasses import dataclass, field
 from enum import IntEnum
+from functools import total_ordering
 from typing import Iterable, Iterator, List, Union
 
 from sortedcontainers import SortedList
@@ -35,6 +36,7 @@ class EventKind(IntEnum):
 
 
 @dataclass
+@total_ordering
 class Event:
   """
   Data class for an Event. Each event has a value for when the event
