@@ -62,15 +62,20 @@ class TestRegion(TestCase):
     test_regions = []
     test_regions.append(Region([0], [5]))
     test_regions.append(Region([0, 0], [5, 5]))
-    test_regions.append(Region([0, 0, 0], [5, 5, 5]))
+    test_regions.append(Region([0, 5, 0], [5, 0, 5]))
 
     for i, region in enumerate(test_regions):
       #print(region)
       self.assertEqual(region.dimension, i + 1)
+      self.assertEqual(region.dimension, len(region.dimensions))
       self.assertEqual(region.dimension, len(region.lower))
       self.assertEqual(region.dimension, len(region.upper))
+      self.assertTrue(all([d == Interval(0,5) for d in region.dimensions]))
       self.assertTrue(all([d == 0 for d in region.lower]))
       self.assertTrue(all([d == 5 for d in region.upper]))
+      self.assertTrue(all([region.lower[i] <= region.upper[i] for i in range(region.dimension)]))
+      self.assertTrue(all([region.lower[i] == region[i].lower for i in range(region.dimension)]))
+      self.assertTrue(all([region.upper[i] == region[i].upper for i in range(region.dimension)]))
 
   def test_region_dimension_mismatch(self):
     with self.assertRaises(AssertionError):

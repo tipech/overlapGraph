@@ -33,8 +33,8 @@ class Region(IOable):
   intersection and union regions between the two regions are, and
   randomly generate regions and points within a region.
 
-  Properties:           id, lower, upper, dimension, dimensions, data
-  Computed Properties:  lengths, midpoint, size
+  Properties:           id, dimension, dimensions, data
+  Computed Properties:  lower, upper, lengths, midpoint, size
   Special Methods:      __init__, __getitem__, __setitem__, __repr__, __contains__, __eq__
   Methods:              contains, encloses, overlaps, intersect, union,
                         project, random_points, random_regions
@@ -47,8 +47,6 @@ class Region(IOable):
       Overridden:       to_object, from_object
   """
   id: str
-  lower: List[float]
-  upper: List[float]
   dimension: int = field(repr=False)
   dimensions: List[Interval] = field(repr=False)
   data: Dict = field(repr=False)
@@ -84,8 +82,6 @@ class Region(IOable):
     self.id = id
     self.dimension = dimension
     self.dimensions = [Interval(*i) for i in zip(lower, upper)]
-    self.lower = [d.lower for d in self.dimensions]
-    self.upper = [d.upper for d in self.dimensions]
     self.data = {}
     for k, v in kwargs.items():
       self.data[k] = v
@@ -93,14 +89,24 @@ class Region(IOable):
   @property
   def _instance_invariant(self) -> bool:
     return all([
-      isinstance(self.lower, List),
-      isinstance(self.upper, List),
       isinstance(self.dimensions, List),
-      self.dimension > 0,
-      self.dimension == len(self.lower) == len(self.upper),
-      all([isinstance(d, Interval) for d in self.dimensions]),
-      all([self.lower[i] <= self.upper[i] for i in range(self.dimension)])
+      self.dimension == len(self.dimensions),
+      all([isinstance(d, Interval) for d in self.dimensions])
     ])
+
+  @property
+  def lower(self) -> List[float]:
+    """The lower bounding vertex of this Region. Calculate and
+       return a copy of the vector that represent the lower 
+       bounding values for this Region in each dimension."""
+    return [d.lower for d in self.dimensions]
+
+  @property
+  def upper(self) -> List[float]:
+    """The upper bounding vertex of this Region. Calculate and
+       return a copy of the vector that represent the upper
+       bounding values for this Region in each dimension."""
+    return [d.upper for d in self.dimensions]
 
   @property
   def lengths(self) -> List[float]:
@@ -159,8 +165,6 @@ class Region(IOable):
       assert 0 <= index < self.dimension
 
       self.dimensions[index] = value
-      self.lower[index] = value.lower
-      self.upper[index] = value.upper
 
   def __repr__(self) -> str:
     """
