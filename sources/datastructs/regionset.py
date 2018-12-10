@@ -299,7 +299,11 @@ class RegionSet(Iterable[Region], IOable):
     Generates an object (dict, list, or tuple) from the given RegionSet object that
     can be converted or serialized as the specified data format: 'json'. Additional
     arguments passed via kwargs are used to the customize and tweak the object
-    generation process.
+    generation process. kwargs arguments:
+
+    - 'compact': True or False, which specifies whether or not
+      the data representation of the output JSON is a compact, abbreviated
+      representation or the full data representation with all fields.
 
     :param object:
     :param format:
