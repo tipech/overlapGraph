@@ -19,6 +19,59 @@ from json import loads as JSONParse
 from typing import Any, Dict
 
 
+def json_encoder_default_factory(withself: bool = False, default = JSONEncoder.default, **kwargs):
+  """
+  Returns a function that extends JSONEncoder to recognize other objects, by
+  implementing a default() method with another method that returns a 
+  serializable object for o if possible, otherwise it should call the 
+  default implementation (to raise TypeError). If withself is True, the
+  function that's self, so that it can be attached to a class. default is
+  the unmodified JSONEncoder.default method or base implementation that the
+  new default() method falls back on. Additional arguments passed via kwargs
+  are used to customize and tweak the object generation process. kwargs
+  arguments handled within json_encoder_default (prior to or after
+  passing through to 'to_object' or 'to_json' methods):
+
+  - 'object_types': if True, outputs __type__ attribute to object output.
+    The '__type__' attribute will hold the class name of the object type.
+    Sometimes necessary for deserializing the output back in its in-memory
+    object represectation.
+
+  :param withself:
+  :param default:
+  :param kwargs:
+  """
+  def json_encoder_default(self, value):
+    if isinstance(value, IOable):
+      json_value = value.__class__.to_object(value, **kwargs)
+      if 'object_types' in kwargs and kwargs['object_types'] and isinstance(json_value, Dict):
+        json_value['__type__'] = value.__class__.__name__
+
+      return json_value
+    if hasattr(value, 'to_json'):
+      json_value = getattr(value, 'to_json', default)(value, **kwargs)
+      if 'object_types' in kwargs and kwargs['object_types'] and isinstance(json_value, Dict):
+        json_value['__type__'] = value.__class__.__name__
+
+      return json_value
+    else:
+      raise TypeError(f'{value}')
+
+  def json_encoder_default_noself(value):
+    return json_encoder_default(None, value)
+
+  def json_encoder_default_setdefault(default):
+    JSONEncoder.default = default
+
+  json_encoder_default.default        = default
+  json_encoder_default_noself.default = default
+  json_encoder_default.setdefault     = lambda: json_encoder_default_setdefault(json_encoder_default)
+  json_encoder_default.resetdefault   = lambda: json_encoder_default_setdefault(json_encoder_default.default)
+
+  return json_encoder_default if withself else \
+         json_encoder_default_noself
+
+
 class IOable:
   """
   Abstract base class for (de)serialization of objects that implement
@@ -47,16 +100,12 @@ class IOable:
     """
     assert output.writable()
 
-    def generator(value):
-      if isinstance(value, IOable):
-        return value.__class__.to_object(value, format, **options)
-      else:
-        raise TypeError(f'{value}')
+    default = json_encoder_default_factory(**options)
 
     if format == 'json':
       if 'indent' not in kwargs:
         kwargs['indent'] = 2
-      encoder = JSONEncoder(default = generator, **kwargs)
+      encoder = JSONEncoder(default=default, **kwargs)
       for chunk in encoder.iterencode(self):
         output.write(chunk)
     else:
