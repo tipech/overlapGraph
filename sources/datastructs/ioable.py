@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 
-#
-# datastructs/ioable.py - Base Definition for IOable class
-#
-# This script implements an base class for (de)serialization of
-# certain objects to/from various serialized data formats: JSON and
-# Python Literal (parseable by ast.literal_eval). Provides base
-# implements for to_output, from_text and from_source methods.
-# Requires the concrete classes to implement the to_object and
-# from_object method.
-#
+"""
+datastructs/ioable.py - Base Definition for IOable class
+
+This script implements an base class for (de)serialization of
+certain objects to/from various serialized data formats: JSON and
+Python Literal (parseable by ast.literal_eval). Provides base
+implements for to_output, from_text and from_source methods.
+Requires the concrete classes to implement the to_object and
+from_object method.
+"""
 
 from ast import literal_eval as PythonParse
 from io import TextIOBase

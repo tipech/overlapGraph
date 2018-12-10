@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
-#
-# datastructs/timeline.py - Event Timeline for Region Sets
-#
-# This script implements the Timeline class along with its helper
-# classes EventKind and Event. The Timeline class generates a sorted
-# iteration of Events for each dimension in the Regions, each Region
-# results in a beginning and an ending event.
-#
+"""
+datastructs/timeline.py - Event Timeline for Region Sets
+
+This script implements the Timeline class along with its helper
+classes EventKind and Event. The Timeline class generates a sorted
+iteration of Events for each dimension in the Regions, each Region
+results in a beginning and an ending event.
+"""
 
 from dataclasses import dataclass, field
 from enum import IntEnum
@@ -32,6 +32,7 @@ class EventKind(IntEnum):
   """
   Begin = 0
   End   = 1
+
 
 @dataclass
 class Event:

@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 
-#
-# helpers/base26.py - Base26 Converter
-#
-# This script implements methods for converting from a
-# decimal integer to a Base26 number and from a Base26
-# number back to a decimal integer. A values in this
-# numeric representation are in uppercase A-Z letters.
-# Used for generating shorter, more readable Region or
-# RegionSet IDs. For instance: 
-# 
-#   A, B, C, ..., X, Y, Z, AA, AB, ...
-#
+"""
+helpers/base26.py - Base26 Converter
+
+This script implements methods for converting from a
+decimal integer to a Base26 number and from a Base26
+number back to a decimal integer. A values in this
+numeric representation are in uppercase A-Z letters.
+Used for generating shorter, more readable Region or
+RegionSet IDs. For instance: 
+ 
+- A, B, C, ..., X, Y, Z, AA, AB, ...
+"""
 
 from functools import reduce
 from string import ascii_uppercase as alphabet
@@ -22,6 +22,7 @@ def _divmod_base26(n):
   if b == 0:
     return a - 1, b + 26
   return a, b
+
 
 def to_base26(num: int) -> str:
   """
@@ -39,6 +40,7 @@ def to_base26(num: int) -> str:
     chars.append(alphabet[d - 1])
 
   return ''.join(reversed(chars))
+
 
 def from_base26(chars: str) -> int:
   """

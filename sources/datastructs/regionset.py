@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 
-#
-# datastructs/regionset.py - Regions Collection
-#
-# This script implements the RegionSet class, a data class
-# that represents a collection of Regions dataset. Provides
-# methods for generating new datasets, and loading from or
-# saving to a file, in the JSON or CSV file formats. This
-# collection of Regions is then passed to the Intersection
-# Graph construction algorithm.
-#
+"""
+datastructs/regionset.py - Regions Collection
+
+This script implements the RegionSet class, a data class
+that represents a collection of Regions dataset. Provides
+methods for generating new datasets, and loading from or
+saving to a file, in the JSON or CSV file formats. This
+collection of Regions is then passed to the Intersection
+Graph construction algorithm.
+"""
 
 from dataclasses import asdict, astuple, dataclass
 from typing import Any, Dict, Iterable, Iterator, List, Union

@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-#
-# tests/test_timeline.py - Unit tests for datastructs/timeline.py
-#
-# This script implements the following tests:
-#   - test_timeline_event_create
-#   - test_timeline_ordering
-#
+"""
+tests/test_timeline.py - Unit tests for datastructs/timeline.py
+
+This script implements the following tests:
+  - test_timeline_event_create
+  - test_timeline_ordering
+"""
 
 from unittest import TestCase
 

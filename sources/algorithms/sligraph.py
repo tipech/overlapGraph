@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
-#
-# algorithms/sligraph.py - Intersection Graph By Sweepline Algorithm
-#
-# This script implements the SLIGraph (or intersection graph construction
-# by sweepline algorithm). This algorithm builds an undirected, weighted (labelled)
-# graph of all the pair-wise intersections or overlapping regions between a
-# collection of regions with the same dimensionality.
-#
+"""
+algorithms/sligraph.py - Intersection Graph By Sweepline Algorithm
+
+This script implements the SLIGraph (or intersection graph construction
+by sweepline algorithm). This algorithm builds an undirected, weighted (labelled)
+graph of all the pair-wise intersections or overlapping regions between a
+collection of regions with the same dimensionality.
+"""
 
 from networkx import Graph
 

@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 
-#
-# datastructs/region.py - Region class
-#
-# This script implements the Region class, a data class that defines a
-# multidimensional region, with an upper and a lower vertex. Each region
-# has a defined dimensionality. Provides methods for determining if there
-# is an overlap between two regions, what the intersection or union regions
-# between the two regions are, and randomly generate regions and points
-# within a region.
-#
+"""
+datastructs/region.py - Region class
+
+This script implements the Region class, a data class that defines a
+multidimensional region, with an upper and a lower vertex. Each region
+has a defined dimensionality. Provides methods for determining if there
+is an overlap between two regions, what the intersection or union regions
+between the two regions are, and randomly generate regions and points
+within a region.
+"""
 
 from dataclasses import asdict, astuple, dataclass, field
 from functools import reduce
@@ -23,6 +23,7 @@ from .ioable import IOable
 
 
 RegionPair = Tuple['Region', 'Region']
+
 
 @dataclass
 class Region(IOable):

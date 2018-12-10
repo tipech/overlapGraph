@@ -1,17 +1,17 @@
 #!/usr/env/python
 
-#
-# algorithms/sweepln.py - The Sweepline Algorithm
-#
-# This script implements a generalized version of a single-pass
-# sweepline algorithm. Implements SweeplnAlg and SweeplnRT classes, where
-# the SweeplnRT (the runtime) drives the evaluation by initializing each
-# SweeplnAlgs' oninit methods, looping over the sorted Events and executing
-# each SweeplnAlgs' onbegin and onend handlers, and finally, invoking each
-# SweeplnAlgs' onfinalize methods. The SweeplnAlg (evaluator) is a base
-# class for implementations that implement these handlers and maintain the
-# necessary, associated interval state of the evaluation.
-#
+"""
+algorithms/sweepln.py - The Sweepline Algorithm
+
+This script implements a generalized version of a single-pass
+sweepline algorithm. Implements SweeplnAlg and SweeplnRT classes, where
+the SweeplnRT (the runtime) drives the evaluation by initializing each
+SweeplnAlgs' oninit methods, looping over the sorted Events and executing
+each SweeplnAlgs' onbegin and onend handlers, and finally, invoking each
+SweeplnAlgs' onfinalize methods. The SweeplnAlg (evaluator) is a base
+class for implementations that implement these handlers and maintain the
+necessary, associated interval state of the evaluation.
+"""
 
 from typing import Any, Dict, Iterable, List, Tuple
 
@@ -188,6 +188,7 @@ class SweeplnAlg:
 
     self.dimension = None
     return self.overlaps
+
 
 class SweeplnRT:
   """

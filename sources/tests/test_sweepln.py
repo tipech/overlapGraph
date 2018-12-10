@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-#
-# tests/test_sweepln.py - Unit tests for algorithms/sweepln.py
-#
-# This script implements the following tests:
-#   - test_sweepln_simple
-#   - test_sweepln_random
-#
+"""
+tests/test_sweepln.py - Unit tests for algorithms/sweepln.py
+
+This script implements the following tests:
+  - test_sweepln_simple
+  - test_sweepln_random
+"""
 
 from typing import List
 from unittest import TestCase

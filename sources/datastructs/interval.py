@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 
-#
-# datastructs/interval.py - Interval class
-#
-# This script implements the Interval class, a data class that defines
-# lower and upper bounding values for an interval. Are the building blocks for
-# representing multi-dimensional regions and computing for overlap between
-# those regions. Provides methods for determining if there is an overlap
-# between two intervals, what the intersection interval between the two
-# intervals is, what the union interval between the two intervals is,
-# randomly generate intervals, and randomly choose values within an interval.
-#
+"""
+datastructs/interval.py - Interval class
+
+This script implements the Interval class, a data class that defines
+lower and upper bounding values for an interval. Are the building blocks for
+representing multi-dimensional regions and computing for overlap between
+those regions. Provides methods for determining if there is an overlap
+between two intervals, what the intersection interval between the two
+intervals is, what the union interval between the two intervals is,
+randomly generate intervals, and randomly choose values within an interval.
+"""
 
 from dataclasses import asdict, astuple, dataclass
 from functools import reduce

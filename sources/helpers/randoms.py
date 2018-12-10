@@ -1,23 +1,25 @@
 #!/usr/bin/env python
 
-#
-# helpers/randoms.py - Random Number Generators
-#
-# This script implements the Randoms class, a static class
-# that provides factory methods that each return Callable (lambdas)
-# that are preconfigured to generate random values based on a
-# particular distribution or random number generation function.
-# The only missing parameters is the lower and upper bounds of the
-# values generated and the sample size of the output.
-#
+"""
+helpers/randoms.py - Random Number Generators
+
+This script implements the Randoms class, a static class
+that provides factory methods that each return Callable (lambdas)
+that are preconfigured to generate random values based on a
+particular distribution or random number generation function.
+The only missing parameters is the lower and upper bounds of the
+values generated and the sample size of the output.
+"""
 
 from typing import Callable, Dict, List, Union
 
 from numpy import ndarray, random
 
-ShapeSize = Union[None,int,List[int]]
+
+ShapeSize = Union[None, int, List[int]]
 NDArray   = ndarray
 RandomFn  = Callable[[float, float, ShapeSize], NDArray]
+
 
 class Randoms:
   """
