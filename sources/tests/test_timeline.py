@@ -32,7 +32,7 @@ class TestRegionSet(TestCase):
     self.assertTrue(all([e.context is region for e in upper + lower]))
 
   def test_timeline_ordering(self):
-    regions = RegionSet(dimension = 2)
+    regions = RegionSet(dimension=2)
     regions.add(Region([0, 0], [3, 5], 'A'))
     regions.add(Region([3, 1], [5, 5], 'B'))
     regions.add(Region([2, 5], [6, 5], 'C'))

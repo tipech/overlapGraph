@@ -79,7 +79,7 @@ class TestRegion(TestCase):
 
   def test_region_dimension_mismatch(self):
     with self.assertRaises(AssertionError):
-      Region([0, 0], [10, 10], dimension = 3)
+      Region([0, 0], [10, 10], dimension=3)
     with self.assertRaises(AssertionError):
       Region([0, 0, 0], [10, 10])
 
@@ -100,7 +100,7 @@ class TestRegion(TestCase):
   def test_region_getsetitem(self):
     data = {'data': 'value', 'datalist': ['list', 'of', 'items'], 'dataprop': 'dataprop'}
     intervals = [Interval(0, 10)]*3
-    region = Region.from_intervals(intervals, dataprop = data['dataprop'])
+    region = Region.from_intervals(intervals, dataprop=data['dataprop'])
 
     def check_region(region: Region, intervals: List[Interval]):
       self.assertTrue(all([region[i] == interval for i, interval in enumerate(intervals)]))
@@ -136,8 +136,8 @@ class TestRegion(TestCase):
     self.assertTrue([region.lower[0]      , region.lower[1] + 0.1] in region)
     self.assertTrue([region.upper[0] - 0.1, region.upper[1]]       in region)
     self.assertTrue([region.upper[0]      , region.upper[1] - 0.1] in region)
-    self.assertFalse(region.contains(region.lower, inc_lower = False))
-    self.assertFalse(region.contains(region.upper, inc_upper = False))
+    self.assertFalse(region.contains(region.lower, inc_lower=False))
+    self.assertFalse(region.contains(region.upper, inc_upper=False))
     self.assertFalse([v - 0.1 for v in region.lower] in region)
     self.assertFalse([v + 0.1 for v in region.upper] in region)
     self.assertFalse([region.lower[0] - 0.1, region.lower[1]]       in region)

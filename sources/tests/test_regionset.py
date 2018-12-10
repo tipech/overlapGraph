@@ -43,12 +43,12 @@ class TestRegionSet(TestCase):
     self._test_regionset(regionset, len(regions), bounds, regions)
 
   def test_regionset_dimension_mismatch(self):
-    regionset = RegionSet(dimension = 2)
+    regionset = RegionSet(dimension=2)
     with self.assertRaises(AssertionError):
       regionset.add(Region([0]*3,[1]*3))
 
   def test_regionset_outofbounds(self):
-    regionset = RegionSet(bounds = Region([0, 0], [10, 10]))
+    regionset = RegionSet(bounds=Region([0, 0], [10, 10]))
     with self.assertRaises(AssertionError):
       regionset.add(Region([-1, -1],[5, 5]))
 
@@ -56,17 +56,17 @@ class TestRegionSet(TestCase):
     nregions = 50
     bounds = Region([0]*2, [10]*2)
     sizepc_range = Region([0]*2, [0.5]*2)
-    regionset = RegionSet.from_random(nregions, bounds, sizepc_range = sizepc_range, precision = 1)
+    regionset = RegionSet.from_random(nregions, bounds, sizepc_range=sizepc_range, precision=1)
     self._test_regionset(regionset, nregions, bounds, regionset)
 
   def test_regionset_tofrom_output(self):
     nregions = 10
     bounds = Region([0]*2, [100]*2)
     sizepc_range = Region([0]*2, [0.5]*2)
-    regionset = RegionSet.from_random(nregions, bounds, sizepc_range = sizepc_range, precision = 1)
+    regionset = RegionSet.from_random(nregions, bounds, sizepc_range=sizepc_range, precision=1)
 
     with StringIO() as output:
-      regionset.to_output(output, options = {'compact': True})
+      regionset.to_output(output, options={'compact': True})
       before = output.getvalue()
       #print(before)
       output.seek(0)
@@ -75,7 +75,7 @@ class TestRegionSet(TestCase):
 
       output.truncate(0)
       output.seek(0)
-      newregionset.to_output(output, options = {'compact': True})
+      newregionset.to_output(output, options={'compact': True})
       after = output.getvalue()
       #print(after)
       self.assertEqual(before, after)
@@ -84,7 +84,7 @@ class TestRegionSet(TestCase):
     nregions = 50
     bounds = Region([0]*2, [10]*2)
     sizepc_range = Region([0]*2, [0.5]*2)
-    regionset = RegionSet.from_random(nregions, bounds, sizepc_range = sizepc_range, precision = 1)    
+    regionset = RegionSet.from_random(nregions, bounds, sizepc_range=sizepc_range, precision=1)    
     filter_bound = Region([5]*2, [10]*2)
     filtered = regionset.filter(filter_bound)
 

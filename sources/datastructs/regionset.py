@@ -12,8 +12,6 @@
 #
 
 from dataclasses import asdict, astuple, dataclass
-from io import TextIOBase
-from json import JSONEncoder
 from typing import Any, Dict, Iterable, Iterator, List, Union
 from uuid import uuid4
 
@@ -283,10 +281,10 @@ class RegionSet(Iterable[Region], IOable):
       assert len(object['regions']) == object['size']
 
     if 'bounds' in object and object['bounds'] != None:
-      regionset = cls(id, bounds = Region.from_object(object['bounds']))
+      regionset = cls(id, bounds=Region.from_object(object['bounds']))
     elif 'dimension' in object:
       assert isinstance(object['dimension'], int) and 0 < object['dimension']
-      regionset = cls(id, dimension = object['dimension'])
+      regionset = cls(id, dimension=object['dimension'])
     else:
       raise ValueError('Unrecognized RegionSet representation')
 

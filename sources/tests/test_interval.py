@@ -84,8 +84,8 @@ class TestInterval(TestCase):
     self.assertTrue(interval.midpoint in interval)
     self.assertTrue((interval.lower + 0.1) in interval)
     self.assertTrue((interval.upper - 0.1) in interval)
-    self.assertFalse(interval.contains(interval.lower, inc_lower = False))
-    self.assertFalse(interval.contains(interval.upper, inc_upper = False))
+    self.assertFalse(interval.contains(interval.lower, inc_lower=False))
+    self.assertFalse(interval.contains(interval.upper, inc_upper=False))
     self.assertFalse((interval.lower - 0.1) in interval)
     self.assertFalse((interval.upper + 0.1) in interval)
 
@@ -151,7 +151,7 @@ class TestInterval(TestCase):
   def test_interval_random_interval(self):
     interval = Interval(-5, 15)
     randoms  = interval.random_intervals(5, Interval(0.25, 0.75))
-    randoms += interval.random_intervals(5, Interval(0.25, 0.75), precision = 0)
+    randoms += interval.random_intervals(5, Interval(0.25, 0.75), precision=0)
     #print(f'{interval}:')
     for subinterval in randoms:
       #print(f'- {subinterval}')

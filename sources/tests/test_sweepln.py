@@ -20,7 +20,7 @@ from ..datastructs.timeline import Event, EventKind, Timeline
 class TestSweepln(TestCase):
 
   def test_sweepln_simple(self):
-    regionset = RegionSet(dimension = 2)
+    regionset = RegionSet(dimension=2)
     regionset.add(Region([0, 0], [3, 5]))
     regionset.add(Region([3, 1], [5, 5]))
     regionset.add(Region([2, 4], [6, 6]))
@@ -37,7 +37,7 @@ class TestSweepln(TestCase):
       self.assertEqual(len(expect), len(actual))
 
   def test_sweepln_random(self):
-    regionset = RegionSet.from_random(30, Region([0]*3, [100]*3), sizepc_range = Region([0]*3, [0.5]*3), precision = 0)
+    regionset = RegionSet.from_random(30, Region([0]*3, [100]*3), sizepc_range=Region([0]*3, [0.5]*3), precision=0)
     sweepln = SweeplnRT(regionset)
     sweepln.put(SweeplnAlg())
 
