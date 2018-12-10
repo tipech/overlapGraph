@@ -164,21 +164,6 @@ class SweeplnAlg:
     """
     region_id = event.context.id
 
-    # Debugging code for a persistent but difficult to reproduce bug (issue #2)
-    if region_id not in self.actives:
-      with open('data/bug-2.log', 'w') as f:
-        f.write(f'Region: {region_id} not in {self.actives}\n\n')
-        f.write(f'Event: {event}\n')
-        f.write(f'Dimension: {self.dimension}\n')
-        f.write(f'\nRegions:\n')
-        for region in self.regionset:
-          f.write(f'{region} *\n' if region.id == region_id else f'{region}\n')
-        f.write(f'\nEvents:\n')
-        for ev in self.regionset.timeline[self.dimension]:
-          f.write(f'{ev} *\n' if ev == event else f'{ev}\n')
-      with open('data/bug-2-regions.json', 'w') as f:
-        self.regionset.to_output(f)
-
     assert self.binded and self.initialized
     assert region_id in self.actives
 
