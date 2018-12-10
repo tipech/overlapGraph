@@ -35,9 +35,9 @@ class Interval(IOable):
 
   Properties:           lower, upper
   Computed Properties:  length, midpoint
-  Special Methods:      __init__, __contains__
-  Methods:              contains, encloses, overlaps, intersect, union,
-                        random_values, random_intervals
+  Special Methods:      __init__, __setattr__, __contains__
+  Methods:              assign, contains, encloses, overlaps, intersect,
+                        union, random_values, random_intervals
   Class Methods:        from_intersect, from_union
 
   Inherited from IOable:
@@ -47,10 +47,6 @@ class Interval(IOable):
   """
   lower: float
   upper: float
-
-  def _assign(self, lower: float, upper: float):
-    self.lower = lower
-    self.upper = upper
 
   def __init__(self, lower, upper):
     """
@@ -62,9 +58,7 @@ class Interval(IOable):
     :param lower:
     :param upper:
     """
-    self._assign(float(lower), float(upper))
-    if self.lower > self.upper:
-      self._assign(self.upper, self.lower)
+    self.assign(float(lower), float(upper))
 
   @property
   def _instance_invariant(self) -> bool:
@@ -81,6 +75,48 @@ class Interval(IOable):
   def midpoint(self) -> float:
     """The value equal distance between the lower and upper bounding values."""
     return (self.lower + self.upper) / 2
+
+  def __setattr__(self, name, value):
+    """
+    Called when an attribute assignment is attempted. This is called instead 
+    of the normal mechanism. name is the attribute name, value is the value 
+    to be assigned to it.
+    
+    Ensures that the lower and upper bounding values satisfy the object
+    invariant: lower <= upper, the lower and upper bounding values cannot be 
+    modified directly after this Interval is initialized. If the lower or upper
+    bounding values are attempted to be set, raises an exception. This effectively
+    prevents this Interval from being mutated into an invalid state. To mutate this
+    Interval, call the assign() method with both lower and upper bounding values
+    instead.
+
+    :param name:
+    :param value:    
+    """
+    if name == 'lower' or name == 'upper':
+      raise Exception(f'Cannot set immutable "{name}" attribute')
+
+    object.__setattr__(self, name, value)
+
+  def assign(self, lower: Real, upper: Real):
+    """
+    Assign the lower and upper bounding values of this Interval.
+    Converts input values to floating point numbers, and assigns
+    the float value to the lower and upper fields. If lower is greater
+    than upper, swaps the lower and upper values.
+
+    :param lower:
+    :param upper:
+    """
+    assert isinstance(lower, Real)
+    assert isinstance(upper, Real)
+
+    if lower > upper:
+      object.__setattr__(self, 'lower', float(upper))
+      object.__setattr__(self, 'upper', float(lower))
+    else:
+      object.__setattr__(self, 'lower', float(lower))
+      object.__setattr__(self, 'upper', float(upper))
 
   def contains(self, value: float, inc_lower = True, inc_upper = True) -> bool:
     """
