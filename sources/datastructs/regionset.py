@@ -291,6 +291,17 @@ class RegionSet(Iterable[Region], IOable):
     for region in object['regions']:
       regionset.add(Region.from_object(region))
 
+    # resolve backlinks amongst the set of Regions
+    for region in regionset:
+      if 'intersect_' in region.data:
+        assert all([r in regionset for r in region.data['intersect_']])
+        region.data['intersect'] = list(map(lambda r: regionset[r], region.data['intersect_']))
+        del region.data['intersect_']
+      if 'union_' in region.data:
+        assert all([r in regionset for r in region.data['union_']])
+        region.data['union'] = list(map(lambda r: regionset[r], region.data['union_']))
+        del region.data['union_']
+
     return regionset
 
   @classmethod

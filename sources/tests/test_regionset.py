@@ -9,6 +9,7 @@ This script implements the following tests:
   - test_regionset_outofbounds
   - test_regionset_from_random
   - test_regionset_tofrom_output
+  - test_regionset_tofrom_output_backlinks
   - test_regionset_filter
 """
 
@@ -79,6 +80,42 @@ class TestRegionSet(TestCase):
       after = output.getvalue()
       #print(after)
       self.assertEqual(before, after)
+
+  def test_regionset_tofrom_output_backlinks(self):
+    nregions = 10
+    bounds = Region([0]*2, [100]*2)
+    sizepc_range = Region([0]*2, [0.5]*2)
+    regionset = RegionSet.from_random(nregions, bounds, sizepc_range=sizepc_range, precision=1)
+    regions = []
+
+    for first in regionset:
+      for second in regionset:
+        if first is not second:
+          regions.append(first.union(second, 'reference'))
+          if first.overlaps(second):
+            regions.append(first.intersect(second, 'reference'))
+
+    for region in regions:
+      #print(f'{region}')
+      regionset.add(region)
+
+    with StringIO() as output:
+      regionset.to_output(output, options={'compact': True})
+      #print(before)
+      output.seek(0)
+      newregionset = RegionSet.from_source(output, 'json')
+
+      for region in regions:
+        if 'intersect' in region.data:
+          self.assertTrue('intersect' in newregionset[region.id].data)
+          self.assertTrue('intersect_' not in newregionset[region.id].data)
+          self.assertTrue(all([isinstance(r, Region) for r in newregionset[region.id].data['intersect']]))
+          self.assertListEqual(region.data['intersect'], newregionset[region.id].data['intersect'])
+        if 'union' in region.data:
+          self.assertTrue('union' in newregionset[region.id].data)
+          self.assertTrue('union_' not in newregionset[region.id].data)
+          self.assertTrue(all([isinstance(r, Region) for r in newregionset[region.id].data['union']]))
+          self.assertListEqual(region.data['union'], newregionset[region.id].data['union'])
 
   def test_regionset_filter(self):
     nregions = 50
