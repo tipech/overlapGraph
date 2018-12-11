@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-helpers/base26.py - Base26 Converter
+Base26 Converter
 
 This script implements methods for converting from a
 decimal integer to a Base26 number and from a Base26

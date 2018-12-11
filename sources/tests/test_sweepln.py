@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-tests/test_sweepln.py - Unit tests for algorithms/sweepln.py
+Unit tests for Generalized One-Pass Sweep-line Algorithm
 
 This script implements the following tests:
   - test_sweepln_simple

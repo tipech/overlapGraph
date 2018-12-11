@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-tests/test_timeline.py - Unit tests for datastructs/timeline.py
+Unit tests for Event Timeline for Region Sets
 
 This script implements the following tests:
   - test_timeline_event_create

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-datastructs/timeline.py - Event Timeline for Region Sets
+Event Timeline for Region Sets
 
 This script implements the Timeline class along with its helper
 classes EventKind and Event. The Timeline class generates a sorted

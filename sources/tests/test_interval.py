@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-tests/test_interval.py - Unit tests for datastructs/interval.py
+Unit tests for Interval Data Class
 
 This script implements the following tests:
   - test_create_interval

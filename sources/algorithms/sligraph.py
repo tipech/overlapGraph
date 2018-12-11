@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-algorithms/sligraph.py - Intersection Graph By Sweepline Algorithm
+Intersection Graph Construction By Sweepline Algorithm
 
 This script implements the SLIGraph (or intersection graph construction
 by sweepline algorithm). This algorithm builds an undirected, weighted (labelled)

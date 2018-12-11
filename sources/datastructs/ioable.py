@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-datastructs/ioable.py - Base Definition for IOable class
+Base Definition for IOable class
 
 This script implements an base class for (de)serialization of
 certain objects to/from various serialized data formats: JSON and

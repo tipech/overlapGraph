@@ -1,7 +1,7 @@
 #!/usr/env/python
 
 """
-algorithms/sweepln.py - The Sweepline Algorithm
+Generalized One-Pass Sweep-line Algorithm
 
 This script implements a generalized version of a single-pass
 sweepline algorithm. Implements SweeplnAlg and SweeplnRT classes, where

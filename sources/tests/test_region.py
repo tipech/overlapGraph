@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-tests/test_region.py - Unit tests for datastructs/region.py
+Unit tests for Region Data Class
 
 This script implements the following tests:
   - test_create_region

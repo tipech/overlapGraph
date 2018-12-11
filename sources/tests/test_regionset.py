@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-tests/test_regionset.py - Unit tests for datastructs/regionet.py
+Unit tests for Regions Collection
 
 This script implements the following tests:
   - test_create_regionset

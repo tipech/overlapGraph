@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-datastructs/regionset.py - Regions Collection
+Regions Collection
 
 This script implements the RegionSet class, a data class
 that represents a collection of Regions dataset. Provides

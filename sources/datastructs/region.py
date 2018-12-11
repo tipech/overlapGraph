@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-datastructs/region.py - Region class
+Region Data Class
 
 This script implements the Region class, a data class that defines a
 multidimensional region, with an upper and a lower vertex. Each region
