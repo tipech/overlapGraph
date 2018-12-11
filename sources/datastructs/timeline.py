@@ -16,10 +16,10 @@ from typing import Iterable, Iterator, List, Union
 
 from sortedcontainers import SortedList
 
-from .region import Region
+from sources.datastructs.region import Region
 
 try: # cyclic codependency
-  from .regionset import RegionSet
+  from sources.datastructs.regionset import RegionSet
 except ImportError:
   pass
 

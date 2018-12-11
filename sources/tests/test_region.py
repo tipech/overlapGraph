@@ -34,8 +34,8 @@ from unittest import TestCase
 
 from numpy import mean
 
-from ..datastructs.interval import Interval
-from ..datastructs.region import Region
+from sources.datastructs.interval import Interval
+from sources.datastructs.region import Region
 
 
 class TestRegion(TestCase):

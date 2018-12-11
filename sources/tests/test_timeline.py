@@ -10,9 +10,9 @@ This script implements the following tests:
 
 from unittest import TestCase
 
-from ..datastructs.region import Region
-from ..datastructs.regionset import RegionSet
-from ..datastructs.timeline import Event, EventKind, Timeline
+from sources.datastructs.region import Region
+from sources.datastructs.regionset import RegionSet
+from sources.datastructs.timeline import Event, EventKind, Timeline
 
 
 class TestRegionSet(TestCase):

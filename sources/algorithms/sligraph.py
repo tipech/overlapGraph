@@ -11,9 +11,9 @@ collection of regions with the same dimensionality.
 
 from networkx import Graph
 
-from ..datastructs.region import Region, RegionPair
-from ..datastructs.regionset import RegionSet
-from .sweepln import SweeplnAlg, SweeplnRT
+from sources.algorithms.sweepln import SweeplnAlg, SweeplnRT
+from sources.datastructs.region import Region, RegionPair
+from sources.datastructs.regionset import RegionSet
 
 
 class SLIGraph(SweeplnAlg, SweeplnRT):

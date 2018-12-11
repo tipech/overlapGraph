@@ -17,8 +17,8 @@ from io import StringIO
 from typing import Iterable, List
 from unittest import TestCase
 
-from ..datastructs.region import Region
-from ..datastructs.regionset import RegionSet
+from sources.datastructs.region import Region
+from sources.datastructs.regionset import RegionSet
 
 
 class TestRegionSet(TestCase):

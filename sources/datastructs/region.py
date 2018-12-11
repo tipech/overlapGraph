@@ -17,9 +17,9 @@ from numbers import Real
 from typing import Any, Callable, Dict, List, Tuple, Union
 from uuid import uuid4
 
-from ..helpers.randoms import NDArray, RandomFn, Randoms
-from .interval import Interval
-from .ioable import IOable
+from sources.datastructs.interval import Interval
+from sources.datastructs.ioable import IOable
+from sources.helpers.randoms import NDArray, RandomFn, Randoms
 
 
 RegionPair = Tuple['Region', 'Region']

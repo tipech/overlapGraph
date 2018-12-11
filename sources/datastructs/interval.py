@@ -19,8 +19,8 @@ from typing import Any, Callable, Dict, List, Tuple, Union
 
 from numpy import floor
 
-from ..helpers.randoms import NDArray, RandomFn, Randoms
-from .ioable import IOable
+from sources.datastructs.ioable import IOable
+from sources.helpers.randoms import NDArray, RandomFn, Randoms
 
 
 @dataclass(order = True)

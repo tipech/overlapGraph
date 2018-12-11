@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
-__all__ = [
-  'algorithms',
-  'commands',
-  'datastructs',
-  'experiments',
-  'helpers',
-  'tests'
-]
+from __future__ import absolute_import
+
+from sources.algorithms import *
+from sources.commands import *
+from sources.datastructs import *
+from sources.experiments import *
+from sources.helpers import *
+from sources.tests import *
