@@ -1,25 +1,25 @@
 #!/usr/bin/env python
 
 """
-Intersection Graph Construction By Sweepline Algorithm
+Regional Intersection Graph (RIG) Construction by One-pass Sweepline Algorithm
 
-This script implements the SLIGraph (or intersection graph construction
-by sweepline algorithm). This algorithm builds an undirected, weighted (labelled)
+This script implements the OpslConstr (or one-pass sweepline RIG construction
+algorithm). This algorithm builds an undirected, weighted (labelled)
 graph of all the pair-wise intersections or overlapping regions between a
 collection of regions with the same dimensionality.
 """
 
 from networkx import Graph
 
-from sources.algorithms.sweepln import SweeplnAlg, SweeplnRT
-from sources.datastructs.region import Region, RegionPair
-from sources.datastructs.regionset import RegionSet
+from sources.algorithms.sweepln.opsweepln import SweeplnAlg, SweeplnRT
+from sources.datastructs.datasets.regionset import RegionSet
+from sources.datastructs.shapes.region import Region, RegionPair
 
 
-class SLIGraph(SweeplnAlg, SweeplnRT):
+class OpslConstr(SweeplnAlg, SweeplnRT):
   """
-  Implementation of intersection graph construction based on a 
-  single-pass sweepline algorithm. This algorithm builds an undirected, 
+  Implementation of regional intersection graph construction based on a 
+  one-pass sweepline algorithm. This algorithm builds an undirected, 
   weighted graph of all the pair-wise intersections or overlapping
   regions within a RegionSet. Inherits from: SweeplnAlg and SweeplnRT.
 

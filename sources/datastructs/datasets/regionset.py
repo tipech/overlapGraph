@@ -15,15 +15,15 @@ from dataclasses import asdict, astuple, dataclass
 from typing import Any, Dict, Iterable, Iterator, List, Union
 from uuid import uuid4
 
-from sources.datastructs.interval import Interval
-from sources.datastructs.ioable import IOable
-from sources.datastructs.region import Region, RegionPair
-from sources.datastructs.timeline import EventKind
+from sources.datastructs.datasets.ioable import IOable
+from sources.datastructs.datasets.timeline import EventKind
+from sources.datastructs.shapes.interval import Interval
+from sources.datastructs.shapes.region import Region, RegionPair
 from sources.helpers.base26 import to_base26
 from sources.helpers.randoms import RandomFn, Randoms
 
 try: # cyclic codependency
-  from sources.datastructs.timeline import Timeline
+  from sources.datastructs.datasets.timeline import Timeline
 except ImportError:
   pass
 

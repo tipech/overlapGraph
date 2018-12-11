@@ -17,8 +17,8 @@ from numbers import Real
 from typing import Any, Callable, Dict, List, Tuple, Union
 from uuid import uuid4
 
-from sources.datastructs.interval import Interval
-from sources.datastructs.ioable import IOable
+from sources.datastructs.datasets.ioable import IOable
+from sources.datastructs.shapes.interval import Interval
 from sources.helpers.randoms import NDArray, RandomFn, Randoms
 
 

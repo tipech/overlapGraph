@@ -15,9 +15,9 @@ necessary, associated interval state of the evaluation.
 
 from typing import Any, Dict, Iterable, List, Tuple
 
-from sources.datastructs.region import Region, RegionPair
-from sources.datastructs.regionset import RegionSet
-from sources.datastructs.timeline import Event, EventKind
+from sources.datastructs.datasets.regionset import RegionSet
+from sources.datastructs.datasets.timeline import Event, EventKind
+from sources.datastructs.shapes.region import Region, RegionPair
 
 
 class SweeplnAlg:

@@ -11,10 +11,10 @@ This script implements the following tests:
 from typing import List
 from unittest import TestCase
 
-from sources.algorithms.sweepln import SweeplnAlg, SweeplnRT
-from sources.datastructs.region import Region, RegionPair
-from sources.datastructs.regionset import RegionSet
-from sources.datastructs.timeline import Event, EventKind, Timeline
+from sources.algorithms.sweepln.opsweepln import SweeplnAlg, SweeplnRT
+from sources.datastructs.datasets.regionset import RegionSet
+from sources.datastructs.datasets.timeline import Event, EventKind, Timeline
+from sources.datastructs.shapes.region import Region, RegionPair
 
 
 class TestSweepln(TestCase):
