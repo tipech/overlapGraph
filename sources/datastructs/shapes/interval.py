@@ -10,6 +10,9 @@ those regions. Provides methods for determining if there is an overlap
 between two intervals, what the intersection interval between the two
 intervals is, what the union interval between the two intervals is,
 randomly generate intervals, and randomly choose values within an interval.
+
+Classes:
+- Interval
 """
 
 from dataclasses import asdict, astuple, dataclass
@@ -33,17 +36,27 @@ class Interval(IOable):
   two intervals is, what the union interval between the two intervals is,
   and randomly generate intervals.
 
-  Properties:           lower, upper
-  Computed Properties:  length, midpoint
-  Special Methods:      __init__, __setattr__, __contains__
-  Methods:              assign, contains, encloses, overlaps, intersect,
-                        union, random_values, random_intervals
-  Class Methods:        from_intersect, from_union
+  Attributes:
+    lower, upper:
+      The lower and upper bounding values.
+
+  Properties:
+    length:   The distance between the lower
+              and upper bounding values.
+    midpoint: The value equal distance between the lower
+              and upper bounding values.
+
+  Methods:
+    Special:        __init__, __setattr__, __contains__
+    Instance:       assign, contains, encloses,
+                    overlaps, intersect, union,
+                    random_values, random_intervals
+    Class Methods:  from_intersect, from_union
 
   Inherited from IOable:
-    Methods:            to_output
-    Class Methods:      from_text, from_source
-      Overridden:       to_object, from_object
+    Methods:        to_output
+    Class Methods:  from_text, from_source
+      Overridden:   to_object, from_object
   """
   lower: float
   upper: float
@@ -55,43 +68,74 @@ class Interval(IOable):
     the float value to the lower and upper fields. If lower is greater
     than upper, swaps the lower and upper values.
 
-    :param lower:
-    :param upper:
+    Args:
+      lower, upper:
+        the lower and upper bounding values.
     """
     self.assign(float(lower), float(upper))
 
+  ### Properties: Getters
+
   @property
   def _instance_invariant(self) -> bool:
+    """
+    Invariant:
+    - lower, upper must Real or float values
+    - lower <= upper
+
+    Returns:
+      True: If instance invariant holds
+      False: Otherwise.
+    """
     return all([isinstance(self.lower, Real),
                 isinstance(self.upper, Real),
                 self.lower <= self.upper])
 
   @property
   def length(self) -> float:
-    """The distance between the lower and upper bounding values."""
+    """
+    Compute the length of this Interval.
+
+    Returns:
+      The distance between the lower and
+      upper bounding values.
+    """
     return abs(self.upper - self.lower)
 
   @property
   def midpoint(self) -> float:
-    """The value equal distance between the lower and upper bounding values."""
+    """
+    Compute the midpoint between the lower and upper bounds
+    of this Interval.
+
+    Returns:
+      The value equal distance between the lower and
+      upper bounding values.
+    """
     return (self.lower + self.upper) / 2
+
+  ### Methods: Assignment
 
   def __setattr__(self, name, value):
     """
-    Called when an attribute assignment is attempted. This is called instead 
-    of the normal mechanism. name is the attribute name, value is the value 
+    Called when an attribute assignment is attempted. This is called instead
+    of the normal mechanism. name is the attribute name, value is the value
     to be assigned to it.
-    
-    Ensures that the lower and upper bounding values satisfy the object
-    invariant: lower <= upper, the lower and upper bounding values cannot be 
-    modified directly after this Interval is initialized. If the lower or upper
-    bounding values are attempted to be set, raises an exception. This effectively
-    prevents this Interval from being mutated into an invalid state. To mutate this
-    Interval, call the assign() method with both lower and upper bounding values
-    instead.
 
-    :param name:
-    :param value:    
+    Ensures that the lower and upper bounding values satisfy the object
+    invariant: lower <= upper, the lower and upper bounding values cannot be
+    modified directly after this Interval is initialized. If the lower or upper
+    bounding values are attempted to be set, raises an exception. This
+    effectively prevents this Interval from being mutated into an invalid state.
+    To mutate this Interval, call the assign() method with both lower and
+    upper bounding values instead.
+
+    Args:
+      name:   The attribute name
+      value:  The value to be assigned to it.
+
+    Raises:
+      Exception: Attempt to be set lower or upper
     """
     if name == 'lower' or name == 'upper':
       raise Exception(f'Cannot set immutable "{name}" attribute')
@@ -105,8 +149,9 @@ class Interval(IOable):
     the float value to the lower and upper fields. If lower is greater
     than upper, swaps the lower and upper values.
 
-    :param lower:
-    :param upper:
+    Args:
+      lower, upper:
+        the lower and upper bounding values.
     """
     assert isinstance(lower, Real)
     assert isinstance(upper, Real)
@@ -118,16 +163,28 @@ class Interval(IOable):
       object.__setattr__(self, 'lower', float(lower))
       object.__setattr__(self, 'upper', float(upper))
 
+  ### Methods: Queries
+
   def contains(self, value: float, inc_lower = True, inc_upper = True) -> bool:
     """
     Determine if the value lies between the lower and upper bounding values.
-    If inc_lower is True, includes the lower value, otherwise excludes lower value.
-    If inc_upper is True, includes the upper value, otherwise excludes upper value.
-    Return True if values lies between the lower and upper bounding values, otherwise False.
 
-    :param value:
-    :param inc_lower:
-    :param inc_upper:
+    Args:
+      value:
+        The value to test if it lies within
+        this Interval's bounds.
+      inc_lower, inc_upper:
+        Boolean flag for whether or not to include or
+        to exclude the lower or upper bounding values
+        of this Interval. If inc_lower is True, includes
+        the lower bounding value, otherwise excludes it.
+        Likewise, if inc_upper is True, includes the
+        upper bounding value, otherwise excludes it.
+
+    Returns:
+      True:   If values lies between the lower and
+              upper bounding values.
+      False:  Otherwise.
     """
     assert self._instance_invariant
 
@@ -138,14 +195,24 @@ class Interval(IOable):
 
   def encloses(self, that: 'Interval', inc_lower = True, inc_upper = True) -> bool:
     """
-    Determine if the interval lies within the lower and upper bounding values.
-    If inc_lower is True, includes the lower value, otherwise excludes lower value.
-    If inc_upper is True, includes the upper value, otherwise excludes upper value.
-    Return True if interval lies within the lower and upper bounding values, otherwise False.
+    Determine if the Interval lies entirely within this Interval.
 
-    :param that:
-    :param inc_lower:
-    :param inc_upper:
+    Args:
+      that:
+        The other Interval to test if it lies
+        entirely within this Interval's bounds.
+      inc_lower, inc_upper:
+        Boolean flag for whether or not to include or
+        to exclude the lower or upper bounding values
+        of this Interval. If inc_lower is True, includes
+        the lower bounding value, otherwise excludes it.
+        Likewise, if inc_upper is True, includes the
+        upper bounding value, otherwise excludes it.
+
+    Returns:
+      True:   If other Interval lies entirely within
+              this Interval's bounds.
+      False:  Otherwise.
     """
     assert isinstance(that, Interval)
 
@@ -155,19 +222,27 @@ class Interval(IOable):
 
   def __contains__(self, value: Union[float, 'Interval']) -> bool:
     """
-    For Type value: float
-      Determine if the value lies between the lower and upper bounding values (inclusively).
-      Return True if values lies between the lower and upper bounding values, otherwise False.
-      Same as: self.contains(value, inc_lower = True, inc_upper = True)
-      Syntactic Sugar: value in self
+    Determine if the value or Interval lies entirely between this Interval's
+    lower and upper bounding values, inclusively. Return True if value or
+    Interval is entirely within this Interval, otherwise False.
 
-    For Type value: Interval
-      Determine if the interval lies between the lower and upper bounding values (inclusively).
-      Return True if interval lies between the lower and upper bounding values, otherwise False.
-      Same as: self.encloses(value, inc_lower = True, inc_upper = True)
-      Syntactic Sugar: value in self
+    Is syntactic sugar for:
+      value in self
 
-    :param value:
+    Overload Method that wraps:
+      self.contains when value is a float value, and
+      self.encloses when value is an Interval
+
+    Args:
+      value:
+        The value to test if it lies within this Interval's
+        bounds, or the other Interval to test if it lies
+        entirely within this Interval's bounds.
+
+    Returns:
+      True:   If the value or other Interval lies entirely
+              within this Interval's bounds.
+      False:  Otherwise.
     """
     if isinstance(value, Interval):
       return self.encloses(value)
@@ -177,30 +252,40 @@ class Interval(IOable):
   def overlaps(self, that: 'Interval') -> bool:
     """
     Determine if the given Interval overlaps with this Interval.
-    If the Intervals are equal, exact same lower and upper bounding values, then overlaps.
-    If the Intervals are adjacent, then not overlapping.
-    To be overlapping, one Interval must contains the other's lower or upper bounding value.
-    Return True if given Interval overlaps with this Interval, otherwise False.
+    If the Intervals are equal, exact same lower and upper bounding values,
+    then overlaps. If the Intervals are adjacent, then not overlapping.
+    To be overlapping, one Interval must contains the other's lower or upper
+    bounding value. Return True if given Interval overlaps with this Interval,
+    otherwise False.
 
-    Overlapping:
-    - |<---- Interval A ---->|
-      |<---- Interval B ---->|
-    - |<---- Interval A ---->|
-          |<- Interval B ->|
-    -    |<- Interval A ->|
-      |<---- Interval B ---->|
-    - |<- Interval A ->|
+    Args:
+      that:
+        The other Interval to test if it overlaps
+        with this Interval.
+
+    Returns:
+      True:   If that Interval overlaps with this Interval
+      False:  Otherwise.
+
+    Examples:
+
+      Overlapping:
+      - |<---- Interval A ---->|
+        |<---- Interval B ---->|
+      - |<---- Interval A ---->|
             |<- Interval B ->|
-    -       |<- Interval A ->|
-      |<- Interval B ->|
+      -    |<- Interval A ->|
+        |<---- Interval B ---->|
+      - |<- Interval A ->|
+              |<- Interval B ->|
+      -       |<- Interval A ->|
+        |<- Interval B ->|
 
-    Not overlapping:
-    - |<- Interval A ->||<- Interval B ->|
-    - |<- Interval B ->||<- Interval A ->|
-    - |<- Interval A ->|   |<- Interval B ->|
-    - |<- Interval B ->|   |<- Interval A ->|
-
-    :param that:
+      Not overlapping:
+      - |<- Interval A ->||<- Interval B ->|
+      - |<- Interval B ->||<- Interval A ->|
+      - |<- Interval A ->|   |<- Interval B ->|
+      - |<- Interval B ->|   |<- Interval A ->|
     """
     assert isinstance(that, Interval)
     assert self._instance_invariant
@@ -214,29 +299,40 @@ class Interval(IOable):
     # return any([that.lower in self, that.upper in self, self.lower in that, self.upper in that])
     return max(self.lower, that.lower) <= min(self.upper, that.upper)
 
-  def intersect(self, that: 'Interval') -> 'Interval':
+  ### Methods: Generators
+
+  def intersect(self, that: 'Interval') -> Union['Interval', None]:
     """
-    Compute the overlapping Interval between this Interval and the given Interval.
+    Compute the overlapping Interval between this Interval and that Interval.
     Return the overlapping Interval or None if the Intervals do not overlap.
 
-    Intersects:
-    - |<---- Interval A ---->|
-      |<---- Interval B ---->|
-      |<---- ########## ---->|
-    - |<---- Interval A ---->|
-          |<- Interval B ->|
-          |<- ########## ->|
-    -    |<- Interval A ->|
-      |<---- Interval B ---->|
-          |<- ######### ->|
-    - |<- Interval A ->|
-            |<- Interval B ->|
-            |<- #### ->|
-    -       |<- Interval A ->|
-      |<- Interval B ->|
-            |<- #### ->|
+    Args:
+      that:
+        The other Interval which this Interval is to compute
+        the overlapping Interval with.
 
-    :param that:
+    Returns:
+      The overlapping Interval: If the Intervals overlap.
+      None: If the Intervals do not overlap.
+
+    Examples:
+
+      Intersects:
+      - |<---- Interval A ---->|
+        |<---- Interval B ---->|
+        |<---- ########## ---->|
+      - |<---- Interval A ---->|
+            |<- Interval B ->|
+            |<- ########## ->|
+      -    |<- Interval A ->|
+        |<---- Interval B ---->|
+            |<- ######### ->|
+      - |<- Interval A ->|
+              |<- Interval B ->|
+              |<- #### ->|
+      -       |<- Interval A ->|
+        |<- Interval B ->|
+              |<- #### ->|
     """
     assert isinstance(that, Interval)
     assert self._instance_invariant
@@ -250,23 +346,31 @@ class Interval(IOable):
 
   def union(self, that: 'Interval') -> 'Interval':
     """
-    Compute the Interval that encloses both this Interval and the given Interval.
+    Compute the Interval that encloses both this Interval and that Interval.
     Return the enclosing Interval.
 
-    Unions:
-    - |<- Interval A ->|        |<- A ->||<- B ->|
-      |<- Interval B ->|        |<- B ->||<- A ->|
-      |<- ########## ->|        |<- ########## ->|
-    - |<--- Interval A --->|        |<- Interval A ->|
-          |<- Interval B ->|    |<--- Interval B --->|
-      |<- ############## ->|    |<- ############## ->|
-    - |<- Interval A ->|        |<- Interval A ->|
-          |<- Interval B ->|    |<- Interval B ->|
-      |<- ############## ->|    |<- ############## ->|
-    - |<- A ->|    |<- B ->|    |<- B ->|    |<- A ->|
-      |<- ############## ->|    |<- ############## ->|
+    Args:
+      that:
+        The other Interval which this Interval is to compute
+        the encloseing Interval with.
 
-    :param that:
+    Returns:
+      The enclosing Interval.
+
+    Examples:
+
+      Unions:
+      - |<- Interval A ->|        |<- A ->||<- B ->|
+        |<- Interval B ->|        |<- B ->||<- A ->|
+        |<- ########## ->|        |<- ########## ->|
+      - |<--- Interval A --->|        |<- Interval A ->|
+            |<- Interval B ->|    |<--- Interval B --->|
+        |<- ############## ->|    |<- ############## ->|
+      - |<- Interval A ->|        |<- Interval A ->|
+            |<- Interval B ->|    |<- Interval B ->|
+        |<- ############## ->|    |<- ############## ->|
+      - |<- A ->|    |<- B ->|    |<- B ->|    |<- A ->|
+        |<- ############## ->|    |<- ############## ->|
     """
     assert isinstance(that, Interval)
     assert self._instance_invariant
@@ -277,21 +381,25 @@ class Interval(IOable):
 
   def random_values(self, nvalues: int = 1, randomng: RandomFn = Randoms.uniform()) -> NDArray:
     """
-    Randomly draw N samples from a given distribution or random
-    number generation function. Samples are drawn over the interval
-    [lower, upper) specified by this Interval. The given size N specifies
-    the number of values to output. The default nvalues is 1; a single value
-    is returned. Otherwise, a list with the specified number of samples
-    are drawn.
+    Randomly draw N samples from a given distribution or random number
+    generation function. Samples are drawn over the interval [lower, upper)
+    specified by this Interval. The given size N specifies the number of
+    values to output. The default nvalues is 1; a single value is returned.
+    Otherwise, a list with the specified number of samples are drawn.
 
-    The default behavior is that samples are uniformly distributed.
-    In other words, any value within the given interval is equally
-    likely to be drawn by uniform. Other distribution or random
-    number generation functions can be substituted via the `randomng`
-    parameter.
+    The default behavior is that samples are uniformly distributed. In other
+    words, any value within the given interval is equally likely to be drawn
+    by uniform. Other distribution or random number generation functions
+    can be substituted via the `randomng` parameter.
 
-    :param nvalues:
-    :param randomng:
+    Args:
+      nvalues:  The number of values to generate
+      randomng: The random number generator that dictates
+                the distribution of the values generated.
+
+    Returns:
+      List of randomly, sampled values drawn
+      over this Interval.
     """
     assert isinstance(nvalues, int) and nvalues > 0
     assert isinstance(randomng, Callable)
@@ -306,19 +414,30 @@ class Interval(IOable):
     Randomly generate N Intervals within this Interval, each with a random size
     as a percentage of the total Interval length, bounded by the given size
     percentage Interval (enclosed by Interval(0, 1)). The default distributions
-    for choosing the position of the Interval and its size percentage are uniform
-    distributions, but can be substituted for other distribution or random number
-    generation functions via the `posnrng` and `sizerng` parameter. If precision is
-    given, return the randomly generated Intervals where the lower and upper
-    bounding values are rounded/truncated to the specified precision (number of
-    digits after the decimal point). If precision is None, the lower and upper
-    bounding values are of arbitrary precision.
+    for choosing the position of the Interval and its size percentage are
+    uniform distributions, but can be substituted for other distribution or
+    random number generation functions via the `posnrng` and `sizerng`
+    parameter. If precision is given, return the randomly generated Intervals
+    where the lower and upper bounding values are rounded/truncated to the
+    specified precision (number of digits after the decimal point).
+    If precision is None, the lower and upper bounding values are of
+    arbitrary precision.
 
-    :param nintervals:
-    :param sizepc_range:
-    :param posnrng:
-    :param sizerng:
-    :param precision:
+    Args:
+      nintervals:   The number of Intervals to be generated.
+      sizepc_range: The size range as a percentage of the
+                    total Interval length.
+      posnrng:      The random number generator for choosing
+                    the position of the Interval.
+      sizerng:      The random number generator for choosing
+                    the size of the Interval.
+      precision:    The number of digits after the decimal
+                    point for the lower and upper bounding
+                    values, or None for arbitrary precision.
+
+    Returns:
+      List of randonly generated Intervals
+      within this Interval.
     """
     if sizepc_range == None:
       sizepc_range = Interval(0, 1)
@@ -344,6 +463,8 @@ class Interval(IOable):
 
     return intervals
 
+  ### Class Methods: Generators
+
   @classmethod
   def from_intersect(cls, intervals: List['Interval']) -> Union['Interval', None]:
     """
@@ -351,14 +472,21 @@ class Interval(IOable):
     Intervals. If not all the Intervals intersect, return None, otherwise
     return the Interval that intersects with all of the given Intervals.
 
-    :param intervals:
+    Args:
+      intervals:
+        List of Intervals to compute the intersecting
+        Interval amongst.
+
+    Returns:
+      Interval that intersects with all given Intervals.
+      None: If not all the Intervals intersect.
     """
     assert isinstance(intervals, List) and len(intervals) > 1
     assert all([isinstance(interval, Interval) for interval in intervals])
 
     def intersect(a: Interval, b: Interval) -> Interval:
       assert a != None and b != None
-      assert a.overlaps(b)      
+      assert a.overlaps(b)
       return a.intersect(b)
 
     try:
@@ -369,32 +497,46 @@ class Interval(IOable):
   @classmethod
   def from_union(cls, intervals: List['Interval']) -> 'Interval':
     """
-    Construct a new Interval from the union of the given list of
-    Intervals. Return the Interval that encloses all of the given
-    Intervals.
+    Construct a new Interval from the union of the given list of Intervals.
+    Return the Interval that encloses all of the given Intervals.
 
-    :param intervals:
+    Args:
+      intervals:
+        List of Intervals to compute the union
+        Interval amongst.
+
+    Returns:
+      Interval that encloses all of the given Intervals.
     """
     assert isinstance(intervals, List) and len(intervals) > 1
     assert all([isinstance(interval, Interval) for interval in intervals])
 
     return reduce(lambda a, b: a.union(b), intervals)
 
+  ### Class Methods: (De)serialization
+
   @classmethod
   def to_object(cls, object: 'Interval', format: str = 'json', **kwargs) -> Any:
     """
-    Generates an object (dict, list, or tuple) from the given Interval object that
-    can be converted or serialized as the specified data format: 'json'. Additional
-    arguments passed via kwargs are used to the customize and tweak the object
-    generation process. kwargs arguments:
+    Generates an object (dict, list, or tuple) from the given Interval object
+    that can be converted or serialized as the specified data format: 'json'.
+    Additional arguments passed via kwargs are used to customize and tweak the
+    object generation process.
 
-    - 'compact': True or False, which specifies whether or not
-      the data representation of the output JSON is a compact, abbreviated
-      representation or the full data representation with all fields.
+    Args:
+      object: The Interval convert to an object (dict, list, tuple).
+      format: The targetted output format type.
+      kwargs: Additional arguments or options to customize and
+              tweak the object generation process.
 
-    :param object:
-    :param format:
-    :param kwargs:
+    kwargs:
+      compact:
+        Boolean flag for whether or not the data representation
+        of the output JSON is a compact, abbreviated representation or
+        the full data representation with all fields.
+
+    Returns:
+      The generated object.
     """
     assert isinstance(object, Interval)
 
@@ -406,13 +548,19 @@ class Interval(IOable):
   @classmethod
   def from_object(cls, object: Any) -> 'Interval':
     """
-    Construct a new Interval from the conversion of the given
-    object. The object may be a Dict, List or Tuple. If it is a
-    Dict contains fields: lower and upper bounding values. If it
-    is a List or Tuple contains 2 values, first for the lower bound
-    and second for the upper bound. Returns the new Interval.
+    Construct a new Interval from the conversion of the given object.
+    The object may be a Dict, List or Tuple. If it is a Dict contains fields:
+    lower and upper bounding values. If it is a List or Tuple contains two
+    values, first for the lower bound and second for the upper bound. Returns
+    the new Interval.
 
-    :param object:
+    Args:
+      object:
+        The object (dict, tuple, list) to be converted
+        into a new Interval instance.
+
+    Returns:
+      The newly constructed Interval.
     """
     if isinstance(object, Dict):
       assert 'lower' in object and isinstance(object['lower'], Real)
