@@ -589,21 +589,27 @@ class Region(IOable):
     return Region.from_intervals([d.union(that[i]) \
                   for i, d in enumerate(self.dimensions)], **data)
 
-  def project(self, dimension: int, **kwargs) -> 'Region':
+  def project(self, dimension: int,
+                    interval: Interval = Interval(0, 0),
+                    **kwargs) -> 'Region':
     """
     Project this Region to the specified number of dimensions.
     If the given number of dimensions is greater than this Region's
-    dimensionality, output a Region with additional dimensions with [0, 0]
-    intervals. If the given number of dimensions is less than this Region's
-    dimensionality, output a Region with the additional dimensions removed. 
-    If the given number of dimensions is equal to this Region's
-    dimensionality, outputs a copy of this Region. Additional arguments passed
-    through to Region.from_intervals.
+    dimensionality, output a Region with additional dimensions with the given
+    Interval or [0, 0]  intervals. If the given number of dimensions is less
+    than this Region's dimensionality, output a Region with the additional
+    dimensions removed. If the given number of dimensions is equal to this
+    Region's dimensionality, outputs a copy of this Region. Additional
+    arguments passed through to Region.from_intervals.
 
     Args:
       dimension:
         The number of dimensions in the output
         projected Region.
+      interval:
+        The Interval to add to each dimension if
+        the projected number of dimension is greater
+        than this Region.
       kwargs:
         Additional arguments passed through to
         Region.from_intervals.
@@ -613,7 +619,7 @@ class Region(IOable):
     """
     assert dimension > 0
 
-    dimensions = [Interval(*astuple(Interval(0, 0) \
+    dimensions = [Interval(*astuple(interval \
                   if d >= self.dimension else self[d])) \
                   for d in range(dimension)]
 

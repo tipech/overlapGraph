@@ -253,13 +253,14 @@ class TestRegion(TestCase):
 
   def test_region_project(self):
     dimlimit = 7
+    test_interval = Interval(1, 5)
     region = Region([-5, 5, 0], [15, 10, 50])
     for d in range(1, dimlimit):
-      new_region = region.project(d)
+      new_region = region.project(d, test_interval)
       #print(f'{new_region}')
       self.assertEqual(new_region.dimension, d)
       for i in range(0, d):
-        interval = region[i] if i < region.dimension else Interval(0, 0)
+        interval = region[i] if i < region.dimension else test_interval
         self.assertEqual(new_region[i], interval)
 
   def test_region_random_points(self):
