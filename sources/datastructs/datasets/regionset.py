@@ -3,12 +3,14 @@
 """
 Regions Collection
 
-This script implements the RegionSet class, a data class
-that represents a collection of Regions dataset. Provides
-methods for generating new datasets, and loading from or
-saving to a file, in the JSON or CSV file formats. This
-collection of Regions is then passed to the Intersection
-Graph construction algorithm.
+This script implements the RegionSet class, a data class that represents a
+collection of Regions dataset. Provides methods for generating new datasets,
+and loading from or saving to a file, in the JSON or CSV file formats. This
+collection of Regions is then passed to the Intersection Graph construction
+algorithm.
+
+Classes:
+- RegionSet
 """
 
 from dataclasses import asdict, astuple, dataclass
@@ -35,16 +37,30 @@ class RegionSet(Iterable[Region], IOable):
   Provides methods for generating new datasets, and loading from or
   saving to a file, in the JSON or CSV file formats.
 
-  Properties:           name, dimension, regions, bounds
-  Computed Properties:  size, minbound, timeline
-  Special Methods:      __init__, __getitem__, __contains__, __iter__
-  Methods:              add, get, filter, overlaps
-  Class Methods:        from_random, from_dict
+  Attributes:
+    id:         The unique identifier for this Region.
+    dimension:  The number of dimensions (dimensionality).
+    regions:    The collection of Regions.
+    bounds:     The bounding Region that must enclose
+                all Regions in this collection.
+                Or None, for no outer bounding Region.
+
+  Properties:
+    size:       The number of Regions in this collection.
+    minbound:   The computed minimum Region that encloses
+                all Regions in this collection within it.
+    timeline:   Timeline instance for this RegionSet.
+
+  Methods:
+    Special:        __init__, __getitem__,
+                    __contains__, __iter__
+    Instance:       add, get, filter, overlaps
+    Class Methods:  from_random, from_dict
 
   Inherited from IOable:
-    Methods:            to_output
-    Class Methods:      from_text, from_source
-      Overridden:       to_object, from_object
+    Methods:        to_output
+    Class Methods:  from_text, from_source
+      Overridden:   to_object, from_object
   """
   id: str
   dimension: int
@@ -53,17 +69,23 @@ class RegionSet(Iterable[Region], IOable):
 
   def __init__(self, id: str = '', bounds: Region = None, dimension: int = 1):
     """
-    Initialize a new Regions collection dataset, with the given
-    id, the specified dimensionality, and the outer bounding Region 
-    that all Regions within this collection must be enclosed in.
-    If bounds is None, no outer bounding Region, dimension must be
-    specified or defaults to 1. If bounds is not None, dimension is
-    computed based on the bounds dimensionality. Initialize an empty
-    list of Regions to be populated.
+    Initialize a new Regions collection dataset, with the given id, the
+    specified dimensionality, and the outer bounding Region that all Regions
+    within this collection must be enclosed in. If bounds is None, no outer
+    bounding Region, dimension must be specified or defaults to 1. If bounds
+    is not None, dimension is computed based on the bounds dimensionality.
+    Initialize an empty list of Regions to be populated.
 
-    :param id:
-    :param bounds:
-    :param dimension:
+    Args:
+      id:
+        The unique identifier for this RegionSet.
+        Randonly generated with UUID v4, if not provided.
+      bounds:
+        The outer bounding Region that all Regions
+        within this collection must be enclosed in.
+        Can be None, for no outer bounding Region.
+      dimension:
+        The number of dimensions (dimensionality).
     """
     if bounds != None:
       assert isinstance(bounds, Region)
@@ -76,8 +98,21 @@ class RegionSet(Iterable[Region], IOable):
     self.regions = []
     self.bounds = bounds
 
+  ### Properties: Getters
+
   @property
   def _instance_invariant(self) -> bool:
+    """
+    Invariant:
+    - All items in self.regions are:
+      - Instances of Region
+      - Have same dimension as self.dimension
+      - Are enclosed by bounds if not None
+
+    Returns:
+      True: If instance invariant holds
+      False: Otherwise.
+    """
     return all([all([isinstance(r, Region),
                      r.dimension == self.dimension,
                      self.bounds == None or self.bounds.encloses(r)]) \
@@ -85,14 +120,23 @@ class RegionSet(Iterable[Region], IOable):
 
   @property
   def size(self) -> int:
-    """The number of Regions within this collection."""
+    """
+    Computes the number of Regions within this collection.
+
+    Returns:
+      The number of Regions in this collection.
+    """
     return len(self.regions)
 
   @property
   def minbounds(self) -> Region:
     """
-    The computed minimum Region that encloses all member 
+    Computes the minimum Region that encloses all member
     Regions in this collection within it.
+
+    Returns:
+      The minimum Region that encloses all Regions
+      within this collection.
     """
     assert self._instance_invariant
     return Region.from_union(self.regions)
@@ -101,23 +145,35 @@ class RegionSet(Iterable[Region], IOable):
   def timeline(self) -> 'Timeline':
     """
     Return a Timeline instance binded to this RegionSet. The Timeline
-    provides methods for generating sorted iterations of Events for 
+    provides methods for generating sorted iterations of Events for
     each dimension in the Regions within this RegionSet; each Region
     results in a beginning and an ending event. Each RegionSet may only
     have one Timeline instance, once created always returns the same
     instance.
+
+    Returns:
+      A Timeline instance for this Region.
     """
     if not hasattr(self, '_timeline'):
       self._timeline = Timeline(self)
 
     return self._timeline
 
+  ### Methods: Getters
+
   def get(self, id: str) -> Region:
     """
     Return the Region with the given ID within this collection.
     If no Region within this collection has this ID, return None.
 
-    :param id:
+    Args:
+      id: The unique identifier corresponding to
+          the Region in this collection to be
+          retrieved.
+
+    Returns:
+      The retrieved Region in this collection.
+      None: If no Region with given ID in this collection.
     """
     assert isinstance(id, str) and len(id) > 0
 
@@ -129,34 +185,37 @@ class RegionSet(Iterable[Region], IOable):
 
   def __getitem__(self, index: Union[int,str]) -> Region:
     """
-    For index: int
-      Return the Region at the given index within this collection.
-    For index: str
-      Return the Region with the given ID within this collection.
+    Retrieve the Region at the given index as an int within this collection.
+    Retrieve the Region with the given ID as a str within this collection.
 
-    :param index:
+    Is syntactic sugar for:
+      region = self[index]
+
+    Overload Method that wraps:
+      self.regions.__getitem__ when index is an int.
+      self.get when index is a str.
+
+    Args:
+      index:
+        The index in self.regions when is an int.
+        The Region ID when is a str.
+
+    Returns:
+      The retrieved Region.
     """
     return self.get(index) if isinstance(index, str) \
                            else self.regions[index]
 
-  def __contains__(self, value: Union[Region, str]) -> bool:
-    """
-    For Type value: Region
-      Determine if the given Region is contained within this collection.
-      Return True if this collection contains that Region, otherwise False.
-    For Type value: str
-      Determine if the given Region ID is contained within this collection.
-      Return True if this collection contains a Region with that ID,
-      otherwise False.
-
-    :param value:
-    """
-    return self.get(value.id if isinstance(value, Region) \
-                             else value) != None
-
   def __iter__(self) -> Iterator[Region]:
-    """Return an iterator object for iterating this collection of Regions."""
+    """
+    Return an iterator object for iterating this collection of Regions.
+
+    Returns:
+      An iterator over this collection of Regions.
+    """
     return self.regions.__iter__()
+
+  ### Methods: Insert
 
   def add(self, region: Region):
     """
@@ -164,7 +223,9 @@ class RegionSet(Iterable[Region], IOable):
     The given Region must have the same dimensionality as the number of
     dimensions specified in this collection of Regions.
 
-    :param region:
+    Args:
+      region: The Region to be appended to this
+              collection of Regions.
     """
     assert isinstance(region, Region)
     assert region.dimension == self.dimension
@@ -173,32 +234,49 @@ class RegionSet(Iterable[Region], IOable):
 
     self.regions.append(region)
 
-  def filter(self, bounds: Region) -> 'RegionSet':
+  ### Methods: Queries
+
+  def __contains__(self, value: Union[Region, str]) -> bool:
     """
-    Returns a new filtered RegionSet with the only the Regions
-    within the given, more restricted Region bounds.
+    Determine if the given Region or Region ID is contained within
+    this collection. Return True if this collection contains that Region,
+    otherwise False.
 
-    :param bounds:
+    Is syntactic sugar for:
+      value in self
+
+    Overload Method that wraps:
+      value in self.regions, when value is a str.
+      value.id in self.regions, when value is a Region.
+
+    Args:
+      value:
+        The Region or Region ID to test if
+        exists within this RegionSet.
+
+    Returns:
+      True:   If Region exists within this RegionSet.
+      False:  Otherwise.
     """
-    assert bounds.dimension == self.dimension
-    if self.bounds != None:
-      assert self.bounds.encloses(bounds)
-
-    regionset = RegionSet(bounds = bounds)
-    for region in self.regions:
-      if bounds.encloses(region):
-        regionset.add(region)
-
-    return regionset
+    return self.get(value.id if isinstance(value, Region) \
+                             else value) != None
 
   def overlaps(self, dimension: int = 0) -> List[RegionPair]:
     """
     List all of overlaps between the Regions within this set.
     This is a Naive implementation for finding all overlapping Region pairs.
-    Returns a list of overlapping pairs, ordered based on the lower bounds
+    Returns a list of overlapping regions, ordered based on the lower bounds
     of the Regions along the specified dimension.
 
-    :param dimension:
+    Args:
+      dimension:
+        The dimension on which to order the computed
+        overlapping Region pairs. Ordered based on the
+        lower bounds of the Regions.
+
+    Returns:
+      A List of all pairwise overlaps between the
+      Regions within this collection of Regions.
     """
     ordered_regions = []
     for event in self.timeline.events(dimension):
@@ -216,36 +294,60 @@ class RegionSet(Iterable[Region], IOable):
 
     return overlaps
 
-  @classmethod
-  def from_random(cls, nregions: int, bounds: Region, 
-                       id: str = '', base26_ids: bool = True,
-                       **args) -> 'RegionSet':
+  def filter(self, bounds: Region) -> 'RegionSet':
     """
-    Construct a new RegionSet with N randomly generated Regions.
-    All randomly generated Regions must be enclosed by the given bounding Region.
-    Each Region has a random size as a percentage of the total bounding Region 
-    dimensions, bounded by the given size percentage Region (enclosed by 
-    Region([0, ...], [1, ...])). All subregions must have the same number of
-    dimensions as the bounding Region. The default distributions for choosing the
-    position of the Region and its size percentage are uniform distributions, but
-    can be substituted for other distribution or random number generation functions
-    via the `posnrng` and `sizerng` parameter. If precision is given, return the
-    randomly generated Intervals where the lower and upper bounding values are 
-    rounded/truncated to the specified precision (number of digits after the
-    decimal point). If precision is None, the lower and upper bounding values
-    are of arbitrary precision. If base26_ids is True, the randonly generated
-    Region will be assign a numeric ID, encoded in Base26 (A - Z).
+    Returns a new filtered RegionSet with the only the Regions
+    within the given, more restricted Region bounds.
 
-    :param nregions:
-    :param bounds:
-    :param id:
-    :param base26_ids:
-    :param args:
+    Args:
+      bounds:
+        The Region that will enclose all Regions in
+        new filtered RegionSet. Must be enclosed by
+        self.bounds, more restrictive.
+
+    Returns:
+      The newly, created filtered RegionSet.
+    """
+    assert bounds.dimension == self.dimension
+    if self.bounds != None:
+      assert self.bounds.encloses(bounds)
+
+    regionset = RegionSet(bounds = bounds)
+    for region in self.regions:
+      if bounds.encloses(region):
+        regionset.add(region)
+
+    return regionset
+
+  ## CLass Methods: Generators
+
+  @classmethod
+  def from_random(cls, nregions: int, bounds: Region,
+                       id: str = '', base26_ids: bool = True,
+                       **kwargs) -> 'RegionSet':
+    """
+    Construct a new RegionSet with N randomly generated Regions. All randomly
+    generated Regions must be enclosed by the given bounding Region. All
+    subregions must have the same number of dimensions as the bounding Region.
+
+    Args:
+      nregions:   The number of Regions to be generated.
+      bounds:     The bounding Region that all randomly
+                  generated Regions must be enclosed by.
+      id:         The unique identifier for this RegionSet.
+      base26_ids: Whether or not the randonly generated
+                  Regions will be assign numeric IDs,
+                  encoded in Base26 (A - Z).
+      kwargs:     Additional arguments passed through to
+                  Region.from_intervals.
+
+    Returns:
+      The newly generated RegionSet.
     """
     assert isinstance(nregions, int) and nregions > 0
 
     regionset = cls(id, bounds)
-    regions = bounds.random_regions(nregions, **args)
+    regions = bounds.random_regions(nregions, **kwargs)
     for n, region in enumerate(regions):
       if base26_ids:
         region.id = to_base26(n + 1)
@@ -253,22 +355,70 @@ class RegionSet(Iterable[Region], IOable):
 
     return regionset
 
+  ### Class Methods: (De)serialization
+
+  @classmethod
+  def to_object(cls, object: 'RegionSet', format: str = 'json', **kwargs) -> Any:
+    """
+    Generates an object (dict, list, or tuple) from the given RegionSet object
+    that can be converted or serialized as the specified data format: 'json'.
+    Additional arguments passed via kwargs are used to customize and tweak the
+    object generation process.
+
+    Args:
+      object: The Interval convert to an object.
+      format: The targetted output format type.
+      kwargs: Additional arguments or options to customize
+              and tweak the object generation process.
+
+    kwargs:
+      compact:
+        Boolean flag for whether or not the data
+        representation of the output JSON is a compact,
+        abbreviated representation or the full data
+        representation with all fields.
+
+    Returns:
+      The generated object.
+    """
+    assert isinstance(object, RegionSet)
+
+    fieldnames = ['id', 'dimension', 'size', 'bounds', 'regions']
+
+    if 'compact' in kwargs and kwargs['compact']:
+      return dict(map(lambda f: (f, getattr(object, f)), fieldnames))
+    else:
+      return asdict(object)
+
   @classmethod
   def from_dict(cls, object: Dict, id: str = '') -> 'RegionSet':
     """
     Construct a new set of Region from the conversion of the given Dict.
     The Dict must contains one of the following combinations of fields:
 
-    - regions (List[Region-equivalent]) and bounds (Region-equivalent)
-    - regions (List[Region-equivalent]) and dimension (int)
+    - regions   (List[Region-equivalent]) and
+      bounds    (Region-equivalent)
+    - regions   (List[Region-equivalent]) and
+      dimension (int)
 
-    Region-equivalent means parseable by Region.from_object.
-    If id is specified, sets it as the unique identifier for this RegionSet, otherwise
-    generates a random identifier, UUID v4. If object does not have one of the above
-    combinations of fields, raises ValueError. Returns the newly constructed RegionSet.
+    Note:
+    - Region-equivalent means parseable by
+      Region.from_object.
 
-    :param object:
-    :param id:
+    Args:
+      object:
+        The Dict to be converted to a RegionSet
+      id:
+        The unique identifier for this RegionSet
+        Randonly generated with UUID v4, if not provided.
+
+    Returns:
+      The newly constructed RegionSet.
+
+    Raises:
+      ValueError:
+        If object does not have one of the above
+        combinations of fields.
     """
     assert isinstance(object, Dict)
     assert 'regions' in object and isinstance(object['regions'], List)
@@ -305,45 +455,29 @@ class RegionSet(Iterable[Region], IOable):
     return regionset
 
   @classmethod
-  def to_object(cls, object: 'RegionSet', format: str = 'json', **kwargs) -> Any:
-    """
-    Generates an object (dict, list, or tuple) from the given RegionSet object that
-    can be converted or serialized as the specified data format: 'json'. Additional
-    arguments passed via kwargs are used to customize and tweak the object
-    generation process. kwargs arguments:
-
-    - 'compact': True or False, which specifies whether or not
-      the data representation of the output JSON is a compact, abbreviated
-      representation or the full data representation with all fields.
-
-    :param object:
-    :param format:
-    :param kwargs:
-    """
-    assert isinstance(object, RegionSet)
-
-    fieldnames = ['id', 'dimension', 'size', 'bounds', 'regions']
-
-    if 'compact' in kwargs and kwargs['compact']:
-      return dict(map(lambda f: (f, getattr(object, f)), fieldnames))
-    else:
-      return asdict(object)
-
-  @classmethod
   def from_object(cls, object: Any, id: str = '') -> 'RegionSet':
     """
-    Construct a new set of Region from the conversion of the given object.
+    Construct a new Region from the conversion of the given object.
     The object must contains one of the following representations:
 
-    - A Dict that is parseable by the from_dict method.
-    - A List of objects that are parseable by Region.from_object
+    - A Dict that is parseable by RegionSet.from_dict.
+    - A List of objects that are parseable by
+      Region.from_object.
 
-    If id is specified, sets it as the unique identifier for this RegionSet, otherwise
-    generates a random identifier, UUID v4. If object does not have one of the above
-    combinations of fields, raises ValueError. Returns the newly constructed RegionSet.
+    Args:
+      object:
+        The object to be converted to a RegionSet.
+      id:
+        The unique identifier for this RegionSet.
+        Randonly generated with UUID v4, if not provided.
 
-    :param object:
-    :param id:
+    Returns:
+      The newly constructed RegionSet.
+
+    Raises:
+      ValueError:
+        If object does not have one of the above
+        combinations of fields.
     """
     if isinstance(object, Dict):
       return cls.from_dict(object, id)
