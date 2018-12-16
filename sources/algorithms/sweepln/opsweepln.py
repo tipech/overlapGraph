@@ -3,7 +3,7 @@
 """
 Generalized One-Pass Sweep-line Algorithm
 
-This script implements a generalized version of a one-pass sweep-line 
+This script implements a generalized version of a one-pass sweep-line
 algorithm. Implements OpSLEvaluator and OpSweepln classes, where
 the OpSweepln (the algorithm) drives the evaluation by initializing each
 OpSLEvaluators' oninit methods, looping over the sorted Events and executing
@@ -11,9 +11,13 @@ each OpSLEvaluators' onbegin and onend handlers, and finally, invoking each
 OpSLEvaluators' onfinalize methods. The OpSLEvaluator (evaluator) is a base
 class for implementations that implement these handlers and maintain the
 necessary, associated interval state of the evaluation.
+
+Classes:
+- OpSLEvaluator
+- OpSweepln
 """
 
-from typing import Any, Dict, Iterable, List, Tuple
+from typing import Any, Dict, Iterator, List, Tuple
 
 from sources.datastructs.datasets.regionset import RegionSet
 from sources.datastructs.datasets.timeline import Event, EventKind
@@ -26,11 +30,26 @@ class OpSLEvaluator:
   binded to and evaluated when the OpSweepln evaluates a one-pass,
   sweep-line along a dimension on a set of Regions.
 
-  Properties:           runtime, regionset, dimension, actives, overlaps
-  Computed Properties:  binded, initialized
-  Special Methods:      __init__
-  Methods:              bind, unbind, findoverlaps, addoverlap,
-                        oninit, onbegin, onend, onfinalize
+  Attributes:
+    runtime:    The OpSweepln for which its binded.
+    regionset:  The RegionSet to evaluate sweep-line over.
+    dimension:  The dimension to evaluate sweep-line over.
+    actives:    The active Regions during sweep-line.
+    data:       The data properties.
+
+  Properties:
+    binded:
+      Whether or not this OpSLEvaluator is binded to a
+      OpSweepln. True if it is binded otherwise False.
+    initialized:
+      Whether or not this OpSLEvaluator has been
+      initialized for evaluation. True if it is
+      initialized otherwise False.
+
+  Methods:
+    Special:  __init__
+    Instance: bind, unbind, findoverlaps, addoverlap,
+              oninit, onbegin, onend, onfinalize
   """
   runtime   : 'OpSweepln'
   regionset : RegionSet
@@ -39,16 +58,23 @@ class OpSLEvaluator:
   overlaps  : List[RegionPair]
 
   def __init__(self):
-    """Initialize this OpSLEvaluator with None values."""
+    """
+    Initialize this OpSLEvaluator with the default values.
+    """
     self.runtime = None
     self.regionset = None
     self.dimension = None
+
+  ### Properties: Getters
 
   @property
   def binded(self) -> bool:
     """
     Determine if this OpSLEvaluator is binded to a OpSweepln.
-    Return True if it is binded otherwise False.
+
+    Returns:
+      True:   If it is binded.
+      False:  Otherwise.
     """
     return isinstance(self.runtime, OpSweepln)
 
@@ -56,9 +82,14 @@ class OpSLEvaluator:
   def initialized(self) -> bool:
     """
     Determine if this OpSLEvaluator has been initialized for evaluation.
-    Return True if it is initialized otherwise False.
+
+    Returns:
+      True:   If it is initialized.
+      False:  Otherwise.
     """
     return isinstance(self.dimension, int)
+
+  ### Methods: Binding
 
   def bind(self, runtime: 'OpSweepln', unbind: bool = False):
     """
@@ -66,8 +97,11 @@ class OpSLEvaluator:
     If the unbind flag is True, unbinds the previous OpSweepln if this
     OpSLEvaluator is currently binded to it.
 
-    :param runtime:
-    :param unbind:
+    Args:
+      runtime:  The OpSweepln for which its binded.
+      unbind:   Boolean flag whether or not to unbind the
+                previous OpSweepln if this OpSLEvaluator is
+                currently binded to it.
     """
     if unbind:
       self.unbind()
@@ -79,24 +113,31 @@ class OpSLEvaluator:
 
   def unbind(self):
     """
-    Unbind or detach this OpSLEvaluator from its currently 
-    atteched OpSweepln.
+    Unbind or detach this OpSLEvaluator from
+    its currently atteched OpSweepln.
     """
     if self.binded:
       self.runtime = None
       self.regionset = None
 
-  def findoverlaps(self, region: Region) -> Iterable[RegionPair]:
+  ### Methods: Overlaps
+
+  def findoverlaps(self, region: Region) -> Iterator[RegionPair]:
     """
-    Given a Region, return an iterator for iterating over
-    all the pairs of overlaps between the given Region and the
-    currently active Regions, as RegionPairs.
+    Return an iterator over all the pairs of overlaps between the
+    given Region and the currently active Regions, as RegionPairs.
 
     This method should be overridden in subclasses to implement,
     the finding of overlaps using more efficient means, such as:
     via an Interval tree.
 
-    :param region:
+    Args:
+      region:   The Region to find pairs of overlaps with
+                currently active Regions, as RegionPairs.
+
+    Returns:
+      An iterator over all the pairs of overlaps between
+      the Region and currently active Regions.
     """
     for _, activeregion in self.actives.items():
       if region.overlaps(activeregion):
@@ -106,15 +147,21 @@ class OpSLEvaluator:
     """
     Add the given pair of Regions to the list of overlaps.
     This method should be overridden in subclasses to implement:
-    
-    - The addition of a edge in the intersection graph between the given
-      region pair and labelling of the edge with additional information,
-    - The addition of a branch in the interval tree for the given
-      region pair and labelling of the branch with additional information.
 
-    :param regionpair:
+    - The addition of a edge in the intersection graph
+      between the given region pair and labelling of the
+      edge with additional information,
+    - The addition of a branch in the interval tree for the
+      given region pair and labelling of the branch with
+      additional information.
+
+    Args:
+      regionpair:
+        The pair of Regions to add as overlaps.
     """
     self.overlaps.append(regionpair)
+
+  ### Methods: Event Callbacks
 
   def oninit(self, dimension: int):
     """
@@ -122,11 +169,15 @@ class OpSLEvaluator:
     with the given dimensions. This method should be overridden in
     subclasses to implement:
 
-    - The creation of nodes in the intersection graph for each Region.
-    - The creation of the interval tree root in preparation for the
-      addition of branches and leaves associated with the overlaps.
+    - The creation of nodes in the intersection
+      graph for each Region.
+    - The creation of the interval tree root in
+      preparation for the addition of branches and
+      leaves associated with the overlaps.
 
-    :param dimension:
+    Args:
+      dimension:
+        The dimension to evaluate sweep-line over.
     """
     assert self.binded and not self.initialized
     assert 0 <= dimension < self.regionset.dimension
@@ -138,20 +189,23 @@ class OpSLEvaluator:
   def onbegin(self, event: Event):
     """
     When a Begin Event is encountered in the OpSweepln evaluation, this
-    method is invoked with that Event. Invokes findoverlaps and 
+    method is invoked with that Event. Invokes findoverlaps and
     addoverlap methods from here. Adds the newly active Region to the
     set of active Regions.
 
-    :param event:
+    Args:
+      event:
+        The beginning Event when encountered
+        in the OpSweepln evaluation.
     """
     region = event.context
 
     assert self.binded and self.initialized
     assert region.id not in self.actives
 
-    for regionpair in self.findoverlaps(region): 
+    for regionpair in self.findoverlaps(region):
       self.addoverlap(regionpair)
-    
+
     self.actives[region.id] = region
 
   def onend(self, event: Event):
@@ -160,7 +214,10 @@ class OpSLEvaluator:
     method is invoked with that Event. Removes the ending Region from
     to the set of active Regions.
 
-    :param event:
+    Args:
+      event:
+        The ending Event when encountered
+        in the OpSweepln evaluation.
     """
     region_id = event.context.id
 
@@ -182,6 +239,9 @@ class OpSLEvaluator:
     pass on a different dimension for multiple pass versions of the
     sweep-line algorithm. Should return references to the generated
     intersection graphs and interval trees.
+
+    Returns:
+      The list of Region overlapping pairs.
     """
     assert self.binded and self.initialized
     assert len(self.actives) == 0
@@ -199,9 +259,14 @@ class OpSweepln:
   the onbegin or onend methods of the OpSLEvaluators depending on
   EventKind.
 
-  Properties:       regionset, evaluators
-  Special Methods:  __init__
-  Methods:          put, evaluate
+  Attributes:
+    regionset:  The RegionSet to evaluate sweep-line over.
+    evaluators: The OpSLEvaluators which are binded to
+                this OpSweepln.
+
+  Methods:
+    Special:    __init__
+    Instance:   put, evaluate
   """
   regionset: RegionSet
   evaluators: List[OpSLEvaluator]
@@ -211,7 +276,9 @@ class OpSweepln:
     Initialize the sweep-line runtime with the given RegionSet
     and an empty list of OpSLEvaluators.
 
-    :param regionset:
+    Args:
+      regionset:
+        The RegionSet to evaluate sweep-line over.
     """
     self.regionset = regionset
     self.evaluators = []
@@ -222,7 +289,9 @@ class OpSweepln:
     this sweep-line algorithm Runtime to bind and execute
     when evaluating the input Regions.
 
-    :param evaluator:
+    Args:
+      evaluator:
+        The OpSLEvaluator to bind to this OpSweepln.
     """
     assert evaluator not in self.evaluators
     assert evaluator.runtime == None
@@ -232,13 +301,19 @@ class OpSweepln:
 
   def evaluate(self, dimension: int) -> List[Any]:
     """
-    Execute the sweep-line algorithm on the set of Regions
-    along the given dimension. Invokes the OpSLEvaluator at the initialization phase,
-    when encountering the beginning of an overlap and ending of an overlap Events,
-    and at the finalization phase of the algorithm. Returns a list of results, one
-    result for each OpSLEvaluator.
+    Execute the sweep-line algorithm on the set of Regions along the given
+    dimension. Invokes the OpSLEvaluator at the initialization phase, when
+    encountering the beginning of an overlap and ending of an overlap Events,
+    and at the finalization phase of the algorithm. Returns a list of results,
+    one result for each OpSLEvaluator.
 
-    :param dimension:
+    Args:
+      dimension:
+        The dimension to evaluate sweep-line over.
+
+    Returns:
+      A list of returned value from the binded
+      OpSLEvaluators to this OpSweepln.
     """
     assert 0 <= dimension < self.regionset.dimension
     assert len(self.evaluators) > 0
@@ -249,7 +324,7 @@ class OpSweepln:
     for evaluator in self.evaluators:
       evaluator.oninit(dimension)
 
-    # Sweep / Single-Pass
+    # Sweep / One-Pass
     for event in self.regionset.timeline[dimension]:
       if event.kind == EventKind.Begin:
         for evaluator in self.evaluators:
