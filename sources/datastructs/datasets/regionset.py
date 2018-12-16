@@ -52,9 +52,9 @@ class RegionSet(Iterable[Region], IOable):
     timeline:   Timeline instance for this RegionSet.
 
   Methods:
-    Special:        __init__, __getitem__,
-                    __contains__, __iter__
-    Instance:       add, get, filter, overlaps
+    Special:        __init__, __getitem__, __iter__, 
+                    __contains__
+    Instance:       get, add, overlaps, intersect, filter
     Class Methods:  from_random, from_dict
 
   Inherited from IOable:
@@ -263,10 +263,10 @@ class RegionSet(Iterable[Region], IOable):
 
   def overlaps(self, dimension: int = 0) -> List[RegionPair]:
     """
-    List all of overlaps between the Regions within this set.
+    List all of pairwise overlaps between the Regions within this set.
     This is a Naive implementation for finding all overlapping Region pairs.
-    Returns a list of overlapping regions, ordered based on the lower bounds
-    of the Regions along the specified dimension.
+    Returns a list of pairwise overlapping regions, ordered based on
+    the lower bounds of the Regions along the specified dimension.
 
     Args:
       dimension:
@@ -293,6 +293,29 @@ class RegionSet(Iterable[Region], IOable):
           overlaps.append((first, second))
 
     return overlaps
+
+  def intersect(self, dimension: int = 0) -> List[Region]:
+    """
+    List all of intersecting Regions between pairwise Regions within this set.
+    This is a Naive implementation for finding all overlapping Region pairs.
+    Returns a list of intersecting Regions between pairs, ordered based on
+    the lower bounds of the Regions along the specified dimension.
+
+    Args:
+      dimension:
+        The dimension on which to order the computed
+        intersecting Regions. Ordered based on the
+        lower bounds of the Regions.
+
+    Returns:
+      A List of all intersecting Regions between
+      pairwise Regions within this collection of Regions.
+    """
+    def to_intersect(regionpair: RegionPair) -> Region:
+      return regionpair[0].intersect(regionpair[1], 'reference')
+
+    return list(map(to_intersect, \
+                    self.overlaps(dimension)))
 
   def filter(self, bounds: Region) -> 'RegionSet':
     """
