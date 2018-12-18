@@ -4,30 +4,30 @@
 Regional Intersection Graph (RIG) Construction by
 One-pass Sweepline Algorithm -- NetworkX
 
-This script implements the NxGraphCtorOpSL (or one-pass sweep-line regional
+This script implements the NxGraphSweepCtor (or one-pass sweep-line regional
 intersection graph construction algorithm). This algorithm builds an
 undirected, labelled graph of all the pair-wise intersections or overlapping
 regions between a collection of regions with the same dimensionality. The
 graph representation is implemented as a NetworkX graph.
 
 Classes:
-- NxGraphCtorOpSL
+- NxGraphSweepCtor
 """
 
 from typing import Tuple
 
-from sources.algorithms.sweepln.opsweepln import OpSLEvaluator, OpSweepln
+from sources.algorithms.sweepln.sweepln import RegionSweep, RegionSweepRn
 from sources.datastructs.datasets.regionset import RegionSet
 from sources.datastructs.rigraphs.nxgraph import NxGraph
 from sources.datastructs.shapes.region import Region, RegionPair
 
 
-class NxGraphCtorOpSL(OpSLEvaluator, OpSweepln):
+class NxGraphSweepCtor(RegionSweepRn, RegionSweep):
   """
   Implementation of regional intersection graph construction based on a one-
   pass sweep-line algorithm. This algorithm builds an undirected, weighted
   graph of all the pair-wise intersections or overlapping regions within a
-  RegionSet. Inherits from: OpSLEvaluator and OpSweepln. The graph
+  RegionSet. Inherits from: RegionSweepRn and RegionSweep. The graph
   representation is implemented as a NetworkX graph.
 
   Attributes:
@@ -35,7 +35,7 @@ class NxGraphCtorOpSL(OpSLEvaluator, OpSweepln):
       The NetworkX graph representation of
       intersecting Regions.
 
-  Inherited from OpSLEvaluator:
+  Inherited from RegionSweepRn:
     Attributes:
       runtime, regionset, dimension, actives
     Properties:
@@ -47,7 +47,7 @@ class NxGraphCtorOpSL(OpSLEvaluator, OpSweepln):
       Special:  __init__
       Instance: oninit, onbegin, onend, onfinalize
 
-  Inherited from OpSweepln:
+  Inherited from RegionSweep:
     Attributes:
       regionset, evaluators
     Methods:
@@ -67,13 +67,13 @@ class NxGraphCtorOpSL(OpSLEvaluator, OpSweepln):
       regionset:
         The RegionSet to evaluate sweep-line over.
     """
-    OpSLEvaluator.__init__(self)
-    OpSweepln.__init__(self, regionset)
-    OpSweepln.put(self, self)
+    RegionSweepRn.__init__(self)
+    RegionSweep.__init__(self, regionset)
+    RegionSweep.put(self, self)
 
   def oninit(self, dimension: int):
     """
-    Initialize the evaluation of the RegionSet in the OpSweepln with the
+    Initialize the evaluation of the RegionSet in the RegionSweep with the
     given dimensions. Create a new intersection Graph and populate it with
     nodes for each Region. This method extends the superclass
     implementation.
@@ -82,7 +82,7 @@ class NxGraphCtorOpSL(OpSLEvaluator, OpSweepln):
       dimension:
         The dimension to evaluate sweep-line over.
     """
-    OpSLEvaluator.oninit(self, dimension)
+    RegionSweepRn.oninit(self, dimension)
 
     self.G = NxGraph(self.regionset.dimension)
 
@@ -113,6 +113,6 @@ class NxGraphCtorOpSL(OpSLEvaluator, OpSweepln):
     Returns:
       The newly constructed intersection NetworkX graph.
     """
-    OpSLEvaluator.onfinalize(self)
+    RegionSweepRn.onfinalize(self)
 
     return self.G

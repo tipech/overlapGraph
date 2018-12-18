@@ -4,17 +4,22 @@
 Generalized One-Pass Sweep-line Algorithm
 
 This script implements a generalized version of a one-pass sweep-line
-algorithm. Implements OpSLEvaluator and OpSweepln classes, where
-the OpSweepln (the algorithm) drives the evaluation by initializing each
-OpSLEvaluators' oninit methods, looping over the sorted Events and executing
-each OpSLEvaluators' onbegin and onend handlers, and finally, invoking each
-OpSLEvaluators' onfinalize methods. The OpSLEvaluator (evaluator) is a base
-class for implementations that implement these handlers and maintain the
-necessary, associated interval state of the evaluation.
+algorithm. Implements RegionSweepRn and RegionSweep classes, where
+the RegionSweep drives the evaluation while the RegionSweepRn executes the
+specifics details of the algorithm, by RegionSweep:
+
+- Initializing each RegionSweepRns' oninit methods
+- Looping over the sorted Events and executing each RegionSweepRns'
+  onbegin and onend handlers, and
+- Finally, invoking each RegionSweepRns' onfinalize methods.
+
+RegionSweepRn is a base class for implementations that implement these
+handlers and maintain the necessary, associated internal state of the
+evaluation.
 
 Classes:
-- OpSLEvaluator
-- OpSweepln
+- RegionSweepRn
+- RegionSweep
 """
 
 from typing import Any, Dict, Iterator, List, Tuple
@@ -24,14 +29,14 @@ from sources.datastructs.datasets.timeline import Event, EventKind
 from sources.datastructs.shapes.region import Region, RegionPair
 
 
-class OpSLEvaluator:
+class RegionSweepRn:
   """
-  Base class for implementing a OpSLEvaluator (evaluator) that is
-  binded to and evaluated when the OpSweepln evaluates a one-pass,
+  Base class for implementing a RegionSweepRn (evaluator) that is
+  binded to and evaluated when the RegionSweep evaluates a one-pass,
   sweep-line along a dimension on a set of Regions.
 
   Attributes:
-    runtime:    The OpSweepln for which its binded.
+    runtime:    The RegionSweep for which its binded.
     regionset:  The RegionSet to evaluate sweep-line over.
     dimension:  The dimension to evaluate sweep-line over.
     actives:    The active Regions during sweep-line.
@@ -39,10 +44,10 @@ class OpSLEvaluator:
 
   Properties:
     binded:
-      Whether or not this OpSLEvaluator is binded to a
-      OpSweepln. True if it is binded otherwise False.
+      Whether or not this RegionSweepRn is binded to a
+      RegionSweep. True if it is binded otherwise False.
     initialized:
-      Whether or not this OpSLEvaluator has been
+      Whether or not this RegionSweepRn has been
       initialized for evaluation. True if it is
       initialized otherwise False.
 
@@ -51,7 +56,7 @@ class OpSLEvaluator:
     Instance: bind, unbind, findoverlaps, addoverlap,
               oninit, onbegin, onend, onfinalize
   """
-  runtime   : 'OpSweepln'
+  runtime   : 'RegionSweep'
   regionset : RegionSet
   dimension : int
   actives   : Dict[str, Region]
@@ -59,7 +64,7 @@ class OpSLEvaluator:
 
   def __init__(self):
     """
-    Initialize this OpSLEvaluator with the default values.
+    Initialize this RegionSweepRn with the default values.
     """
     self.runtime = None
     self.regionset = None
@@ -70,18 +75,18 @@ class OpSLEvaluator:
   @property
   def binded(self) -> bool:
     """
-    Determine if this OpSLEvaluator is binded to a OpSweepln.
+    Determine if this RegionSweepRn is binded to a RegionSweep.
 
     Returns:
       True:   If it is binded.
       False:  Otherwise.
     """
-    return isinstance(self.runtime, OpSweepln)
+    return isinstance(self.runtime, RegionSweep)
 
   @property
   def initialized(self) -> bool:
     """
-    Determine if this OpSLEvaluator has been initialized for evaluation.
+    Determine if this RegionSweepRn has been initialized for evaluation.
 
     Returns:
       True:   If it is initialized.
@@ -91,16 +96,16 @@ class OpSLEvaluator:
 
   ### Methods: Binding
 
-  def bind(self, runtime: 'OpSweepln', unbind: bool = False):
+  def bind(self, runtime: 'RegionSweep', unbind: bool = False):
     """
-    Bind or attach this OpSLEvaluator to the given OpSweepln.
-    If the unbind flag is True, unbinds the previous OpSweepln if this
-    OpSLEvaluator is currently binded to it.
+    Bind or attach this RegionSweepRn to the given RegionSweep.
+    If the unbind flag is True, unbinds the previous RegionSweep if this
+    RegionSweepRn is currently binded to it.
 
     Args:
-      runtime:  The OpSweepln for which its binded.
+      runtime:  The RegionSweep for which its binded.
       unbind:   Boolean flag whether or not to unbind the
-                previous OpSweepln if this OpSLEvaluator is
+                previous RegionSweep if this RegionSweepRn is
                 currently binded to it.
     """
     if unbind:
@@ -113,8 +118,8 @@ class OpSLEvaluator:
 
   def unbind(self):
     """
-    Unbind or detach this OpSLEvaluator from
-    its currently atteched OpSweepln.
+    Unbind or detach this RegionSweepRn from
+    its currently atteched RegionSweep.
     """
     if self.binded:
       self.runtime = None
@@ -165,7 +170,7 @@ class OpSLEvaluator:
 
   def oninit(self, dimension: int):
     """
-    Initialize the evaluation of the RegionSet in the OpSweepln
+    Initialize the evaluation of the RegionSet in the RegionSweep
     with the given dimensions. This method should be overridden in
     subclasses to implement:
 
@@ -188,7 +193,7 @@ class OpSLEvaluator:
 
   def onbegin(self, event: Event):
     """
-    When a Begin Event is encountered in the OpSweepln evaluation, this
+    When a Begin Event is encountered in the RegionSweep evaluation, this
     method is invoked with that Event. Invokes findoverlaps and
     addoverlap methods from here. Adds the newly active Region to the
     set of active Regions.
@@ -196,7 +201,7 @@ class OpSLEvaluator:
     Args:
       event:
         The beginning Event when encountered
-        in the OpSweepln evaluation.
+        in the RegionSweep evaluation.
     """
     region = event.context
 
@@ -210,14 +215,14 @@ class OpSLEvaluator:
 
   def onend(self, event: Event):
     """
-    When an End Event is encountered in the OpSweepln evaluation, this
+    When an End Event is encountered in the RegionSweep evaluation, this
     method is invoked with that Event. Removes the ending Region from
     to the set of active Regions.
 
     Args:
       event:
         The ending Event when encountered
-        in the OpSweepln evaluation.
+        in the RegionSweep evaluation.
     """
     region_id = event.context.id
 
@@ -228,8 +233,8 @@ class OpSLEvaluator:
 
   def onfinalize(self) -> List[RegionPair]:
     """
-    When the OpSweepln evaluation is complete, the sweep is complete,
-    this method is invoked. Uninitialized this OpSLEvaluator. Returns
+    When the RegionSweep evaluation is complete, the sweep is complete,
+    this method is invoked. Uninitialized this RegionSweepRn. Returns
     the result of the sweep-line algorithm; for this base implementation
     returns the list of Region overlapping pairs.
 
@@ -250,31 +255,31 @@ class OpSLEvaluator:
     return self.overlaps
 
 
-class OpSweepln:
+class RegionSweep:
   """
   Runtime for the generalized one-pass sweep-line algorithm.
   This class implements the sorting and determining the overlapping
-  Regions along a specified dimension via one or more OpSLEvaluators.
-  Loops over that event generated by the RegionSet's Timeline, calls
-  the onbegin or onend methods of the OpSLEvaluators depending on
-  EventKind.
+  Regions along a specified dimension via one or more RegionSweepRns.
+  Loops over the Events generated by the RegionSet's Timeline, calls
+  the oninit, onbegin, onend and onfinalize methods of the
+  RegionSweepRns for each Event for each stage of the algorithm.
 
   Attributes:
     regionset:  The RegionSet to evaluate sweep-line over.
-    evaluators: The OpSLEvaluators which are binded to
-                this OpSweepln.
+    evaluators: The RegionSweepRns which are binded to
+                this RegionSweep.
 
   Methods:
     Special:    __init__
     Instance:   put, evaluate
   """
   regionset: RegionSet
-  evaluators: List[OpSLEvaluator]
+  evaluators: List[RegionSweepRn]
 
   def __init__(self, regionset: RegionSet):
     """
     Initialize the sweep-line runtime with the given RegionSet
-    and an empty list of OpSLEvaluators.
+    and an empty list of RegionSweepRns.
 
     Args:
       regionset:
@@ -283,15 +288,15 @@ class OpSweepln:
     self.regionset = regionset
     self.evaluators = []
 
-  def put(self, evaluator: OpSLEvaluator):
+  def put(self, evaluator: RegionSweepRn):
     """
-    Adds the given OpSLEvaluator to the list of evaluators for
+    Adds the given RegionSweepRn to the list of evaluators for
     this sweep-line algorithm Runtime to bind and execute
     when evaluating the input Regions.
 
     Args:
       evaluator:
-        The OpSLEvaluator to bind to this OpSweepln.
+        The RegionSweepRn to bind to this RegionSweep.
     """
     assert evaluator not in self.evaluators
     assert evaluator.runtime == None
@@ -302,10 +307,10 @@ class OpSweepln:
   def evaluate(self, dimension: int) -> List[Any]:
     """
     Execute the sweep-line algorithm on the set of Regions along the given
-    dimension. Invokes the OpSLEvaluator at the initialization phase, when
+    dimension. Invokes the RegionSweepRn at the initialization phase, when
     encountering the beginning of an overlap and ending of an overlap Events,
     and at the finalization phase of the algorithm. Returns a list of results,
-    one result for each OpSLEvaluator.
+    one result for each RegionSweepRn.
 
     Args:
       dimension:
@@ -313,7 +318,7 @@ class OpSweepln:
 
     Returns:
       A list of returned value from the binded
-      OpSLEvaluators to this OpSweepln.
+      RegionSweepRns to this RegionSweep.
     """
     assert 0 <= dimension < self.regionset.dimension
     assert len(self.evaluators) > 0
