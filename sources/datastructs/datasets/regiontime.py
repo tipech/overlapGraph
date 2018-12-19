@@ -10,8 +10,8 @@ results in a beginning and an ending event.
 
 Classes:
 - RegionEvtKind (IntEnum)
-- RegionEvent
-- RegionTimeln
+- RegionEvent   (Event)
+- RegionTimeln  (Timeline)
 """
 
 from dataclasses import dataclass, field
@@ -21,6 +21,7 @@ from typing import Iterator, List, Union
 
 from sortedcontainers import SortedList
 
+from sources.datastructs.datasets.timeline import Event, Timeline
 from sources.datastructs.shapes.region import Region
 
 try: # cyclic codependency
@@ -44,7 +45,7 @@ class RegionEvtKind(IntEnum):
 
 @dataclass
 @total_ordering
-class RegionEvent:
+class RegionEvent(Event[Region]):
   """
   Data class for an event. Each event has a value for when the event occurs,
   a specified event type, the Region context associated with the event, and
@@ -53,8 +54,8 @@ class RegionEvent:
   along the timeline dimension.
 
   Attributes:
-    when:       The value (time) along the sorted dimension
-                where this event takes place.
+    when:       The value (time) along the sorted
+                dimension, where this event takes place.
     kind:       The type of event: Begin or End of Region.
     context:    The Region associated with this event.
     dimension:  The dimension along which events occur.
@@ -62,7 +63,16 @@ class RegionEvent:
                 same 'when', occurs at the same time.
 
   Methods:
-    Special:  __init__, __eq__, __lt__
+    Special:    __init__, __eq__, __lt__
+
+  Inherited from Event:
+    Overridden Attributes:
+      when:     The value (time) along the sorted
+                timeline, where this event takes place.
+      kind:     The type of event.
+      context:  The object associated with this event.
+    Overridden Methods:
+      Special:  __eq__, __lt__
   """
   when:       float
   kind:       RegionEvtKind
@@ -157,7 +167,7 @@ class RegionEvent:
       return self.context.id < that.context.id
 
 @dataclass
-class RegionTimeln:
+class RegionTimeln(Timeline[Region]):
   """
   Data class that provides methods for generating sorted iterations of 
   RegionEvents for each dimension in the Regions within an assigned RegionSet; 
@@ -169,6 +179,10 @@ class RegionTimeln:
   Methods:
     Special:  __getitem__
     Instance: events
+  
+  Inherited from Timeline:
+    Abstract Methods:
+      Instance: events
   """
   regions: 'RegionSet'
 
