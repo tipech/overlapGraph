@@ -18,14 +18,14 @@ from typing import Any, Dict, Iterable, Iterator, List, Union
 from uuid import uuid4
 
 from sources.datastructs.datasets.ioable import IOable
-from sources.datastructs.datasets.timeline import EventKind
+from sources.datastructs.datasets.regiontime import RegionEvtKind
 from sources.datastructs.shapes.interval import Interval
 from sources.datastructs.shapes.region import Region, RegionPair
 from sources.helpers.base26 import to_base26
 from sources.helpers.randoms import RandomFn, Randoms
 
 try: # cyclic codependency
-  from sources.datastructs.datasets.timeline import Timeline
+  from sources.datastructs.datasets.regiontime import RegionTimeln
 except ImportError:
   pass
 
@@ -49,7 +49,7 @@ class RegionSet(Iterable[Region], IOable):
     size:       The number of Regions in this collection.
     minbound:   The computed minimum Region that encloses
                 all Regions in this collection within it.
-    timeline:   Timeline instance for this RegionSet.
+    timeline:   RegionTimeln instance for this RegionSet.
 
   Methods:
     Special:        __init__, __getitem__, __iter__, 
@@ -142,20 +142,20 @@ class RegionSet(Iterable[Region], IOable):
     return Region.from_union(self.regions)
 
   @property
-  def timeline(self) -> 'Timeline':
+  def timeline(self) -> 'RegionTimeln':
     """
-    Return a Timeline instance binded to this RegionSet. The Timeline
-    provides methods for generating sorted iterations of Events for
+    Return a RegionTimeln instance binded to this RegionSet. The RegionTimeln
+    provides methods for generating sorted iterations of RegionEvents for
     each dimension in the Regions within this RegionSet; each Region
     results in a beginning and an ending event. Each RegionSet may only
-    have one Timeline instance, once created always returns the same
+    have one RegionTimeln instance, once created always returns the same
     instance.
 
     Returns:
-      A Timeline instance for this Region.
+      A RegionTimeln instance for this Region.
     """
     if not hasattr(self, '_timeline'):
-      self._timeline = Timeline(self)
+      self._timeline = RegionTimeln(self)
 
     return self._timeline
 
@@ -280,7 +280,7 @@ class RegionSet(Iterable[Region], IOable):
     """
     ordered_regions = []
     for event in self.timeline.events(dimension):
-      if event.kind == EventKind.Begin:
+      if event.kind == RegionEvtKind.Begin:
         ordered_regions.append(event.context)
 
     overlaps = []
