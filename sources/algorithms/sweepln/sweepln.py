@@ -29,10 +29,10 @@ from uuid import uuid4
 from sources.datastructs.datasets.timeline import Event, Timeline
 
 
-R = TypeVar('R')
+T = TypeVar('T')
 
 
-class SweepRunner(Generic[R]): # pylint: disable=E1136
+class SweepRunner(Generic[T]): # pylint: disable=E1136
   """
   Abstract class for defining an object that binds and unbinds to 
   and evaluates over a timeline with a specific algorithm, when the
@@ -146,7 +146,7 @@ class SweepRunner(Generic[R]): # pylint: disable=E1136
 
   ### Methods: Results
 
-  def results(self, **kwargs) -> R:
+  def results(self, **kwargs) -> T:
     """
     Returns the resulting values for the runner over
     the sweep-line algorithm.
