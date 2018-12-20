@@ -11,7 +11,7 @@ This script implements the following tests:
 from unittest import TestCase
 
 from sources.datastructs.datasets.regionset import RegionSet
-from sources.datastructs.datasets.regiontime import RegionEvent, RegionEvtKind, RegionTimeln
+from sources.datastructs.datasets.regiontime import RegionEvent, RegionEvtKind
 from sources.datastructs.shapes.region import Region
 
 
@@ -45,9 +45,8 @@ class TestRegionTimeln(TestCase):
        ("Begin", 5, regions[2]), ("End"  , 5, regions[2])]
     ]
 
-    self.assertEqual(regions.timeline, regions.timeline)
     for d in range(regions.dimension):
-      for i, event in enumerate(regions.timeline[d]):
+      for i, event in enumerate(regions.timeline.events(d)):
         #print(f'{d},{i}: {event}')
         self.assertEqual(event.kind, RegionEvtKind[oracle[d][i][0]])
         self.assertEqual(event.when, float(oracle[d][i][1]))

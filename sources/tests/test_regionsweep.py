@@ -14,7 +14,7 @@ from unittest import TestCase
 from sources.algorithms.sweepln.regionsweep import RegionSweep
 from sources.algorithms.sweepln.sweepln import Sweepln
 from sources.datastructs.datasets.regionset import RegionSet
-from sources.datastructs.datasets.regiontime import RegionEvent, RegionEvtKind, RegionTimeln
+from sources.datastructs.datasets.regiontime import RegionEvent, RegionEvtKind
 from sources.datastructs.shapes.region import Region, RegionPair
 
 
