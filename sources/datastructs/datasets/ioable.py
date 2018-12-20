@@ -9,9 +9,6 @@ ast.literal_eval). Provides base implements for to_output, from_text and
 from_source methods. Requires the concrete classes to implement the to_object
 and from_object method.
 
-Methods:
-- json_encoder_default_factory
-
 Classes:
 - IOable
 """
@@ -22,93 +19,6 @@ from json import JSONEncoder
 from json import load as JSONLoader
 from json import loads as JSONParse
 from typing import Any, Callable, Dict
-
-
-def json_encoder_default_factory(
-        withself: bool = False,
-        default = JSONEncoder.default, **kwargs) -> Callable:
-  """
-  Returns a function that extends JSONEncoder to recognize other objects, by
-  implementing a default() method with another method that returns a
-  serializable object if possible, otherwise it should call the default
-  implementation (to raise TypeError).
-
-  Args:
-    withself:
-      Whether or not the function has self as the
-      first argument, so that it can be attached
-      to a class.
-    default:
-      The unmodified JSONEncoder.default method or
-      base implementation that the new default()
-      method falls back on.
-    kwargs:
-      Additional arguments used to customize and
-      tweak the object generation process.
-
-  kwargs:
-    object_types:
-      Outputs __type__ attribute to object output if True.
-      The '__type__' attribute will hold the class
-      name of the object type. Sometimes necessary for
-      deserializing the output back in its in-memory
-      object represectation.
-
-  Factory for:
-    json_encoder_default(self, value), if withself is True
-    json_encoder_default(value), otherwise
-
-    Args:
-      self:
-        JSONEncoder class
-      value:
-        The value to be converted to an object
-        (dict, list, tuple).
-
-    Returns:
-      The object (dict, list, tuple) that
-      represents the given value.
-
-    Raises:
-      TypeError: If object type is unrecognized.
-
-  Returns:
-    A function that extends JSONEncoder to
-    recognize other objects.
-  """
-  def json_encoder_default(self, value):
-    if isinstance(value, IOable):
-      json_value = value.__class__.to_object(value, **kwargs)
-      if 'object_types' in kwargs and kwargs['object_types'] \
-                                  and isinstance(json_value, Dict):
-        json_value['__type__'] = value.__class__.__name__
-
-      return json_value
-    if hasattr(value, 'to_json'):
-      json_value = getattr(value, 'to_json', default)(value, **kwargs)
-      if 'object_types' in kwargs and kwargs['object_types'] \
-                                  and isinstance(json_value, Dict):
-        json_value['__type__'] = value.__class__.__name__
-
-      return json_value
-    else:
-      raise TypeError(f'{value}')
-
-  def json_encoder_default_noself(value):
-    return json_encoder_default(None, value)
-
-  def json_encoder_default_setdefault(default):
-    JSONEncoder.default = default
-
-  json_encoder_default.default        = default
-  json_encoder_default_noself.default = default
-  json_encoder_default.setdefault     = \
-      lambda: json_encoder_default_setdefault(json_encoder_default)
-  json_encoder_default.resetdefault   = \
-      lambda: json_encoder_default_setdefault(json_encoder_default.default)
-
-  return json_encoder_default if withself else \
-         json_encoder_default_noself
 
 
 class IOable:
@@ -147,12 +57,20 @@ class IOable:
     """
     assert output.writable()
 
-    default = json_encoder_default_factory(**options)
+    default = JSONEncoder.default
+
+    def json_encoder(value):
+      if isinstance(value, IOable):
+        return value.__class__.to_object(value, **options)
+      elif hasattr(value, 'to_json'):
+        return getattr(value, 'to_json', default)(value, **options)
+      else:
+        raise TypeError(f'{value}')
 
     if format == 'json':
       if 'indent' not in kwargs:
         kwargs['indent'] = 2
-      encoder = JSONEncoder(default=default, **kwargs)
+      encoder = JSONEncoder(default=json_encoder, **kwargs)
       for chunk in encoder.iterencode(self):
         output.write(chunk)
     else:
