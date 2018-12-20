@@ -107,9 +107,12 @@ class Timeline(Generic[T]): # pylint: disable=E1136
     Instance: events
   """
 
-  def events(self) -> Iterator[Event[T]]:
+  def events(self, **kwargs) -> Iterator[Event[T]]:
     """
     Returns an Iterator of sorted Events.
+
+    Args:
+      kwargs: Additional arguments.
 
     Returns:
       An Iterator of sorted Events.
