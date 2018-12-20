@@ -97,7 +97,7 @@ class Event(Generic[T]): # pylint: disable=E1136
 @dataclass
 class Timeline(Generic[T]): # pylint: disable=E1136
   """
-  Abstract data class is a timeline that provides methods for 
+  Abstract data class for a timeline that provides methods for 
   generating sorted Iterators of Events.
 
   Generic:
