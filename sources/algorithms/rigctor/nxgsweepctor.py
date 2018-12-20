@@ -16,7 +16,7 @@ Classes:
 
 from typing import Tuple
 
-from sources.algorithms.sweepln.sweepln import RegionSweep, RegionSweepRn
+from sources.algorithms.sweepln.regionsweep import RegionSweep, RegionSweepRn
 from sources.datastructs.datasets.regionset import RegionSet
 from sources.datastructs.rigraphs.nxgraph import NxGraph
 from sources.datastructs.shapes.region import Region, RegionPair
