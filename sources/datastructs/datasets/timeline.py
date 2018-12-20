@@ -16,21 +16,22 @@ Abstract Classes:
 - Timeline
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import IntEnum
 from functools import total_ordering
-from typing import Generic, Iterator, List, TypeVar, Union
+from typing import Generic, Iterator, TypeVar
 
 
 T = TypeVar('T')
+
 
 @dataclass
 @total_ordering
 class Event(Generic[T]): # pylint: disable=E1136
   """
-  Data class for an event. Each event has a value for when the event occurs
-  and a specified event type. Events should be ordered by when the event
-  occurs and the kind of event.
+  Data class for an event. Each event has a value for when the event occurs,
+  a specified event type, and the object associated with the event as context.
+  Events should be ordered by when the event occurs and the kind of event.
 
   Generic:
     T:  Contextual object associated
@@ -96,7 +97,7 @@ class Event(Generic[T]): # pylint: disable=E1136
 @dataclass
 class Timeline(Generic[T]): # pylint: disable=E1136
   """
-  Abstract data class that provides methods for 
+  Abstract data class is a timeline that provides methods for 
   generating sorted Iterators of Events.
 
   Generic:
