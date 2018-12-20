@@ -6,12 +6,12 @@ Generalized One-Pass Sweep-line Algorithm
 This script implements a generalized version of a one-pass sweep-line
 algorithm. Implements Sweepln and SweepRunner (abstract) classes, where
 the Sweepln drives the evaluation while the SweepRunners executes the
-specifics details of the algorithm, by Sweepln:
+specifics details of the algorithm.
 
-- Initializing each SweepRunners' oninit methods
-- Looping over each events and executing each SweepRunners'
-  event handlers, and
-- Finally, invoking each SweepRunners' onfinalize methods.
+Sweepln evaluates on each SweepRunner:
+- Initialize: oninit
+- For each Events, execute: onevent
+- Finalize: onfinalize
 
 SweepRunner is a base class for implementations that implement these
 handlers and maintain the necessary, associated internal state of the
