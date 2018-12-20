@@ -9,9 +9,9 @@ sorted iteration of events for each dimension in the Regions, each Region
 results in a beginning and an ending event.
 
 Classes:
-- RegionEvtKind (IntEnum)
-- RegionEvent   (MdEvent)
-- RegionTimeln  (MdTimeline)
+- RegionEvtKind   (IntEnum)
+- RegionEvent     (MdEvent)
+- RegionTimeln    (MdTimeline)
 """
 
 from dataclasses import dataclass, field
@@ -22,6 +22,7 @@ from typing import Iterator, List, Union
 from sortedcontainers import SortedList
 
 from sources.datastructs.datasets.mdtimeln import MdEvent, MdTimeline
+from sources.datastructs.datasets.timeline import Timeline
 from sources.datastructs.shapes.region import Region
 
 try: # cyclic codependency
@@ -165,6 +166,7 @@ class RegionEvent(MdEvent[Region]):
     else:
       return self.context.id < that.context.id
 
+
 @dataclass
 class RegionTimeln(MdTimeline[Region]):
   """
@@ -173,7 +175,11 @@ class RegionTimeln(MdTimeline[Region]):
   each Region results in a beginning and an ending event.
 
   Attributes:
-    regions
+    regions:
+      The RegionSet associated with this timeline.
+
+  Methods:
+    Instance: events
 
   Inherited from MdTimeline:
     Methods:

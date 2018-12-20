@@ -14,6 +14,7 @@ within the multi-dimensional space of MdTimeline.
 
 Classes:
 - MdEvent (Event)
+- MdTimelineOneDimen (Timeline)
 
 Abstract Classes:
 - MdTimeline (Timeline)
@@ -71,6 +72,7 @@ class MdTimeline(Timeline[T]): # pylint: disable=E1136
 
   Methods:
     Special:  __getitem__
+
   Abstract Methods:
     Instance: events
   """
@@ -91,9 +93,9 @@ class MdTimeline(Timeline[T]): # pylint: disable=E1136
     """
     raise NotImplementedError
 
-  def __getitem__(self, dimension: int = 0) -> Iterator[MdEvent[T]]:
+  def __getitem__(self, dimension: int = 0) -> Timeline[MdEvent[T]]:
     """
-    Returns an Iterator of sorted MdEvent along the given dimension.
+    Returns a binded Timeline of sorted MdEvent along the given dimension.
 
     Is syntactic sugar for:
       self[dimension]
@@ -103,7 +105,44 @@ class MdTimeline(Timeline[T]): # pylint: disable=E1136
         The dimension along which MdEvents occur.
 
     Returns:
-      An Iterator of sorted MdEvent along
+      A binded Timeline of sorted MdEvent along
       specified dimension.
     """
-    return self.events(dimension)
+    return MdTimelineOneDimen(self, dimension)
+
+
+@dataclass
+class MdTimelineOneDimen(Timeline[T]):
+  """
+  Data class for a Timeline along a single dimension.
+
+  Attributes:
+    timeline: 
+      The reference to parent MdTimeline object.
+    dimension:
+      The dimension along which MdEvents occur.
+
+  Methods:
+    Instance: events
+
+  Inherited for Timeline:
+    Abstract Methods:
+      Instance: events
+  """
+  timeline  : MdTimeline
+  dimension : int
+
+  def events(self, **kwargs) -> Iterator[MdEvent[T]]:
+    """
+    Returns an Iterator of sorted MdEvents.
+
+    Args:
+      kwargs: Additional arguments.
+
+    Returns:
+      An Iterator of sorted MdEvents.
+    """
+    assert isinstance(self.timeline, MdTimeline)
+    assert isinstance(self.dimension, int)
+
+    return self.timeline.events(self.dimension)
