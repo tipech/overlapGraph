@@ -11,7 +11,7 @@ specifics details of the algorithm.
 Sweepln evaluates on each SweepRunner:
 - Initialize: oninit
 - For each Events, execute: onevent
-- Finalize: onfinalize
+- Finalize: onfinal
 
 SweepRunner is a base class for implementations that implement these
 handlers and maintain the necessary, associated internal state of the
@@ -59,7 +59,7 @@ class SweepRunner(Generic[R]): # pylint: disable=E1136
   Methods:
     Special:  __init__
     Instance: bind, unbind,
-              onevent, oninit, onfinalize
+              onevent, oninit, onfinal
 
   Abstract Methods:
     Instance: results
@@ -195,7 +195,7 @@ class SweepRunner(Generic[R]): # pylint: disable=E1136
     self.running = True
     self.sweepln[self.id] = None
 
-  def onfinalize(self, **kwargs):
+  def onfinal(self, **kwargs):
     """
     Finalize the runner for the Sweepln algorithm.
     When the Sweepln evaluation is complete, the sweep is complete,
@@ -317,11 +317,11 @@ class Sweepln:
 
     - oninit:     At the initialization phase.
     - onevent:    When each event occurs.
-    - onfinalize: At the finalization phase.
+    - onfinal:    At the finalization phase.
 
     Args:
       kwargs: The arguments to be passed to runners' 
-              oninit(), onevent() & onfinalize(), 
+              oninit(), onevent() & onfinal(), 
               and timeline.events() methods.
     """
     assert len(self.runners) > 0
@@ -339,4 +339,4 @@ class Sweepln:
 
     # Finalization
     for runner in self.runners:
-      runner.onfinalize(**kwargs)
+      runner.onfinal(**kwargs)

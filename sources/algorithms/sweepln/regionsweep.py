@@ -61,11 +61,11 @@ class RegionSweep(SweepRunner[List[RegionPair]]):
     Methods:
       Special:  __init__
       Instance: bind, unbind, results,
-                onevent, oninit, onfinalize
+                onevent, oninit, onfinal
 
     Overridden Methods:
       Special:  __init__
-      Instance: results, oninit, onfinalize
+      Instance: results, oninit, onfinal
   """
   dimension: int
   actives  : Dict[str, Region]
@@ -238,7 +238,7 @@ class RegionSweep(SweepRunner[List[RegionPair]]):
     assert region_id in self.actives
     del self.actives[region_id]
 
-  def onfinalize(self, **kwargs):
+  def onfinal(self, **kwargs):
     """
     Finalize the RegionSweep for the Sweepln algorithm.
     When the Sweepln evaluation is complete, the sweep is complete,
@@ -258,4 +258,4 @@ class RegionSweep(SweepRunner[List[RegionPair]]):
     assert len(self.actives) == 0
 
     self.dimension = None
-    SweepRunner.onfinalize(self)
+    SweepRunner.onfinal(self)

@@ -72,7 +72,7 @@ class NxGraphSweepCtor(Sweepln, RegionSweep, SweepRunner[NxGraph]):
     Methods:
       Special:  __init__
       Instance: bind, unbind, results, findoverlaps,
-                addoverlap, onevent, oninit, onfinalize,
+                addoverlap, onevent, oninit, onfinal,
                 onbegin, onend
       
     Overridden Methods:
