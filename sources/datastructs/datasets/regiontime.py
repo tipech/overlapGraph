@@ -10,8 +10,8 @@ results in a beginning and an ending event.
 
 Classes:
 - RegionEvtKind (IntEnum)
-- RegionEvent   (Event)
-- RegionTimeln  (Timeline)
+- RegionEvent   (MdEvent)
+- RegionTimeln  (MdTimeline)
 """
 
 from dataclasses import dataclass, field
@@ -21,7 +21,7 @@ from typing import Iterator, List, Union
 
 from sortedcontainers import SortedList
 
-from sources.datastructs.datasets.timeline import Event, Timeline
+from sources.datastructs.datasets.mdtimeln import MdEvent, MdTimeline
 from sources.datastructs.shapes.region import Region
 
 try: # cyclic codependency
@@ -45,7 +45,7 @@ class RegionEvtKind(IntEnum):
 
 @dataclass
 @total_ordering
-class RegionEvent(Event[Region]):
+class RegionEvent(MdEvent[Region]):
   """
   Data class for an event. Each event has a value for when the event occurs,
   a specified event type, the Region context associated with the event, and
@@ -65,20 +65,19 @@ class RegionEvent(Event[Region]):
   Methods:
     Special:    __init__, __eq__, __lt__
 
-  Inherited from Event:
+  Inherited from MdEvent:
+    Attributes:
+      when:       The value (time) along the sorted
+                  timeline, where this event takes place.
+      context:    The object associated with this event.
+      dimension:  The dimension along which events occur.
     Overridden Attributes:
-      when:     The value (time) along the sorted
-                timeline, where this event takes place.
-      kind:     The type of event.
-      context:  The object associated with this event.
+      kind:       The type of event.
     Overridden Methods:
-      Special:  __eq__, __lt__
+      Special:    __eq__, __lt__
   """
-  when:       float
-  kind:       RegionEvtKind
-  context:    Region
-  dimension:  int
-  order:      int
+  kind:   RegionEvtKind
+  order:  int
 
   def __init__(self, kind: Union[RegionEvtKind, str], when: float,
                      context: Region, dimension: int = 0):
@@ -167,7 +166,7 @@ class RegionEvent(Event[Region]):
       return self.context.id < that.context.id
 
 @dataclass
-class RegionTimeln(Timeline[Region]):
+class RegionTimeln(MdTimeline[Region]):
   """
   Data class that provides methods for generating sorted iterations of 
   RegionEvents for each dimension in the Regions within an assigned RegionSet; 
@@ -176,11 +175,9 @@ class RegionTimeln(Timeline[Region]):
   Attributes:
     regions
 
-  Methods:
-    Special:  __getitem__
-    Instance: events
-  
-  Inherited from Timeline:
+  Inherited from MdTimeline:
+    Methods:
+      Special:  __getitem__
     Abstract Methods:
       Instance: events
   """
@@ -241,25 +238,3 @@ class RegionTimeln(Timeline[Region]):
       beginning and ending events).
     """
     return self._sorted_events(dimension)
-
-  def __getitem__(self, dimension: int = 0) -> Iterator[RegionEvent]:
-    """
-    Returns an iterator of sorted RegionEvents generated from a set of
-    RegionSet along a given dimension. Each Region maps to two RegionEvents:
-    a beginning RegionEvent and a ending RegionEvent.
-
-    Alias for:
-      self.events(dimension)
-
-    Is syntactic sugar for:
-      self[dimension]
-
-    Args:
-      dimension:
-        The dimension along which RegionEvents occur.
-
-    Returns:
-      An Iterator of sorted RegionEvents (Region
-      beginning and ending events).
-    """
-    return self.events(dimension)
