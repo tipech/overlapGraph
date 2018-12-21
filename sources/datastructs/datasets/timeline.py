@@ -33,7 +33,7 @@ class Event(Generic[T]): # pylint: disable=E1136
   a specified event type, and the object associated with the event as context.
   Events should be ordered by when the event occurs and the kind of event.
 
-  Generic:
+  Generics:
     T:  Contextual object associated
         with each Event.
 
@@ -100,7 +100,7 @@ class Timeline(Generic[T]): # pylint: disable=E1136
   Abstract data class for a timeline that provides methods for 
   generating sorted Iterators of Events.
 
-  Generic:
+  Generics:
     T:  Contextual object associated
         with each Event.
 

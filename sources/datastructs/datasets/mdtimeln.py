@@ -40,7 +40,7 @@ class MdEvent(Event[T]): # pylint: disable=E1136
   multi-dimensional timeline, MdTimeline. Events should be ordered by when
   the event occurs and the kind of event.
 
-  Generic:
+  Generics:
     T:  Contextual object associated
         with each MdEvent.
 
@@ -66,7 +66,7 @@ class MdTimeline(Timeline[T]): # pylint: disable=E1136
   Abstract data class is a multi-dimensional timeline that provides
   methods for generating sorted Iterators of MdEvents.
 
-  Generic:
+  Generics:
     T:  Contextual object associated
         with each MdEvent.
 
@@ -116,6 +116,10 @@ class MdTimelineOneDimen(Timeline[T]):
   """
   Data class for a Timeline along a single dimension.
 
+  Generics:
+    T:  Contextual object associated
+        with each MdEvent.
+
   Attributes:
     timeline: 
       The reference to parent MdTimeline object.
@@ -129,7 +133,7 @@ class MdTimelineOneDimen(Timeline[T]):
     Abstract Methods:
       Instance: events
   """
-  timeline  : MdTimeline
+  timeline  : MdTimeline[T]
   dimension : int
 
   def events(self, **kwargs) -> Iterator[MdEvent[T]]:

@@ -19,7 +19,7 @@ from sources.datastructs.datasets.regiontime import RegionEvent, RegionEvtKind, 
 from sources.datastructs.shapes.region import Region, RegionPair
 
 
-class RegionSweep(SweepRunner[List[RegionPair]]):
+class RegionSweep(SweepRunner[Region, List[RegionPair]]):
   """
   Class for implementing an one-pass sweep-line algorithm over a set of
   Regions. Binds to and is evaluated by the one-pass sweep-line algorithm

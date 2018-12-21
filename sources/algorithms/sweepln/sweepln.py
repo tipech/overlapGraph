@@ -30,13 +30,18 @@ from sources.datastructs.datasets.timeline import Event, Timeline
 
 
 T = TypeVar('T')
+R = TypeVar('R')
 
 
-class SweepRunner(Generic[T]): # pylint: disable=E1136
+class SweepRunner(Generic[T, R]): # pylint: disable=E1136
   """
   Abstract class for defining an object that binds and unbinds to 
   and evaluates over a timeline with a specific algorithm, when the
   one-pass sweep-line algorithm is evaluated.
+
+  Generics:
+    T:  Objects type within the Timeline.
+    R:  The type of Results.
 
   Attributes:
     id:       The unique identifier for this SweepRunner.
@@ -67,7 +72,7 @@ class SweepRunner(Generic[T]): # pylint: disable=E1136
   id: str
   events: Dict[IntEnum, str]
   sweepln: 'Sweepln'
-  timeline: Timeline
+  timeline: Timeline[T]
   running: bool
 
   def __init__(self, events: Dict[IntEnum, str], id: str = ''):
@@ -116,7 +121,7 @@ class SweepRunner(Generic[T]): # pylint: disable=E1136
 
   ### Methods: Binding
 
-  def bind(self, sweepln: 'Sweepln', unbind: bool = False):
+  def bind(self, sweepln: 'Sweepln[T]', unbind: bool = False):
     """
     Bind or attach this SweepRunner to the given Sweepln.
     If the unbind flag is True, unbinds the previous Sweepln if this
@@ -146,7 +151,7 @@ class SweepRunner(Generic[T]): # pylint: disable=E1136
 
   ### Methods: Results
 
-  def results(self, **kwargs) -> T:
+  def results(self, **kwargs) -> R:
     """
     Returns the resulting values for the runner over
     the sweep-line algorithm.
@@ -162,7 +167,7 @@ class SweepRunner(Generic[T]): # pylint: disable=E1136
 
   ### Methods: Event Callbacks
 
-  def onevent(self, event: Event, **kwargs):
+  def onevent(self, event: Event[T], **kwargs):
     """
     Invoke the specified event in this runner for
     the Sweepln algorithm. This method calls the specific
@@ -210,9 +215,12 @@ class SweepRunner(Generic[T]): # pylint: disable=E1136
     self.sweepln[self.id] = self.results(**kwargs)
 
 
-class Sweepln:
+class Sweepln(Generic[T]): # pylint: disable=E1136
   """
   The generalized one-pass sweep-line algorithm.
+
+  Generics:
+    T:  Objects type within the Timeline.
 
   Attributes:
     runners: 
@@ -229,11 +237,11 @@ class Sweepln:
     Special:    __init__, __getitem__, __setitem__
     Instance:   put, evaluate
   """
-  runners: List[SweepRunner]
+  runners: List[SweepRunner[T, Any]]
   outputs: Dict[str, Any]
-  timeline: Timeline
+  timeline: Timeline[T]
 
-  def __init__(self, timeline: Timeline):
+  def __init__(self, timeline: Timeline[T]):
     """
     Initialize the sweep-line algorithm with
     an empty list of SweepRunner.
@@ -292,7 +300,7 @@ class Sweepln:
 
   ### Methods: SweepRunner
 
-  def put(self, runner: SweepRunner):
+  def put(self, runner: SweepRunner[T, Any]):
     """
     Adds the given SweepRunner to the list of runners for
     this sweep-line algorithm to bind and execute when evaluating the 
