@@ -23,7 +23,7 @@ from sources.datastructs.rigraphs.nxgraph import NxGraph
 from sources.datastructs.shapes.region import Region, RegionPair
 
 
-class NxGraphSweepCtor(Sweepln, RegionSweep, SweepRunner[NxGraph]):
+class NxGraphSweepCtor(RegionSweep, Sweepln[Region], SweepRunner[Region, NxGraph]):
   """
   Implementation of regional intersection graph construction based on a one-
   pass sweep-line algorithm. This algorithm builds an undirected, weighted
@@ -119,7 +119,7 @@ class NxGraphSweepCtor(Sweepln, RegionSweep, SweepRunner[NxGraph]):
 
   ### Methods: RegionSweep
 
-  def results(self) -> NxGraph: # pylint: disable=E0202
+  def results(self) -> NxGraph:
     """
     Returns the newly constructed intersection NetworkX graph,
     constructed from the RegionSet using the sweep-line algorithm.
