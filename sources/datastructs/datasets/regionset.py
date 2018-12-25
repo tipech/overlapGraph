@@ -54,7 +54,8 @@ class RegionSet(Iterable[Region], IOable):
   Methods:
     Special:        __init__, __getitem__, __iter__, 
                     __contains__
-    Instance:       get, add, overlaps, intersect, filter
+    Instance:       get, add, streamadd,
+                    overlaps, intersect, filter
     Class Methods:  from_random, from_dict
 
   Inherited from IOable:
@@ -233,6 +234,19 @@ class RegionSet(Iterable[Region], IOable):
       assert self.bounds.encloses(region)
 
     self.regions.append(region)
+
+  def streamadd(self, regions: Iterable[Region]):
+    """
+    Add all of the Regions returned from the Iterable.
+    The given Regions must have the same dimensionality as the number of
+    dimensions specified in this collection of Regions.
+
+    Args:
+      regions:  The Iterable of Regions to be appended
+                to this collection of Regions.
+    """
+    for region in regions:
+      self.add(region)
 
   ### Methods: Queries
 
