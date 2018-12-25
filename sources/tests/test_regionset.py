@@ -108,12 +108,10 @@ class TestRegionSet(TestCase):
       for region in regions:
         if 'intersect' in region.data:
           self.assertTrue('intersect' in newregionset[region.id].data)
-          self.assertTrue('intersect_' not in newregionset[region.id].data)
           self.assertTrue(all([isinstance(r, Region) for r in newregionset[region.id].data['intersect']]))
           self.assertListEqual(region.data['intersect'], newregionset[region.id].data['intersect'])
         if 'union' in region.data:
           self.assertTrue('union' in newregionset[region.id].data)
-          self.assertTrue('union_' not in newregionset[region.id].data)
           self.assertTrue(all([isinstance(r, Region) for r in newregionset[region.id].data['union']]))
           self.assertListEqual(region.data['union'], newregionset[region.id].data['union'])
 

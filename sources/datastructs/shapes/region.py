@@ -878,11 +878,9 @@ class Region(IOable):
         if dictobj['data'] is object.data:
           dictobj['data'] = dictobj['data'].copy()
         if 'intersect' in dictobj['data']:
-          dictobj['data']['intersect_'] = list(map(lambda r: r.id, dictobj['data']['intersect']))
-          del dictobj['data']['intersect']
+          dictobj['data']['intersect'] = list(map(lambda r: r.id, dictobj['data']['intersect']))
         if 'union' in dictobj['data']:
-          dictobj['data']['union_'] = list(map(lambda r: r.id, dictobj['data']['union']))
-          del dictobj['data']['union']
+          dictobj['data']['union'] = list(map(lambda r: r.id, dictobj['data']['union']))
         if len(dictobj['data']) == 0:
           del dictobj['data']
 
