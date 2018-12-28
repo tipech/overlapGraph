@@ -175,19 +175,37 @@ class RegionTimeln(MdTimeline[Region]):
   each Region results in a beginning and an ending event.
 
   Attributes:
+    dimension:
+      The number of dimensions within the 
+      multi-dimensional Region objects.
     regions:
       The RegionSet associated with this timeline.
 
   Methods:
+    Special:  __init__
     Instance: events
 
   Inherited from MdTimeline:
+    Attributes:
+      dimension
     Methods:
       Special:  __getitem__
     Abstract Methods:
       Instance: events
   """
   regions: 'RegionSet'
+
+  def __init__(self, regions: 'RegionSet'):
+    """
+    Initialize this timeline of Regions with the given RegionSet.
+
+    Args:
+      regions:
+        The RegionSet to bind to this
+        timeline of Regions.
+    """
+    self.regions = regions
+    self.dimension = regions.dimension
 
   def _events(self, dimension: int = 0) -> Iterator[RegionEvent]:
     """

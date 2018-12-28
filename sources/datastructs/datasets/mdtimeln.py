@@ -70,12 +70,18 @@ class MdTimeline(Timeline[T]): # pylint: disable=E1136
     T:  Contextual object associated
         with each MdEvent.
 
+  Attributes:
+    dimension:
+      The number of dimensions within the 
+      multi-dimensional contextual object.
+
   Methods:
     Special:  __getitem__
 
   Abstract Methods:
     Instance: events
   """
+  dimension: int
 
   def events(self, dimension: int = 0, **kwargs) -> Iterator[MdEvent[T]]:
     """
@@ -108,6 +114,8 @@ class MdTimeline(Timeline[T]): # pylint: disable=E1136
       A binded Timeline of sorted MdEvent along
       specified dimension.
     """
+    assert 0 <= dimension < self.dimension
+
     return MdTimelineOneDimen(self, dimension)
 
 
@@ -148,5 +156,6 @@ class MdTimelineOneDimen(Timeline[T]):
     """
     assert isinstance(self.timeline, MdTimeline)
     assert isinstance(self.dimension, int)
+    assert 0 <= self.dimension < self.timeline.dimension
 
     return self.timeline.events(self.dimension)
