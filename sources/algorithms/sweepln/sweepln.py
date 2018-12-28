@@ -1,7 +1,7 @@
 #!/usr/env/python
 
 """
-Generalized One-Pass Sweep-line Algorithm 
+Generalized One-Pass Sweep-line Algorithm
 
 This script implements a generalized version of a one-pass sweep-line
 algorithm. Implements Sweepln and SweepRunner (abstract) classes, where
@@ -13,12 +13,14 @@ Sweepln evaluates on each SweepRunner:
 - For each Events, execute: onevent
 - Finalize: onfinal
 
-SweepRunner is a base class for implementations that implement these
-handlers and maintain the necessary, associated internal state of the
+SweepRunner is an abstract class that defines the methods that
+handle and maintain the necessary, associated internal state of the
 evaluation.
 
-Classes:
+Abstract Classes:
 - SweepRunner
+
+Classes:
 - Sweepln
 """
 
@@ -71,7 +73,7 @@ class SweepRunner(Generic[T, R]): # pylint: disable=E1136
   """
   id: str
   events: Dict[IntEnum, str]
-  sweepln: 'Sweepln'
+  sweepln: 'Sweepln[T]'
   timeline: Timeline[T]
   running: bool
 
@@ -128,7 +130,7 @@ class SweepRunner(Generic[T, R]): # pylint: disable=E1136
     SweepRunner is currently binded to it.
 
     Args:
-      runtime:  The Sweepln for which its binded.
+      sweepln:  The Sweepln for which its binded.
       unbind:   Boolean flag whether or not to unbind the
                 previous Sweepln if this SweepRunner is
                 currently binded to it.
