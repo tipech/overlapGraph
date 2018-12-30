@@ -65,7 +65,7 @@ class SweepRunner(Generic[T, R]): # pylint: disable=E1136
   
   Methods:
     Special:  __init__
-    Instance: bind, unbind,
+    Instance: bind, unbind, hasevent,
               onevent, oninit, onfinal
 
   Abstract Methods:
@@ -166,6 +166,24 @@ class SweepRunner(Generic[T, R]): # pylint: disable=E1136
       The resulting values.
     """
     raise NotImplementedError
+
+  ### Methods: Queries
+
+  def hasevent(self, eventcb: str) -> bool:
+    """
+    Determine whether or not the given Event callback
+    exists within this SweepRunner.
+    
+    Args:
+      eventcb:
+        The name of the Event callback to determine if
+        the function exists within this SweepRunner.
+
+    Returns:
+      True:   If Event callback exists.
+      False:  Otherwise.
+    """
+    return hasattr(self, eventcb)
 
   ### Methods: Event Callbacks
 

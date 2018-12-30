@@ -60,7 +60,7 @@ class RegionSweep(SweepRunner[Region, List[RegionPair]]):
     
     Methods:
       Special:  __init__
-      Instance: bind, unbind, results,
+      Instance: bind, unbind, results, hasevent,
                 onevent, oninit, onfinal
 
     Overridden Methods:
