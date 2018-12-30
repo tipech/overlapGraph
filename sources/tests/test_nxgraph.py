@@ -90,7 +90,7 @@ class TestNxGraph(TestCase):
     regionset = RegionSet(dimension=dimension)
     regionset.streamadd(self.test_regions)
     nxgraphctor = NxGraphSweepCtor(regionset, 'nxgraphctor')
-    nxgraphctor.evaluate(dimension=0)
+    nxgraphctor.evaluate()
     nxgraph = nxgraphctor['nxgraphctor']
 
     with StringIO() as output:
@@ -112,7 +112,7 @@ class TestNxGraph(TestCase):
     regionset = RegionSet(dimension=dimension)
     regionset.streamadd(self.test_regions)
     nxgraphctor = NxGraphSweepCtor(regionset, 'nxgraphctor')
-    nxgraphctor.evaluate(dimension=0)
+    nxgraphctor.evaluate()
     nxgraphsweepln = nxgraphctor['nxgraphctor']
 
     G = nxgraph.G

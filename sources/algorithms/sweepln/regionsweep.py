@@ -180,9 +180,8 @@ class RegionSweep(SweepRunner[Region, List[RegionPair]]):
         The dimension to evaluate sweep-line over.
     """
     assert self.binded and not self.initialized
-    assert 'dimension' in kwargs
 
-    dimension = kwargs['dimension']
+    dimension = kwargs['dimension'] if 'dimension' in kwargs else 0
 
     assert isinstance(dimension, int)
     assert 0 <= dimension < self.regions.dimension
