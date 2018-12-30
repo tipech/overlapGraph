@@ -14,6 +14,7 @@ Classes:
 
 Types:
 - RegionPair
+- RegionIntxn
 """
 
 from dataclasses import asdict, astuple, dataclass, field
@@ -27,7 +28,8 @@ from sources.datastructs.shapes.interval import Interval
 from sources.helpers.randoms import NDArray, RandomFn, Randoms
 
 
-RegionPair = Tuple['Region', 'Region']
+RegionPair  = Tuple['Region', 'Region']
+RegionIntxn = List['Region']
 
 
 @dataclass
