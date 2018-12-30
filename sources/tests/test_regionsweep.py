@@ -31,8 +31,7 @@ class TestRegionSweep(TestCase):
 
     for i in range(regionset.dimension):
       expect = regionset.overlaps(i)
-      sweepln.evaluate(dimension=i)
-      actual = sweepln['RegionSweep']
+      actual = sweepln.evaluate(dimension=i)['RegionSweep']
       #for pair in expect: print(f'Expect:\t{pair[0]}\n\t{pair[1]}')
       #for pair in actual: print(f'Actual:\t{pair[0]}\n\t{pair[1]}')
       for pair in expect: self.assertTrue(pair in actual)
@@ -48,8 +47,7 @@ class TestRegionSweep(TestCase):
     for i in range(regionset.dimension):
       #print(f'Dimension: {i}')
       expect = regionset.overlaps(i)
-      sweepln.evaluate(dimension=i)
-      actual = sweepln['RegionSweep']
+      actual = sweepln.evaluate(dimension=i)['RegionSweep']
       #for pair in expect: print(f'Expect: {pair[0].id} {pair[1].id}')
       #for pair in actual: print(f'Actual: {pair[0].id} {pair[1].id}')
       for pair in expect: self.assertTrue(pair in actual)

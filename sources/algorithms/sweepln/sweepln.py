@@ -320,7 +320,7 @@ class Sweepln(Generic[T]): # pylint: disable=E1136
 
   ### Methods: Evaluation
 
-  def evaluate(self, **kwargs):
+  def evaluate(self, **kwargs) -> 'Sweepln[T]':
     """
     Execute the sweep-line algorithm over the attached Timeline.
     Invoke the SweepRunners' methods:
@@ -333,6 +333,9 @@ class Sweepln(Generic[T]): # pylint: disable=E1136
       kwargs: The arguments to be passed to runners' 
               oninit(), onevent() & onfinal(), 
               and timeline.events() methods.
+
+    Returns:
+      This Sweepln object.
     """
     assert len(self.runners) > 0
 
@@ -350,3 +353,5 @@ class Sweepln(Generic[T]): # pylint: disable=E1136
     # Finalization
     for runner in self.runners:
       runner.onfinal(**kwargs)
+
+    return self

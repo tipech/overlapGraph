@@ -90,8 +90,7 @@ class TestNxGraph(TestCase):
     regionset = RegionSet(dimension=dimension)
     regionset.streamadd(self.test_regions)
     nxgraphctor = NxGraphSweepCtor(regionset, 'nxgraphctor')
-    nxgraphctor.evaluate()
-    nxgraph = nxgraphctor['nxgraphctor']
+    nxgraph = nxgraphctor.evaluate()['nxgraphctor']
 
     with StringIO() as output:
       for json_graph in ['node_link', 'adjacency']:
@@ -112,8 +111,7 @@ class TestNxGraph(TestCase):
     regionset = RegionSet(dimension=dimension)
     regionset.streamadd(self.test_regions)
     nxgraphctor = NxGraphSweepCtor(regionset, 'nxgraphctor')
-    nxgraphctor.evaluate()
-    nxgraphsweepln = nxgraphctor['nxgraphctor']
+    nxgraphsweepln = nxgraphctor.evaluate()['nxgraphctor']
 
     G = nxgraph.G
     S = nxgraphsweepln.G
