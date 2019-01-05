@@ -8,3 +8,4 @@ from sources.datastructs import *
 from sources.experiments import *
 from sources.helpers import *
 from sources.tests import *
+from sources.visualize import *
