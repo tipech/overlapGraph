@@ -660,8 +660,8 @@ class Region(IOable):
     return randomng([npoints, self.dimension], self.lower, self.upper)
 
   def random_regions(self, nregions: int = 1, sizepc_range: 'Region' = None,
-                           posnrng: RandomFn = Randoms.uniform(),
-                           sizerng: RandomFn = Randoms.uniform(),
+                           posnrng: Union[RandomFn,List[RandomFn]] = Randoms.uniform(),
+                           sizerng: Union[RandomFn,List[RandomFn]] = Randoms.uniform(),
                            precision: int = None,
                            **kwargs) -> List['Region']:
     """
@@ -682,10 +682,12 @@ class Region(IOable):
       nregions:     The number of Regions to be generated.
       sizepc_range: The size range as a percentage of the
                     total Regions' dimensional length.
-      posnrng:      The random number generator for choosing
-                    the position of the Region.
-      sizerng:      The random number generator for choosing
-                    the size of the Region.
+      posnrng:      The random number generator or list of
+                    random number generator (per dimension)
+                    for choosing the position of the Region.
+      sizerng:      The random number generator or list of
+                    random number generator (per dimension)
+                    for choosing the size of the Region.
       precision:    The number of digits after the decimal
                     point for the lower and upper bounding
                     values, or None for arbitrary precision.
@@ -702,13 +704,22 @@ class Region(IOable):
 
     assert isinstance(sizepc_range, Region) and self.dimension == sizepc_range.dimension
     assert ndunit_region.encloses(sizepc_range)
-    assert isinstance(posnrng, Callable) and isinstance(sizerng, Callable)
+
+    if isinstance(posnrng, Callable):
+      posnrng = [posnrng] * self.dimension
+    if isinstance(sizerng, Callable):
+      sizerng = [sizerng] * self.dimension
+
+    for rng in [posnrng, sizerng]:
+      assert isinstance(rng, List) and \
+             all(isinstance(f, Callable) for f in rng) and \
+             len(rng) == self.dimension
 
     regions = []
     for _ in range(nregions):
       region = []
       for i, d in enumerate(self.dimensions):
-        dimension = d.random_intervals(1, sizepc_range[i], posnrng, sizerng, precision)[0]
+        dimension = d.random_intervals(1, sizepc_range[i], posnrng[i], sizerng[i], precision)[0]
         region.append(dimension)
       regions.append(Region.from_intervals(region, **kwargs))
     return regions
