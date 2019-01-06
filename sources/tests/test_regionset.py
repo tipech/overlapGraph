@@ -25,7 +25,7 @@ class TestRegionSet(TestCase):
 
   def _test_regionset(self, regionset: RegionSet, nregions: int, bounds: Region, regions: Iterable[Region]):
     #print(f'{regionset}')
-    self.assertEqual(regionset.size, nregions)
+    self.assertEqual(regionset.length, nregions)
     self.assertTrue(bounds.encloses(regionset.minbounds))
     for i, region in enumerate(regions):
       #print(f'{region}')

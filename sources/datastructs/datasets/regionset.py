@@ -46,14 +46,14 @@ class RegionSet(Iterable[Region], IOable):
                 Or None, for no outer bounding Region.
 
   Properties:
-    size:       The number of Regions in this collection.
+    length:     The number of Regions in this collection.
     minbound:   The computed minimum Region that encloses
                 all Regions in this collection within it.
     timeline:   RegionTimeln instance for this RegionSet.
 
   Methods:
     Special:        __init__, __getitem__, __iter__, 
-                    __contains__
+                    __len__, __contains__
     Instance:       get, add, streamadd,
                     overlaps, intersect, filter
     Class Methods:  from_random, from_dict
@@ -120,7 +120,7 @@ class RegionSet(Iterable[Region], IOable):
                 for r in self.regions])
 
   @property
-  def size(self) -> int:
+  def length(self) -> int:
     """
     Computes the number of Regions within this collection.
 
@@ -249,6 +249,16 @@ class RegionSet(Iterable[Region], IOable):
       self.add(region)
 
   ### Methods: Queries
+
+  def __len__(self) -> int:
+    """
+    Computes the number of Regions within this collection.
+    Alias for: self.length
+
+    Returns:
+      The number of Regions in this collection.
+    """
+    return self.length
 
   def __contains__(self, value: Union[Region, str]) -> bool:
     """
@@ -420,7 +430,7 @@ class RegionSet(Iterable[Region], IOable):
     """
     assert isinstance(object, RegionSet)
 
-    fieldnames = ['id', 'dimension', 'size', 'bounds', 'regions']
+    fieldnames = ['id', 'dimension', 'length', 'bounds', 'regions']
 
     if 'compact' in kwargs and kwargs['compact']:
       return dict(map(lambda f: (f, getattr(object, f)), fieldnames))
@@ -463,9 +473,9 @@ class RegionSet(Iterable[Region], IOable):
     if 'id' in object:
       id = object['id']
 
-    if 'size' in object:
-      assert isinstance(object['size'], int) and 0 < object['size']
-      assert len(object['regions']) == object['size']
+    if 'length' in object:
+      assert isinstance(object['length'], int) and 0 < object['length']
+      assert len(object['regions']) == object['length']
 
     if 'bounds' in object and object['bounds'] != None:
       regionset = cls(id, bounds=Region.from_object(object['bounds']))
