@@ -47,8 +47,11 @@ class RegionSet(Iterable[Region], IOable):
 
   Properties:
     length:     The number of Regions in this collection.
-    minbound:   The computed minimum Region that encloses
+    minbounds:  The computed minimum Region that encloses
                 all Regions in this collection within it.
+    bbox:       The Region that encloses all Regions in
+                this collection within it, either bounds
+                or minbounds.
     timeline:   RegionTimeln instance for this RegionSet.
 
   Methods:
@@ -141,6 +144,20 @@ class RegionSet(Iterable[Region], IOable):
     """
     assert self._instance_invariant
     return Region.from_union(self.regions)
+
+  @property
+  def bbox(self) -> Region:
+    """
+    Computes the Region that encloses all member
+    Regions in this collection within it. Either the
+    defined bounds or the computed minbounds.
+
+    Returns:
+      The Region that encloses all Regions
+      within this collection.
+    """
+    assert self._instance_invariant
+    return self.minbounds if self.bounds == None else self.bounds
 
   @property
   def timeline(self) -> 'RegionTimeln':
