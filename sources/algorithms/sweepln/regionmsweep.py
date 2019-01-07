@@ -29,7 +29,7 @@ from sortedcontainers import SortedSet
 from sources.algorithms.sweepln.msweepln import MSweepln, MSweepRunner
 from sources.algorithms.sweepln.sweepln import Sweepln, SweepRunner
 from sources.algorithms.sweepln.regionsweep import RegionSweep
-from sources.datastructs.datasets.timeline import Timeline
+from sources.datastructs.abstract.timeline import Timeline
 from sources.datastructs.datasets.regionset import RegionSet
 from sources.datastructs.datasets.regiontime import RegionEvent, RegionEvtKind
 from sources.datastructs.shapes.region import Region, RegionIntxn

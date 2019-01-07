@@ -17,7 +17,7 @@ from dataclasses import asdict, astuple, dataclass
 from typing import Any, Dict, Iterable, Iterator, List, Union
 from uuid import uuid4
 
-from sources.datastructs.datasets.ioable import IOable
+from sources.datastructs.abstract.ioable import IOable
 from sources.datastructs.datasets.regiontime import RegionEvtKind
 from sources.datastructs.shapes.interval import Interval
 from sources.datastructs.shapes.region import Region, RegionPair

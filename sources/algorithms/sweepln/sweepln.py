@@ -28,7 +28,7 @@ from enum import IntEnum
 from typing import Any, Dict, Generic, List, TypeVar
 from uuid import uuid4
 
-from sources.datastructs.datasets.timeline import Event, Timeline
+from sources.datastructs.abstract.timeline import Event, Timeline
 
 
 T = TypeVar('T')

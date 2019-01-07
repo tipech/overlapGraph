@@ -29,7 +29,7 @@ from typing import Any, Callable, Dict, Generic, Iterator, List, Tuple, TypeVar
 from networkx import networkx as nx
 from networkx.readwrite import json_graph
 
-from sources.datastructs.datasets.ioable import IOable
+from sources.datastructs.abstract.ioable import IOable
 from sources.datastructs.rigraphs.rigraph import RIGraph
 from sources.datastructs.shapes.region import Region, RegionPair
 

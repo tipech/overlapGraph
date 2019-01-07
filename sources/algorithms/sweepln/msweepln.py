@@ -28,8 +28,8 @@ Classes:
 
 from typing import Any, Dict, List, Iterator, TypeVar
 
+from sources.datastructs.abstract.timeline import Event, Timeline
 from sources.algorithms.sweepln.sweepln import Sweepln, SweepRunner
-from sources.datastructs.datasets.timeline import Event, Timeline
 
 
 T = TypeVar('T')

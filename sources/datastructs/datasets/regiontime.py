@@ -21,8 +21,8 @@ from typing import Iterator, List, Union
 
 from sortedcontainers import SortedList
 
-from sources.datastructs.datasets.mdtimeln import MdEvent, MdTimeline
-from sources.datastructs.datasets.timeline import Timeline
+from sources.datastructs.abstract.mdtimeln import MdEvent, MdTimeline
+from sources.datastructs.abstract.timeline import Timeline
 from sources.datastructs.shapes.region import Region
 
 try: # cyclic codependency
