@@ -7,6 +7,7 @@ This script implements the following tests:
   - test_create_interval
   - test_interval_properties
   - test_interval_conversion
+  - test_interval_hash
   - test_interval_contains
   - test_interval_overlaps
   - test_interval_intersect
@@ -76,6 +77,17 @@ class TestInterval(TestCase):
       #print(f'{interval}: dict={asdict(interval)}, tuple={astuple(interval)}')
       self.assertEqual(asdict(interval), {'lower': interval.lower, 'upper': interval.upper})
       self.assertEqual(astuple(interval), (interval.lower, interval.upper))
+
+  def test_interval_hash(self):
+    intervals = {}
+    for interval in self.test_intervals:
+      intervals[interval] = interval.length
+    for interval in self.test_intervals:
+      other = Interval(interval.lower, interval.upper)
+      self.assertTrue(interval in intervals)
+      self.assertEqual(interval.length, intervals[interval])
+      self.assertTrue(interval == other)
+      self.assertTrue(hash(interval) == hash(other))
 
   def test_interval_contains(self):
     interval = Interval(-5, 15)

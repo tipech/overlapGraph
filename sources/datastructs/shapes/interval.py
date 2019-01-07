@@ -47,7 +47,8 @@ class Interval(IOable):
               and upper bounding values.
 
   Methods:
-    Special:        __init__, __setattr__, __contains__
+    Special:        __init__, __setattr__,
+                    __hash__, __contains__
     Instance:       assign, contains, encloses,
                     overlaps, intersect, union,
                     random_values, random_intervals
@@ -164,6 +165,17 @@ class Interval(IOable):
       object.__setattr__(self, 'upper', float(upper))
 
   ### Methods: Queries
+
+  def __hash__(self) -> str:
+    """
+    Return the hash value for this object.
+    Two objects that compare equal must also have the same hash value,
+    but the reverse is not necessarily true.
+
+    Returns:
+      The hash value for this object.
+    """
+    return hash(astuple(self))
 
   def contains(self, value: float, inc_lower = True, inc_upper = True) -> bool:
     """
