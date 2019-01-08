@@ -13,6 +13,8 @@ pylint==2.1.1
 pyparsing==2.2.2
 python-dateutil==2.7.5
 pytz==2018.7
+rope==0.11.0
+Rx==1.6.1
 scipy==1.1.0
 six==1.11.0
 sortedcontainers==2.0.5
