@@ -44,11 +44,23 @@ class Event(Generic[T]): # pylint: disable=E1136
     context:  The object associated with this event.
 
   Methods:
+    Instance: setparams
     Special:  __eq__, __lt__
   """
   when: float
   kind: IntEnum
   context: T
+
+  def setparams(self, **kwargs):
+    """
+    Assigns the given keyword arguments as attributes to this Event.
+
+    Args:
+      kwargs:
+        The arguments to set as attributes.
+    """
+    for k, v in kwargs.items():
+      setattr(self, k, v)
 
   def __eq__(self, that: 'Event') -> bool:
     """
@@ -108,12 +120,9 @@ class Timeline(Generic[T]): # pylint: disable=E1136
     Instance: events
   """
 
-  def events(self, **kwargs) -> Iterator[Event[T]]:
+  def events(self) -> Iterator[Event[T]]:
     """
     Returns an Iterator of sorted Events.
-
-    Args:
-      kwargs: Additional arguments.
 
     Returns:
       An Iterator of sorted Events.

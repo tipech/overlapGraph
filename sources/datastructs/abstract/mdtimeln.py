@@ -55,6 +55,7 @@ class MdEvent(Event[T]): # pylint: disable=E1136
       context:  The object associated with this event.
 
     Methods:
+      Instance: setparams
       Special:  __eq__, __lt__
   """
   dimension: int
@@ -83,15 +84,13 @@ class MdTimeline(Timeline[T]): # pylint: disable=E1136
   """
   dimension: int
 
-  def events(self, dimension: int = 0, **kwargs) -> Iterator[MdEvent[T]]:
+  def events(self, dimension: int = 0) -> Iterator[MdEvent[T]]:
     """
     Returns an Iterator of sorted MdEvent along the given dimension.
 
     Args:
       dimension:
         The dimension along which MdEvents occur.
-      kwargs:
-        Additional arguments.
 
     Returns:
       An Iterator of sorted MdEvent along
@@ -144,12 +143,9 @@ class MdTimelineOneDimen(Timeline[T]):
   timeline  : MdTimeline[T]
   dimension : int
 
-  def events(self, **kwargs) -> Iterator[MdEvent[T]]:
+  def events(self) -> Iterator[MdEvent[T]]:
     """
     Returns an Iterator of sorted MdEvents.
-
-    Args:
-      kwargs: Additional arguments.
 
     Returns:
       An Iterator of sorted MdEvents.

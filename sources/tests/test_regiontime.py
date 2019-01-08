@@ -36,13 +36,18 @@ class TestRegionTimeln(TestCase):
     regions.add(Region([0, 0], [3, 5], 'A'))
     regions.add(Region([3, 1], [5, 5], 'B'))
     regions.add(Region([2, 5], [6, 5], 'C'))
+    bbox = regions.bbox
     oracle = [
-      [("Begin", 0, regions[0]), ("Begin", 2, regions[2]),
+      [("Init" , 0, bbox),
+       ("Begin", 0, regions[0]), ("Begin", 2, regions[2]),
        ("End"  , 3, regions[0]), ("Begin", 3, regions[1]),
-       ("End"  , 5, regions[1]), ("End"  , 6, regions[2])],
-      [("Begin", 0, regions[0]), ("Begin", 1, regions[1]),
+       ("End"  , 5, regions[1]), ("End"  , 6, regions[2]),
+       ("Done" , 6, bbox)],
+      [("Init" , 0, bbox),
+       ("Begin", 0, regions[0]), ("Begin", 1, regions[1]),
        ("End"  , 5, regions[0]), ("End"  , 5, regions[1]),
-       ("Begin", 5, regions[2]), ("End"  , 5, regions[2])]
+       ("Begin", 5, regions[2]), ("End"  , 5, regions[2]),
+       ("Done" , 5, bbox)]
     ]
 
     for d in range(regions.dimension):
@@ -50,4 +55,11 @@ class TestRegionTimeln(TestCase):
         #print(f'{d},{i}: {event}')
         self.assertEqual(event.kind, RegionEvtKind[oracle[d][i][0]])
         self.assertEqual(event.when, float(oracle[d][i][1]))
-        self.assertIs(event.context, oracle[d][i][2])
+        if event.kind == RegionEvtKind.Begin or event.kind == RegionEvtKind.End:
+          self.assertIs(event.context, oracle[d][i][2])
+          self.assertTrue(-1 <= event.order <= 1)
+        elif event.kind == RegionEvtKind.Init:
+          self.assertEqual(i, 0)
+          self.assertEqual(event.order, -2)
+        else:
+          self.assertEqual(event.order, 2)

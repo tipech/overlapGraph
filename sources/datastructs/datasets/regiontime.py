@@ -37,11 +37,15 @@ class RegionEvtKind(IntEnum):
   and ending event of an Region's interval in a particular dimension.
 
   Values:
+    Init:   Flag at the beginning of a sweep-line pass.
     Begin:  Flag for the beginning of a Region.
     End:    Flag for the ending of a Region.
+    Done:   Flag at the ending of a sweep-line pass.
   """
-  Begin = 0
-  End   = 1
+  Init  = 0
+  Begin = 1
+  End   = 2
+  Done  = 3
 
 
 @dataclass
@@ -74,6 +78,9 @@ class RegionEvent(MdEvent[Region]):
       dimension:  The dimension along which events occur.
     Overridden Attributes:
       kind:       The type of event.
+
+    Methods:
+      Instance:   setparams
     Overridden Methods:
       Special:    __eq__, __lt__
   """
@@ -107,6 +114,11 @@ class RegionEvent(MdEvent[Region]):
     self.order = (0 if context[dimension].length == 0 else 1) * \
                  (-1 if kind == RegionEvtKind.End else 1)
 
+    if kind == RegionEvtKind.Init:
+      self.order = -2
+    if kind == RegionEvtKind.Done:
+      self.order = 2
+
   def __eq__(self, that: 'RegionEvent') -> bool:
     """
     Determine if the RegionEvents are equal. Equality between RegionEvents
@@ -135,9 +147,11 @@ class RegionEvent(MdEvent[Region]):
 
     1. Lesser `when` first
     2. Order by 'order':
+        - -2: For sweep-line pass Init event
         - -1: For non-zero-length Region End events
         -  0: For zero-length Region Begin and End events
         -  1: For non-zero-length Region Begin events
+        -  2: For sweep-line pass Done event
     3. If same context then beginning events first, and
     4. Same 'order' order by context.id.
 
@@ -211,7 +225,8 @@ class RegionTimeln(MdTimeline[Region]):
     """
     Generator for converting the Regions within the RegionSet to an
     Iterator, unordered sequence of RegionEvents; a beginning RegionEvent
-    and a ending RegionEvent for each Region.
+    and a ending RegionEvent for each Region. Prepend and append Init
+    and Done RegionEvent for beginning and ending bbox Region.
 
     Args:
       dimension:
@@ -222,6 +237,10 @@ class RegionTimeln(MdTimeline[Region]):
       beginning and ending events).
     """
     assert 0 <= dimension < self.regions.dimension
+
+    bbox = self.regions.bbox
+    yield RegionEvent(RegionEvtKind.Init, bbox[dimension].lower, bbox, dimension)
+    yield RegionEvent(RegionEvtKind.Done, bbox[dimension].upper, bbox, dimension)
 
     for region in self.regions:
       yield RegionEvent(RegionEvtKind.Begin, region[dimension].lower, region, dimension)
