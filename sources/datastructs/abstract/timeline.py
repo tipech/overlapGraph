@@ -21,17 +21,20 @@ from enum import IntEnum
 from functools import total_ordering
 from typing import Generic, Iterator, TypeVar
 
+from sources.datastructs.abstract.pubsub import Event
+
 
 T = TypeVar('T')
 
 
 @dataclass
 @total_ordering
-class TEvent(Generic[T]): # pylint: disable=E1136
+class TEvent(Event[T]):
   """
-  Data class for an event. Each event has a value for when the event occurs,
-  a specified event type, and the object associated with the event as context.
-  Events should be ordered by when the event occurs and the kind of event.
+  Data class for an timeline event. Each timeline event has a value for when
+  the event occurs, a specified event type, and the object associated with
+  the event as context. Timeline Events should be ordered by when the
+  event occurs and the kind of event.
 
   Generics:
     T:  Contextual object associated
@@ -44,23 +47,17 @@ class TEvent(Generic[T]): # pylint: disable=E1136
     context:  The object associated with this event.
 
   Methods:
-    Instance: setparams
     Special:  __eq__, __lt__
+
+  Inherited from Event:
+    Attributes:
+      kind:     The type of event.
+      context:  The object associated with this event.
+
+    Methods:
+      Instance: setparams
   """
   when: float
-  kind: IntEnum
-  context: T
-
-  def setparams(self, **kwargs):
-    """
-    Assigns the given keyword arguments as attributes to this Event.
-
-    Args:
-      kwargs:
-        The arguments to set as attributes.
-    """
-    for k, v in kwargs.items():
-      setattr(self, k, v)
 
   def __eq__(self, that: 'TEvent[T]') -> bool:
     """

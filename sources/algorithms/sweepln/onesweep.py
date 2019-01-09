@@ -12,18 +12,16 @@ Classes:
 - OneSweep
 """
 
-from typing import Generic, TypeVar
+from typing import TypeVar
 
-from rx import Observer
-from rx.subjects import Subject
-
+from sources.datastructs.abstract.pubsub import Publisher
 from sources.datastructs.abstract.timeline import Timeline
 
 
 T = TypeVar('T')
 
 
-class OneSweep(Generic[T]): # pylint: disable=E1136
+class OneSweep(Publisher[T]):
   """
   The generalized one-pass sweep-line algorithm.
 
@@ -31,43 +29,51 @@ class OneSweep(Generic[T]): # pylint: disable=E1136
     T:  Objects type within the Timeline.
 
   Attributes:
-    subject:
-      The Rx Subject that the Observers can
-      subscribe to.
     timeline:
-      The Timeline to evaluate the 
-      algorithm over.
+      The Timeline to evaluate the algorithm over.
 
   Methods:
-    Special:    __init__
-    Instance:   subscribe, evaluate
+    Special:  __init__
+    Instance: evaluate
+
+  Inherited from Publisher:
+    Attributes:
+      subject:
+        The Subject for Observers to subscribe to.
+      events:
+        The registered Event types (kind).
+        If None, no register Event types.
+      eventmapper:
+        A lambda method that maps each Event to a method
+        name for a specific event handler.
+      strict:
+        Boolean flag whether or not to raise an exception
+        when Event handler not found. True, raises
+        exception; False, otherwise. Default: False.
+
+    Methods:
+      Special:  __init__
+      Instance: subscribe, broadcast,
+                on_next, on_completed, on_error
+
+    Overridden Methods:
+      Special:  __init__
   """
-  subject:  Subject
   timeline: Timeline[T]
 
-  def __init__(self, timeline: Timeline[T]):
+  def __init__(self, timeline: Timeline[T], *args, **kwargs):
     """
     Initialize the sweep-line algorithm.
 
     Args:
       timeline:
         The Timeline to evaluate the algorithm over.
+      args, kwargs:
+        Additional arguments.
     """
-    self.subject = Subject()
+    Publisher.__init__(self, *args, **kwargs)
+
     self.timeline = timeline
-
-  ### Methods: Subscribe
-
-  def subscribe(self, observer: Observer):
-    """
-    Subscribes the given Observer to the subject of this sweep-line
-    algorithm to receive notifications when evaluating the input timeline.
-
-    Args:
-      observer:
-        The Observer to subscribe to this OneSweep.
-    """
-    self.subject.subscribe(observer)
 
   ### Methods: Evaluation
 
@@ -83,7 +89,6 @@ class OneSweep(Generic[T]): # pylint: disable=E1136
               to event.setparams().
     """
     for event in self.timeline.events(*args):
-      event.setparams(**kwargs)
-      self.subject.on_next(event)
+      self.broadcast(event, **kwargs)
 
-    self.subject.on_completed()
+    self.on_completed()
