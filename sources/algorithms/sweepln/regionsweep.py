@@ -12,7 +12,7 @@ Classes:
 - RegionSweep
 """
 
-from enum import IntEnum
+from enum import IntEnum, auto, unique
 from typing import Dict, Iterator
 
 from rx import Observer
@@ -21,10 +21,11 @@ from rx.subjects import Subject
 from sources.algorithms.sweepln.onesweep import OneSweep
 from sources.datastructs.abstract.pubsub import Event, Publisher
 from sources.datastructs.datasets.regionset import RegionSet
-from sources.datastructs.datasets.regiontime import RegionEvent
+from sources.datastructs.datasets.regiontime import RegionEvent, RegionEvtKind
 from sources.datastructs.shapes.region import Region, RegionPair
 
 
+@unique
 class RegionSweepEvtKind(IntEnum):
   """
   Extended RegionEvtKind enumerator.
@@ -38,11 +39,11 @@ class RegionSweepEvtKind(IntEnum):
     Done:       At the ending of a sweep-line pass.
     Intersect:  When two or more Regions intersect.
   """
-  Init      = 0
-  Begin     = 1
-  End       = 2
-  Done      = 3
-  Intersect = 4
+  Init      = RegionEvtKind.Init.value
+  Begin     = RegionEvtKind.Begin.value
+  End       = RegionEvtKind.End.value
+  Done      = RegionEvtKind.Done.value
+  Intersect = auto()
 
 
 class RegionSweep(OneSweep[Region]):
