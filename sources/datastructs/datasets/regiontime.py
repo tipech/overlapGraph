@@ -15,7 +15,7 @@ Classes:
 """
 
 from dataclasses import dataclass, field
-from enum import IntEnum
+from enum import IntEnum, auto, unique
 from functools import total_ordering
 from typing import Iterator, List, Union
 
@@ -31,6 +31,7 @@ except ImportError:
   pass
 
 
+@unique
 class RegionEvtKind(IntEnum):
   """
   Enumeration of allowed event `kind` values. The values denote the beginning
@@ -42,10 +43,10 @@ class RegionEvtKind(IntEnum):
     End:    Flag for the ending of a Region.
     Done:   Flag at the ending of a sweep-line pass.
   """
-  Init  = 0
-  Begin = 1
-  End   = 2
-  Done  = 3
+  Init  = auto()
+  Begin = auto()
+  End   = auto()
+  Done  = auto()
 
 
 @dataclass
