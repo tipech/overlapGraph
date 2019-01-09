@@ -14,14 +14,10 @@ from typing import List, Tuple
 from unittest import TestCase
 
 from sources.algorithms.rigctor.nxgsweepctor import NxGraphSweepCtor
+from sources.algorithms.sweepln.regionsweep import RegionSweep
 from sources.datastructs.datasets.regionset import RegionSet
 from sources.datastructs.rigraphs.nxgraph import NxGraph
 from sources.datastructs.shapes.region import Region, RegionPair
-
-
-def reset_output(output: StringIO) -> StringIO:
-  output.seek(0)
-  return output
 
 
 class TestNxGraph(TestCase):
@@ -35,6 +31,17 @@ class TestNxGraph(TestCase):
     self.test_regions.append(Region([1, 5], [3, 7]))
     self.test_regions.append(Region([-5, 5], [1, 7]))
     self.test_regions.append(Region([-5, 5], [2, 7]))
+
+  def _reset_output(self, output: StringIO) -> StringIO:
+    output.seek(0)
+    return output
+
+  def _nxgraphctor(self, regions: RegionSet) -> NxGraph:
+    regionsweep = RegionSweep(regions)
+    nxgraphctor = NxGraphSweepCtor(regions)
+    regionsweep.subscribe(nxgraphctor)
+    regionsweep.evaluate()
+    return nxgraphctor.results
 
   def naive_ctor(self, nxgraph: NxGraph):
     for region in self.test_regions:
@@ -78,29 +85,28 @@ class TestNxGraph(TestCase):
       for json_graph in ['node_link', 'adjacency']:
         options = { 'json_graph': json_graph, 'compact': True }
         output.truncate(0)
-        nxgraph.to_output(reset_output(output), options=options)
+        nxgraph.to_output(self._reset_output(output), options=options)
         #json_output = output.getvalue()
         #print(f'{json_graph}:')
         #print(f'{json_output}')
-        newgraph = NxGraph.from_source(reset_output(output))
+        newgraph = NxGraph.from_source(self._reset_output(output))
         self.check_nxgraph(nxgraph, newgraph)
 
   def test_nxgraph_sweepctor(self):
     dimension = self.test_regions[0].dimension
     regionset = RegionSet(dimension=dimension)
     regionset.streamadd(self.test_regions)
-    nxgraphctor = NxGraphSweepCtor(regionset, 'nxgraphctor')
-    nxgraph = nxgraphctor.evaluate()['nxgraphctor']
+    nxgraph = self._nxgraphctor(regionset)
 
     with StringIO() as output:
       for json_graph in ['node_link', 'adjacency']:
         options = { 'json_graph': json_graph, 'compact': True }
         output.truncate(0)
-        nxgraph.to_output(reset_output(output), options=options)
+        nxgraph.to_output(self._reset_output(output), options=options)
         #json_output = output.getvalue()
         #print(f'{json_graph}:')
         #print(f'{json_output}')
-        newgraph = NxGraph.from_source(reset_output(output))
+        newgraph = NxGraph.from_source(self._reset_output(output))
         self.check_nxgraph(nxgraph, newgraph)
 
   def test_nxgraph_sweepctor_graph(self):
@@ -110,8 +116,7 @@ class TestNxGraph(TestCase):
 
     regionset = RegionSet(dimension=dimension)
     regionset.streamadd(self.test_regions)
-    nxgraphctor = NxGraphSweepCtor(regionset, 'nxgraphctor')
-    nxgraphsweepln = nxgraphctor.evaluate()['nxgraphctor']
+    nxgraphsweepln = self._nxgraphctor(regionset)
 
     G = nxgraph.G
     S = nxgraphsweepln.G
