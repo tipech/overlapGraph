@@ -1,119 +1,151 @@
-#!/usr/env/python
+#!/usr/bin/env python
 
 """
 One-Pass Sweep-line Algorithm for RegionSet
 
 This script implements an one-pass sweep-line algorithm over a set of Regions.
-Implements RegionSweep class that executes the specific details and actions
-of the sweep-line algorithm, when encountering a Begin or End event.
+Implements RegionSweep class that executes the specific details and actions of
+the sweep-line algorithm, when encountering: Init, Begin, End or Done events.
 
 Classes:
+- RegionSweepEvtKind
 - RegionSweep
 """
 
-from typing import Any, Dict, Iterator, List, Tuple
+from enum import IntEnum
+from typing import Dict, Iterator
 
-from sources.algorithms.sweepln.sweepln import Sweepln, SweepRunner
+from rx import Observer
+from rx.subjects import Subject
+
+from sources.algorithms.sweepln.onesweep import OneSweep
+from sources.datastructs.abstract.pubsub import Event, Publisher
 from sources.datastructs.datasets.regionset import RegionSet
-from sources.datastructs.datasets.regiontime import RegionEvent, RegionEvtKind, RegionTimeln
+from sources.datastructs.datasets.regiontime import RegionEvent
 from sources.datastructs.shapes.region import Region, RegionPair
 
 
-class RegionSweep(SweepRunner[Region, List[RegionPair]]):
+class RegionSweepEvtKind(IntEnum):
+  """
+  Extended RegionEvtKind enumerator.
+  Enumeration of allowed event `kind` values. The values denote the beginning
+  and ending event of an Region's interval in a particular dimension.
+
+  Values:
+    Init:       At the beginning of a sweep-line pass.
+    Begin:      At the beginning of a Region.
+    End:        At the ending of a Region.
+    Done:       At the ending of a sweep-line pass.
+    Intersect:  When two or more Regions intersect.
+  """
+  Init      = 0
+  Begin     = 1
+  End       = 2
+  Done      = 3
+  Intersect = 4
+
+
+class RegionSweep(OneSweep[Region]):
   """
   Class for implementing an one-pass sweep-line algorithm over a set of
-  Regions. Binds to and is evaluated by the one-pass sweep-line algorithm
+  Regions. Subscribes to and is evaluated by the one-pass sweep-line algorithm
   along a dimension on the set of Regions.
 
   Attributes:
+    regions:    The RegionSet to evaluate sweep-line over.
     dimension:  The dimension to evaluate sweep-line over.
     actives:    The active Regions during sweep-line.
-    overlaps:   The resulting pairwise overlaps.
 
   Properties:
-    regions:    The RegionSet to evaluate sweep-line over.
+    is_active:  Boolean flag for whether or not if the
+                sweep-line algorithm is initialized.
 
   Methods:
-    Special:    __init__
-    Instance:   findoverlaps, addoverlap,
-                onbegin, onend
+    Special:  __init__
+    Instance: broadcast, findintersects, on_init,
+              on_begin, on_intersect, on_end, on_done
 
-  Inherited from SweepRunner:
-
+  Inherited from OneSweep:
     Attributes:
-      id:       The unique identifier for this SweepRunner.
-      events:   Mapping of event kinds to event callbacks.
-      sweepln:  The Sweepln algorithm for which its binded.
-      timeline: The Timeline to evaluate sweep-line over.
-      running:  Boolean flag for whether or not the
-                algorithm is currently running.
+      subject:
+        The Subject for Observers to subscribe to.
+      events:
+        The registered Event types (kind).
+        If None, no register Event types.
+      eventmapper:
+        A lambda method that maps each Event to a method
+        name for a specific event handler.
+      strict:
+        Boolean flag whether or not to raise an exception
+        when Event handler not found. True, raises
+        exception; False, otherwise. Default: False.
+      timeline:
+        The Timeline to evaluate the algorithm over.
 
-    Properties:
-      binded:
-        Whether or not this SweepRunner is binded to a
-        Sweepln algorithm. True if it is binded, False 
-        otherwise.
-      initialized:
-        Whether or not this SweepRunner has been
-        initialized for evaluation. True if it is
-        initialized, False otherwise.
-    
     Methods:
       Special:  __init__
-      Instance: bind, unbind, results, hasevent,
-                onevent, oninit, onfinal
+      Instance: subscribe, broadcast, evaluate,
+                on_next, on_completed, on_error
 
     Overridden Methods:
-      Special:  __init__
-      Instance: results, oninit, onfinal
+      Special:  __init__, broadcast
   """
-  dimension: int
-  actives  : Dict[str, Region]
-  overlaps : List[RegionPair]
+  regions:    RegionSet
+  dimension:  int
+  actives:    Dict[str, Region]
 
-  def __init__(self, id: str = ''):
+  def __init__(self, regions: RegionSet):
     """
-    Initialize this RegionSweep with the default values.
+    Initialize the sweep-line algorithm over Regions.
 
     Args:
-      id:
-        The unique identifier for this Region
-        Randonly generated with UUID v4, if not provided.
+      regions:
+        The set of Regions to evaluate
+        sweep-line algorithm over.
     """
+    OneSweep.__init__(self, regions.timeline, RegionSweepEvtKind)
+
+    self.regions = regions
     self.dimension = None
+    self.actives = None
+    self.subscribe(self)
 
-    SweepRunner.__init__(self, {
-      RegionEvtKind.Begin: 'onbegin',
-      RegionEvtKind.End: 'onend'
-    }, id)
-
-  ### Properties: Getters
+  ### Properties
 
   @property
-  def regions(self) -> RegionSet:
+  def is_active(self) -> bool:
     """
-    Returns the set of Regions associated with the RegionSweep.
+    Determine whether or not if the sweep-line algorithm is initialized.
 
     Returns:
-      The linked RegionSet object.
+      True:   If the algorithm is initialized
+      False:  Otherwise.
     """
-    assert isinstance(self.timeline, RegionTimeln)
+    return isinstance(self.dimension, int) and self.dimension >= 0
 
-    if self.timeline != None:
-      return self.timeline.regions
-    else:
-      return None
+  ### Methods: Broadcast
 
-  ### Methods: Overlaps
+  def broadcast(self, event: Event, **kwargs):
+    """
+    Broadcast the given event to subscribed Observers.
 
-  def findoverlaps(self, region: Region) -> Iterator[RegionPair]:
+    Args:
+      event:
+        The Event to be broadcasted.
+      kwargs:
+        The parameters to be added or modified
+        within the given Event.
+    """
+    depth = len(self.actives) if self.actives else None
+
+    OneSweep.broadcast(self, event, depth=depth)
+
+  ### Methods: Intersections
+
+  def findintersects(self, region: Region) -> Iterator[RegionPair]:
     """
     Return an iterator over all the pairs of overlaps between the
     given Region and the currently active Regions, as RegionPairs.
-
-    This method should be overridden in subclasses to implement,
-    the finding of overlaps using more efficient means, such as:
-    via an Interval tree.
 
     Args:
       region:   The Region to find pairs of overlaps with
@@ -123,138 +155,89 @@ class RegionSweep(SweepRunner[Region, List[RegionPair]]):
       An iterator over all the pairs of overlaps between
       the Region and currently active Regions.
     """
-    for _, activeregion in self.actives.items():
-      if region.overlaps(activeregion):
-        yield (activeregion, region)
+    for _, active in self.actives.items():
+      assert active[self.dimension].lower <= region[self.dimension].lower
+      if region.overlaps(active):
+        yield (active, region)
 
-  def addoverlap(self, regionpair: RegionPair):
+  ### Methods: Event Handlers
+
+  def on_init(self, event: RegionEvent):
     """
-    Add the given pair of Regions to the list of overlaps.
-    This method should be overridden in subclasses to implement:
-
-    - The addition of a edge in the intersection graph
-      between the given region pair and labelling of the
-      edge with additional information,
-    - The addition of a branch in the interval tree for the
-      given region pair and labelling of the branch with
-      additional information.
-
-    Args:
-      regionpair:
-        The pair of Regions to add as overlaps.
-    """
-    self.overlaps.append(regionpair)
-
-  ### Methods: Results
-
-  def results(self) -> List[RegionPair]:
-    """
-    Returns the list of overlapping Regions found in the RegionSet
-    using the sweep-line algorithm.
-
-    Returns:
-      The list of overlapping Regions.
-    """
-    return self.overlaps
-
-  ### Methods: Event Callbacks
-
-  def oninit(self, **kwargs):
-    """
-    Initialize the evaluation of the RegionSet in the RegionSweep
-    with the given dimensions. This method should be overridden in
-    subclasses to implement:
-
-    - The creation of nodes in the intersection
-      graph for each Region.
-    - The creation of the interval tree root in
-      preparation for the addition of branches and
-      leaves associated with the overlaps.
-
-    Args:
-      kwargs:
-        Additional arguments
-
-    kwargs:
-      dimension:
-        The dimension to evaluate sweep-line over.
-    """
-    assert self.binded and not self.initialized
-
-    dimension = kwargs['dimension'] if 'dimension' in kwargs else 0
-
-    assert isinstance(dimension, int)
-    assert 0 <= dimension < self.regions.dimension
-
-    self.dimension = dimension
-    self.actives   = {}
-    self.overlaps  = []
-
-    SweepRunner.oninit(self)
-
-  def onbegin(self, event: RegionEvent, **kwargs):
-    """
-    When a Begin event is encountered in the RegionSweep evaluation, 
-    this method is invoked with that RegionEvent. Invokes findoverlaps and
-    addoverlap methods from here. Adds the newly active Region to the
-    set of active Regions.
+    Handle Event when sweep-line algorithm initializes.
 
     Args:
       event:
-        The beginning event when encountered
-        in the RegionSweep evaluation.
-      kwargs:
-        Additional arguments (unused)
+        The initialization Event.
     """
-    assert isinstance(event, RegionEvent)
-    assert self.binded and self.initialized
-    
-    region = event.context
-    assert region.id not in self.actives
+    assert not self.is_active
+    assert event.kind == RegionSweepEvtKind.Init
+    assert 0 <= event.dimension < self.regions.dimension
 
-    for regionpair in self.findoverlaps(region):
-      self.addoverlap(regionpair)
+    self.dimension = event.dimension
+    self.actives = {}
+
+  def on_begin(self, event: RegionEvent):
+    """
+    Handle Event when sweep-line algorithm encounters
+    the beginning of a Region.
+
+    Args:
+      event:
+        The Region beginning Event.
+    """
+    assert self.is_active
+    assert event.kind == RegionSweepEvtKind.Begin
+    assert event.context.id not in self.actives
+
+    region = event.context
+
+    for a, b in self.findintersects(region):
+      self.on_intersect(Event(RegionSweepEvtKind.Intersect, (a, b)))
 
     self.actives[region.id] = region
 
-  def onend(self, event: RegionEvent, **kwargs):
+  def on_intersect(self, event: Event[RegionPair]):
     """
-    When an End event is encountered in the RegionSweep evaluation, this
-    method is invoked with that RegionEvent. Removes the ending Region from
-    to the set of active Regions.
+    Handle and broadcast Event when sweep-line algorithm encounters
+    the two or more Regions intersecting.
 
     Args:
       event:
-        The ending event when encountered
-        in the RegionSweep evaluation.
-      kwargs:
-        Additional arguments (unused)
+        The intersecting Regions Event.
     """
-    assert isinstance(event, RegionEvent)
-    assert self.binded and self.initialized
+    assert self.is_active
+    assert event.kind == RegionSweepEvtKind.Intersect
 
-    region_id = event.context.id
-    assert region_id in self.actives
-    del self.actives[region_id]
+    self.broadcast(event)
 
-  def onfinal(self, **kwargs):
+  def on_end(self, event: RegionEvent):
     """
-    Finalize the RegionSweep for the Sweepln algorithm.
-    When the Sweepln evaluation is complete, the sweep is complete,
-    this method is invoked. Uninitialized this RegionSweep.
-    Sets the result value with the computed overlapping Regions.
+    Handle Event when sweep-line algorithm encounters
+    the ending of a Region.
 
-    This method should be overridden in subclasses to implement:
-    
-    - Any cleanup or finalization routines for data 
-      structures, such as intersection graphs and
-      interval trees
-    - Initialize the next pass on a different dimension
-      for multi-pass single-threaded versions of the 
-      sweep-line algorithm.
+    Args:
+      event:
+        The Region ending Event.
     """
-    assert self.binded and self.initialized
+    assert self.is_active
+    assert event.kind == RegionSweepEvtKind.End
+    assert event.context.id in self.actives
+
+    region = event.context
+
+    del self.actives[region.id]
+
+  def on_done(self, event: RegionEvent):
+    """
+    Handle Event when sweep-line algorithm completes.
+
+    Args:
+      event:
+        The completion Event.
+    """
+    assert self.is_active
+    assert event.kind == RegionSweepEvtKind.Done
     assert len(self.actives) == 0
 
     self.dimension = None
-    SweepRunner.onfinal(self)
