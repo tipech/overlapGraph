@@ -10,7 +10,7 @@ representation of a point along the Timeline with a particular event type or
 of Events.
 
 Classes:
-- Event
+- TEvent
 
 Abstract Classes:
 - Timeline
@@ -27,7 +27,7 @@ T = TypeVar('T')
 
 @dataclass
 @total_ordering
-class Event(Generic[T]): # pylint: disable=E1136
+class TEvent(Generic[T]): # pylint: disable=E1136
   """
   Data class for an event. Each event has a value for when the event occurs,
   a specified event type, and the object associated with the event as context.
@@ -62,7 +62,7 @@ class Event(Generic[T]): # pylint: disable=E1136
     for k, v in kwargs.items():
       setattr(self, k, v)
 
-  def __eq__(self, that: 'Event') -> bool:
+  def __eq__(self, that: 'TEvent[T]') -> bool:
     """
     Determine if the Events are equal. Equality between Events
     is defined as equal when, kind and same context. Return True if
@@ -77,12 +77,12 @@ class Event(Generic[T]): # pylint: disable=E1136
       True:   If the two Events equal.
       False:  Otherwise.
     """
-    return all([isinstance(that, Event),
+    return all([isinstance(that, TEvent),
                 self.when == that.when,
                 self.kind == that.kind,
                 self.context is that.context])
 
-  def __lt__(self, that: 'Event') -> bool:
+  def __lt__(self, that: 'TEvent[T]') -> bool:
     """
     Determine if this Event is less than the given other Event;
     ordered before the other Event.
@@ -120,7 +120,7 @@ class Timeline(Generic[T]): # pylint: disable=E1136
     Instance: events
   """
 
-  def events(self) -> Iterator[Event[T]]:
+  def events(self) -> Iterator[TEvent[T]]:
     """
     Returns an Iterator of sorted Events.
 

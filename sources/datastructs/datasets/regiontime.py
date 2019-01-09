@@ -10,7 +10,7 @@ results in a beginning and an ending event.
 
 Classes:
 - RegionEvtKind   (IntEnum)
-- RegionEvent     (MdEvent)
+- RegionEvent     (MdTEvent)
 - RegionTimeln    (MdTimeline)
 """
 
@@ -21,7 +21,7 @@ from typing import Iterator, List, Union
 
 from sortedcontainers import SortedList
 
-from sources.datastructs.abstract.mdtimeln import MdEvent, MdTimeline
+from sources.datastructs.abstract.mdtimeln import MdTEvent, MdTimeline
 from sources.datastructs.abstract.timeline import Timeline
 from sources.datastructs.shapes.region import Region
 
@@ -50,7 +50,7 @@ class RegionEvtKind(IntEnum):
 
 @dataclass
 @total_ordering
-class RegionEvent(MdEvent[Region]):
+class RegionEvent(MdTEvent[Region]):
   """
   Data class for an event. Each event has a value for when the event occurs,
   a specified event type, the Region context associated with the event, and
@@ -70,7 +70,7 @@ class RegionEvent(MdEvent[Region]):
   Methods:
     Special:    __init__, __eq__, __lt__
 
-  Inherited from MdEvent:
+  Inherited from MdTEvent:
     Attributes:
       when:       The value (time) along the sorted
                   timeline, where this event takes place.
@@ -221,57 +221,12 @@ class RegionTimeln(MdTimeline[Region]):
     self.regions = regions
     self.dimension = regions.dimension
 
-  def _events(self, dimension: int = 0) -> Iterator[RegionEvent]:
-    """
-    Generator for converting the Regions within the RegionSet to an
-    Iterator, unordered sequence of RegionEvents; a beginning RegionEvent
-    and a ending RegionEvent for each Region. Prepend and append Init
-    and Done RegionEvent for beginning and ending bbox Region.
-
-    Args:
-      dimension:
-        The dimension along which RegionEvents occur.
-
-    Returns:
-      An Iterator of unordered RegionEvents (Region
-      beginning and ending events).
-    """
-    assert 0 <= dimension < self.regions.dimension
-
-    bbox = self.regions.bbox
-    yield RegionEvent(RegionEvtKind.Init, bbox[dimension].lower, bbox, dimension)
-    yield RegionEvent(RegionEvtKind.Done, bbox[dimension].upper, bbox, dimension)
-
-    for region in self.regions:
-      yield RegionEvent(RegionEvtKind.Begin, region[dimension].lower, region, dimension)
-      yield RegionEvent(RegionEvtKind.End,   region[dimension].upper, region, dimension)
-
-  def _sorted_events(self, dimension: int = 0) -> Iterator[RegionEvent]:
-    """
-    Generator for converting the Regions within the RegionSet to an iterator,
-    ordered sequence of RegionEvents; a beginning RegionEvent and
-    a ending RegionEvent for each Region. The output from self._events method
-    is passed to the SortedList data structure that outputs a sorted iterator.
-
-    Args:
-      dimension:
-        The dimension along which RegionEvents occur.
-
-    Returns:
-      An Iterator of sorted RegionEvents (Region
-      beginning and ending events).
-    """
-    return SortedList(self._events(dimension)).__iter__()
-
   def events(self, dimension: int = 0) -> Iterator[RegionEvent]:
     """
     Returns an iterator of sorted RegionEvents generated from a set of
     RegionSet along a given dimension. Each Region maps to two RegionEvents:
     a beginning RegionEvent and a ending RegionEvent.
 
-    Alias for:
-      self._sorted_events(dimension)
-
     Args:
       dimension:
         The dimension along which RegionEvents occur.
@@ -280,4 +235,15 @@ class RegionTimeln(MdTimeline[Region]):
       An Iterator of sorted RegionEvents (Region
       beginning and ending events).
     """
-    return self._sorted_events(dimension)
+    assert 0 <= dimension < self.regions.dimension
+
+    def _events() -> Iterator[RegionEvent]:
+      bbox = self.regions.bbox
+      yield RegionEvent(RegionEvtKind.Init, bbox[dimension].lower, bbox, dimension)
+      yield RegionEvent(RegionEvtKind.Done, bbox[dimension].upper, bbox, dimension)
+
+      for region in self.regions:
+        yield RegionEvent(RegionEvtKind.Begin, region[dimension].lower, region, dimension)
+        yield RegionEvent(RegionEvtKind.End,   region[dimension].upper, region, dimension)
+
+    return iter(SortedList(_events()))
