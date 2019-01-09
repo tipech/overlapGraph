@@ -16,6 +16,7 @@ Abstract Classes:
 - Timeline
 """
 
+from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass
 from enum import IntEnum
 from functools import total_ordering
@@ -116,7 +117,9 @@ class Timeline(Generic[T]): # pylint: disable=E1136
   Abstract Methods:
     Instance: events
   """
+  __metaclass__ = ABCMeta
 
+  @abstractmethod
   def events(self) -> Iterator[TEvent[T]]:
     """
     Returns an Iterator of sorted Events.

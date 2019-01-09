@@ -20,6 +20,7 @@ Abstract Classes:
 - MdTimeline (Timeline)
 """
 
+from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass
 from functools import total_ordering
 from typing import Generic, Iterator, TypeVar
@@ -32,7 +33,7 @@ T = TypeVar('T')
 
 @dataclass
 @total_ordering
-class MdTEvent(TEvent[T]): # pylint: disable=E1136
+class MdTEvent(TEvent[T]):
   """
   Data class for a mult-dimensional event. Each event has a value for when 
   the event occurs, a specified event type, the object associated with the
@@ -62,7 +63,7 @@ class MdTEvent(TEvent[T]): # pylint: disable=E1136
 
 
 @dataclass
-class MdTimeline(Timeline[T]): # pylint: disable=E1136
+class MdTimeline(Timeline[T]):
   """
   Abstract data class is a multi-dimensional timeline that provides
   methods for generating sorted Iterators of MdEvents.
@@ -82,8 +83,10 @@ class MdTimeline(Timeline[T]): # pylint: disable=E1136
   Abstract Methods:
     Instance: events
   """
+  __metaclass__ = ABCMeta
   dimension: int
 
+  @abstractmethod
   def events(self, dimension: int = 0) -> Iterator[MdTEvent[T]]:
     """
     Returns an Iterator of sorted MdTEvent along the given dimension.

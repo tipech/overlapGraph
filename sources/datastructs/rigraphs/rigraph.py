@@ -24,6 +24,7 @@ Classes:
 - RIGraph
 """
 
+from abc import ABCMeta, abstractmethod
 from typing import Any, Generic, Iterator, Tuple, TypeVar
 
 from sources.datastructs.shapes.region import Region, RegionPair
@@ -31,7 +32,7 @@ from sources.datastructs.shapes.region import Region, RegionPair
 
 Graph = TypeVar('Graph')
 
-class RIGraph(Generic[Graph]):
+class RIGraph(Generic[Graph], metaclass=ABCMeta):
   """
   Abstract class for a graph representation of intersecting and overlapping
   Regions. Provides a programming interface for accessing and constructing
@@ -65,6 +66,7 @@ class RIGraph(Generic[Graph]):
   G: Graph
   dimension: int
 
+  @abstractmethod
   def __init__(self, dimension: int, graph: Graph = None):
     """
     Initializes the graph representation of intersecting
@@ -97,6 +99,7 @@ class RIGraph(Generic[Graph]):
     return self.G
 
   @property
+  @abstractmethod
   def regions(self) -> Iterator[Tuple[str, Region]]:
     """
     Returns an Iterator of Regions within the graph
@@ -109,6 +112,7 @@ class RIGraph(Generic[Graph]):
     raise NotImplementedError
 
   @property
+  @abstractmethod
   def overlaps(self) -> Iterator[Tuple[str, str, Region]]:
     """
     Returns an Iterator of overlapping Regions within the graph
@@ -123,6 +127,7 @@ class RIGraph(Generic[Graph]):
 
   ### Methods: Insertion
 
+  @abstractmethod
   def put_region(self, region: Region):
     """
     Add the given Region as a newly created node in the graph.
@@ -133,6 +138,7 @@ class RIGraph(Generic[Graph]):
     """
     raise NotImplementedError
 
+  @abstractmethod
   def put_overlap(self, overlap: RegionPair, **kwargs):
     """
     Add the given pair of Regions as a newly created edge in the graph.

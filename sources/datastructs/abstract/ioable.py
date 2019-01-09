@@ -13,6 +13,7 @@ Classes:
 - IOable
 """
 
+from abc import ABCMeta, abstractmethod
 from ast import literal_eval as PythonParse
 from io import TextIOBase
 from json import JSONEncoder
@@ -21,7 +22,7 @@ from json import loads as JSONParse
 from typing import Any, Callable, Dict
 
 
-class IOable:
+class IOable(metaclass=ABCMeta):
   """
   Abstract base class for (de)serialization of objects that implement
   this class (subclasses) to/from various serialized data formats: JSON and
@@ -79,6 +80,7 @@ class IOable:
   ### Class Methods: Serialization
 
   @classmethod
+  @abstractmethod
   def to_object(cls, object: 'IOable', format: str = 'json', **kwargs) -> Any:
     """
     Abstract Definition.
@@ -102,6 +104,7 @@ class IOable:
   ### Class Methods: Deserialization
 
   @classmethod
+  @abstractmethod
   def from_object(cls, object: Any, **kwargs) -> 'IOable':
     """
     Abstract Definition.
