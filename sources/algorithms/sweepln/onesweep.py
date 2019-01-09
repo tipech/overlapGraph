@@ -14,29 +14,24 @@ Classes:
 
 from typing import TypeVar
 
-from sources.datastructs.abstract.pubsub import Publisher
+from sources.algorithms.sweepln.sweepln import Sweepln
 from sources.datastructs.abstract.timeline import Timeline
 
 
 T = TypeVar('T')
 
 
-class OneSweep(Publisher[T]):
+class OneSweep(Sweepln[T]):
   """
   The generalized one-pass sweep-line algorithm.
 
   Generics:
     T:  Objects type within the Timeline.
 
-  Attributes:
-    timeline:
-      The Timeline to evaluate the algorithm over.
-
   Methods:
-    Special:  __init__
     Instance: evaluate
 
-  Inherited from Publisher:
+  Inherited from Sweepln:
     Attributes:
       subject:
         The Subject for Observers to subscribe to.
@@ -50,30 +45,17 @@ class OneSweep(Publisher[T]):
         Boolean flag whether or not to raise an exception
         when Event handler not found. True, raises
         exception; False, otherwise. Default: False.
+      timeline:
+        The Timeline to evaluate the algorithm over.
 
     Methods:
       Special:  __init__
       Instance: subscribe, broadcast,
                 on_next, on_completed, on_error
 
-    Overridden Methods:
-      Special:  __init__
+    Abstract Methods:
+      Instance: evaluate
   """
-  timeline: Timeline[T]
-
-  def __init__(self, timeline: Timeline[T], *args, **kwargs):
-    """
-    Initialize the sweep-line algorithm.
-
-    Args:
-      timeline:
-        The Timeline to evaluate the algorithm over.
-      args, kwargs:
-        Additional arguments.
-    """
-    Publisher.__init__(self, *args, **kwargs)
-
-    self.timeline = timeline
 
   ### Methods: Evaluation
 
