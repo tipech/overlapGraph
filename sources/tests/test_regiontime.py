@@ -22,8 +22,8 @@ class TestRegionTimeln(TestCase):
     self.assertEqual(RegionEvtKind.End,   RegionEvtKind['End'])
     
     region = Region([0]*2, [1]*2)
-    lower = [RegionEvent(RegionEvtKind.Begin, d.lower, region, i) for i, d in enumerate(region.dimensions)]
-    upper = [RegionEvent(RegionEvtKind.End,   d.upper, region, i) for i, d in enumerate(region.dimensions)]
+    lower = [RegionEvent(RegionEvtKind.Begin, region, i) for i in range(region.dimension)]
+    upper = [RegionEvent(RegionEvtKind.End,   region, i) for i in range(region.dimension)]
 
     self.assertTrue(all([RegionEvtKind.Begin == e.kind for e in lower]))
     self.assertTrue(all([RegionEvtKind.End   == e.kind for e in upper]))

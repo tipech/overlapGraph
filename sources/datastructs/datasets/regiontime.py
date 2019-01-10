@@ -88,17 +88,15 @@ class RegionEvent(MdTEvent[Region]):
   kind:   RegionEvtKind
   order:  int
 
-  def __init__(self, kind: Union[RegionEvtKind, str], when: float,
+  def __init__(self, kind: Union[RegionEvtKind, str],
                      context: Region, dimension: int = 0):
     """
-    Initialize a new RegionEvent with the specified kind, when, context & 
+    Initialize a new RegionEvent with the specified kind, context & 
     dimension. The kind of event can be the RegionEvtKind enum value or
     the string name equivalent.
 
     Args:
       kind:       The type of event: Begin or End of Region.
-      when:       The value/time along the sorted dimension
-                  where this event takes place.
       context:    The Region associated with this event.
       dimension:  The dimension along which events occur.
     """
@@ -109,9 +107,14 @@ class RegionEvent(MdTEvent[Region]):
     assert 0 <= dimension < context.dimension
 
     self.kind = kind
-    self.when = when
     self.context = context
     self.dimension = dimension
+
+    if kind == RegionEvtKind.Init or kind == RegionEvtKind.Begin:
+      self.when = context[dimension].lower
+    if kind == RegionEvtKind.Done or kind == RegionEvtKind.End:
+      self.when = context[dimension].upper
+
     self.order = (0 if context[dimension].length == 0 else 1) * \
                  (-1 if kind == RegionEvtKind.End else 1)
 
@@ -240,11 +243,11 @@ class RegionTimeln(MdTimeline[Region]):
 
     def _events() -> Iterator[RegionEvent]:
       bbox = self.regions.bbox
-      yield RegionEvent(RegionEvtKind.Init, bbox[dimension].lower, bbox, dimension)
-      yield RegionEvent(RegionEvtKind.Done, bbox[dimension].upper, bbox, dimension)
+      yield RegionEvent(RegionEvtKind.Init, bbox, dimension)
+      yield RegionEvent(RegionEvtKind.Done, bbox, dimension)
 
       for region in self.regions:
-        yield RegionEvent(RegionEvtKind.Begin, region[dimension].lower, region, dimension)
-        yield RegionEvent(RegionEvtKind.End,   region[dimension].upper, region, dimension)
+        yield RegionEvent(RegionEvtKind.Begin, region, dimension)
+        yield RegionEvent(RegionEvtKind.End,   region, dimension)
 
     return iter(SortedList(_events()))
