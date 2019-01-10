@@ -383,7 +383,7 @@ class RegionSet(Iterable[Region], IOable):
 
     return regionset
 
-  ## CLass Methods: Generators
+  ### CLass Methods: Generators
 
   @classmethod
   def from_random(cls, nregions: int, bounds: Region,
