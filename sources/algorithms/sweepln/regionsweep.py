@@ -13,7 +13,7 @@ Classes:
 """
 
 from enum import IntEnum, auto, unique
-from typing import Dict, Iterator
+from typing import Dict, Iterator, List, Union
 
 from rx import Observer
 from rx.subjects import Subject
@@ -22,7 +22,10 @@ from sources.algorithms.sweepln.onesweep import OneSweep
 from sources.datastructs.abstract.pubsub import Event, Publisher
 from sources.datastructs.datasets.regionset import RegionSet
 from sources.datastructs.datasets.regiontime import RegionEvent, RegionEvtKind
-from sources.datastructs.shapes.region import Region, RegionPair
+from sources.datastructs.shapes.region import Region, RegionIntxn, RegionPair
+
+
+Regions = Union[Region, RegionIntxn, RegionPair]
 
 
 @unique
@@ -46,7 +49,7 @@ class RegionSweepEvtKind(IntEnum):
   Intersect = auto()
 
 
-class RegionSweep(OneSweep[Region]):
+class RegionSweep(OneSweep[Regions]):
   """
   Class for implementing an one-pass sweep-line algorithm over a set of
   Regions. Subscribes to and is evaluated by the one-pass sweep-line algorithm
@@ -56,6 +59,8 @@ class RegionSweep(OneSweep[Region]):
     regions:    The RegionSet to evaluate sweep-line over.
     dimension:  The dimension to evaluate sweep-line over.
     actives:    The active Regions during sweep-line.
+    bbuffer:    The broadcast buffer to ensure correct,
+                broadcast ordering.
 
   Properties:
     is_active:  Boolean flag for whether or not if the
@@ -94,6 +99,7 @@ class RegionSweep(OneSweep[Region]):
   regions:    RegionSet
   dimension:  int
   actives:    Dict[str, Region]
+  bbuffer:    List[Event[Regions]]
 
   def __init__(self, regions: RegionSet):
     """
@@ -109,6 +115,7 @@ class RegionSweep(OneSweep[Region]):
     self.regions = regions
     self.dimension = None
     self.actives = None
+    self.bbuffer = []
     self.subscribe(self)
 
   ### Properties
@@ -126,7 +133,7 @@ class RegionSweep(OneSweep[Region]):
 
   ### Methods: Broadcast
 
-  def broadcast(self, event: Event, **kwargs):
+  def broadcast(self, event: Event[Regions], **kwargs):
     """
     Broadcast the given event to subscribed Observers.
 
@@ -137,9 +144,19 @@ class RegionSweep(OneSweep[Region]):
         The parameters to be added or modified
         within the given Event.
     """
-    depth = len(self.actives) if self.actives else None
+    kwargs = {
+      'depth': len(self.actives) if self.actives else 0,
+      'actives': list(self.actives.keys()),
+      **kwargs
+    }
 
-    OneSweep.broadcast(self, event, depth=depth)
+    OneSweep.broadcast(self, event, **kwargs)
+
+    for buffered_events in self.bbuffer:
+      OneSweep.broadcast(self, buffered_events, **kwargs)
+
+    if len(self.bbuffer) > 0:
+      self.bbuffer = []
 
   ### Methods: Intersections
 
@@ -200,8 +217,8 @@ class RegionSweep(OneSweep[Region]):
 
   def on_intersect(self, event: Event[RegionPair]):
     """
-    Handle and broadcast Event when sweep-line algorithm encounters
-    the two or more Regions intersecting.
+    Handle Event when sweep-line algorithm encounters the two or
+    more Regions intersecting. Buffers Events for broadcasting.
 
     Args:
       event:
@@ -210,7 +227,7 @@ class RegionSweep(OneSweep[Region]):
     assert self.is_active
     assert event.kind == RegionSweepEvtKind.Intersect
 
-    self.broadcast(event)
+    self.bbuffer.append(event)
 
   def on_end(self, event: RegionEvent):
     """
