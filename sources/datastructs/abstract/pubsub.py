@@ -211,13 +211,7 @@ class Publisher(Subscriber[T]):
       observer:
         The Observer to subscribe to.
     """
-    if observer == self:
-      def on_next(event: Event[T]):
-        Subscriber.on_next(self, event)
-
-      self.subject.subscribe(on_next)
-    else:
-      self.subject.subscribe(observer)
+    self.subject.subscribe(observer)
 
   ### Methods: Broadcast
 
@@ -232,7 +226,7 @@ class Publisher(Subscriber[T]):
         The parameters to be added or modified
         within the given Event.
     """
-    if hasattr(event, 'source') and event.source == self:
+    if hasattr(event, 'source') and event.source is self:
       return
 
     event.setparams(source=self, **kwargs)
@@ -249,6 +243,9 @@ class Publisher(Subscriber[T]):
       event:
         The next Event to occur.
     """
+    if hasattr(event, 'source') and event.source is self:
+      return
+
     try:
       if self.events:
         Subscriber.on_next(self, event)

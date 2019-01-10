@@ -71,6 +71,7 @@ class OneSweep(Sweepln[T]):
               to event.setparams().
     """
     for event in self.timeline.events(*args):
-      self.broadcast(event, **kwargs)
+      event.setparams(**kwargs)
+      self.on_next(event)
 
     self.on_completed()
