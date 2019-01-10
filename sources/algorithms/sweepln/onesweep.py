@@ -49,7 +49,7 @@ class OneSweep(Sweepln[T]):
         The Timeline to evaluate the algorithm over.
 
     Methods:
-      Special:  __init__
+      Special:  __init__, __call__
       Instance: subscribe, broadcast,
                 on_next, on_completed, on_error
 

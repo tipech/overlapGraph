@@ -86,7 +86,7 @@ class RegionSweep(OneSweep[RegionGrp]):
         The Timeline to evaluate the algorithm over.
 
     Methods:
-      Special:  __init__
+      Special:  __init__, __call__
       Instance: subscribe, broadcast, evaluate,
                 on_next, on_completed, on_error
 

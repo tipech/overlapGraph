@@ -33,7 +33,7 @@ class Sweepln(Publisher[T], metaclass=ABCMeta):
       The Timeline to evaluate the algorithm over.
 
   Methods:
-    Special:  __init__
+    Special:  __init__, __call__
 
   Abstract Methods:
     Instance: evaluate
@@ -92,3 +92,14 @@ class Sweepln(Publisher[T], metaclass=ABCMeta):
               to event.setparams().
     """
     raise NotImplementedError
+
+  def __call__(self, *args, **kwargs):
+    """
+    Execute the sweep-line algorithm over the attached Timeline.
+    Broadcast Events to the Observers. Alias for: self.evaluate().
+
+    Args:
+      args, kwargs:
+        Arguments to be passed to evaluate().
+    """
+    self.evaluate(*args, **kwargs)
