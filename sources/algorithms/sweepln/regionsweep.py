@@ -72,6 +72,10 @@ class RegionSweep(OneSweep[RegionGrp]):
     Attributes:
       subject:
         The Subject for Observers to subscribe to.
+      presubj:
+        The Subject for Observers to subscribe to, whose
+        on_next are always called before, self.on_next
+        and the subjects' on_next.
       events:
         The registered Event types (kind).
         If None, no register Event types.

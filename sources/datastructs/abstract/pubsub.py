@@ -159,6 +159,10 @@ class Publisher(Subscriber[T]):
   Attributes:
     subject:
       The Subject for Observers to subscribe to.
+    presubj:
+      The Subject for Observers to subscribe to, whose
+      on_next are always called before, self.on_next
+      and the subjects' on_next.
 
   Methods:
     Special:  __init__
@@ -185,7 +189,8 @@ class Publisher(Subscriber[T]):
     Abstract Methods:
       Instance: on_completed, on_error
   """
-  subject:      Subject
+  subject: Subject
+  presubj: Subject
 
   def __init__(self, events: Union[IntEnum, None] = None):
     """
@@ -198,11 +203,12 @@ class Publisher(Subscriber[T]):
     """
     Subscriber.__init__(self, events)
 
+    self.presubj = Subject()
     self.subject = Subject()
 
   ### Methods: Subscribe
 
-  def subscribe(self, observer: Observer):
+  def subscribe(self, observer: Observer, before: bool = False):
     """
     Subscribes the given Observer to the subject of
     this Publisher when an Event occurs.
@@ -210,8 +216,13 @@ class Publisher(Subscriber[T]):
     Args:
       observer:
         The Observer to subscribe to.
+      before:
+        Boolean flag for whether or not to receive Event
+        before self.on_next or after self.on_next.
+        True, for before; False, otherwise.
     """
-    self.subject.subscribe(observer)
+    subject = self.presubj if before else self.subject
+    subject.subscribe(observer)
 
   ### Methods: Broadcast
 
@@ -246,6 +257,8 @@ class Publisher(Subscriber[T]):
     if hasattr(event, 'source') and event.source is self:
       return
 
+    self.presubj.on_next(event)
+
     try:
       if self.events:
         Subscriber.on_next(self, event)
@@ -257,6 +270,7 @@ class Publisher(Subscriber[T]):
     The Event handler when no more Events. Subscription completed.
     Broadcast completion Event.
     """
+    self.presubj.on_completed()
     self.subject.on_completed()
 
   def on_error(self, exception: Exception):
@@ -268,4 +282,5 @@ class Publisher(Subscriber[T]):
       exception:
         The error that occurred.
     """
+    self.presubj.on_error(exception)
     self.subject.on_error(exception)
