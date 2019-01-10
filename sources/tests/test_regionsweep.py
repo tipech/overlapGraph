@@ -12,6 +12,7 @@ from typing import List
 from unittest import TestCase
 
 from sources.algorithms.sweepln.regionsweep import RegionSweep
+from sources.algorithms.sweepln.regionsweepdebug import RegionSweepDebug
 from sources.algorithms.sweepln.regionsweepovlps import RegionSweepOverlaps
 from sources.datastructs.datasets.regionset import RegionSet
 from sources.datastructs.shapes.region import Region, RegionPair
@@ -22,6 +23,7 @@ class TestRegionSweep(TestCase):
   def _evaluate_regionsweep(self, regions: RegionSet, i: int) -> List[RegionPair]:
     regionsweep = RegionSweep(regions)
     regionsweepovlps = RegionSweepOverlaps()
+    #regionsweep.subscribe(RegionSweepDebug())
     regionsweep.subscribe(regionsweepovlps)
     regionsweep.evaluate(i)
     return regionsweepovlps.results
