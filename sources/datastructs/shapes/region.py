@@ -15,6 +15,7 @@ Classes:
 Types:
 - RegionPair
 - RegionIntxn
+- RegionGrp
 """
 
 from dataclasses import asdict, astuple, dataclass, field
@@ -30,6 +31,7 @@ from sources.helpers.randoms import NDArray, RandomFn, Randoms
 
 RegionPair  = Tuple['Region', 'Region']
 RegionIntxn = List['Region']
+RegionGrp   = Union['Region', RegionIntxn, RegionPair]
 
 
 @dataclass

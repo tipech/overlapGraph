@@ -14,16 +14,16 @@ Classes:
 - NxGraphSweepCtor
 """
 
-from typing import Tuple, Union
+from typing import Tuple
 
 from sources.algorithms.sweepln.regionsweep import RegionSweepEvtKind
 from sources.datastructs.abstract.pubsub import Event, Subscriber
 from sources.datastructs.datasets.regionset import RegionSet
 from sources.datastructs.rigraphs.nxgraph import NxGraph
-from sources.datastructs.shapes.region import Region, RegionPair
+from sources.datastructs.shapes.region import Region, RegionGrp, RegionPair
 
 
-class NxGraphSweepCtor(Subscriber[Union[Region, RegionPair]]):
+class NxGraphSweepCtor(Subscriber[RegionGrp]):
   """
   Implementation of regional intersection graph construction based on a one-
   pass sweep-line algorithm. This algorithm builds an undirected, weighted

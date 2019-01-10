@@ -13,7 +13,7 @@ Classes:
 """
 
 from enum import IntEnum, auto, unique
-from typing import Dict, Iterator, List, Union
+from typing import Dict, Iterator, List
 
 from rx import Observer
 from rx.subjects import Subject
@@ -22,10 +22,7 @@ from sources.algorithms.sweepln.onesweep import OneSweep
 from sources.datastructs.abstract.pubsub import Event, Publisher
 from sources.datastructs.datasets.regionset import RegionSet
 from sources.datastructs.datasets.regiontime import RegionEvent, RegionEvtKind
-from sources.datastructs.shapes.region import Region, RegionIntxn, RegionPair
-
-
-Regions = Union[Region, RegionIntxn, RegionPair]
+from sources.datastructs.shapes.region import Region, RegionGrp, RegionPair
 
 
 @unique
@@ -49,7 +46,7 @@ class RegionSweepEvtKind(IntEnum):
   Intersect = auto()
 
 
-class RegionSweep(OneSweep[Regions]):
+class RegionSweep(OneSweep[RegionGrp]):
   """
   Class for implementing an one-pass sweep-line algorithm over a set of
   Regions. Subscribes to and is evaluated by the one-pass sweep-line algorithm
@@ -99,7 +96,7 @@ class RegionSweep(OneSweep[Regions]):
   regions:    RegionSet
   dimension:  int
   actives:    Dict[str, Region]
-  bbuffer:    List[Event[Regions]]
+  bbuffer:    List[Event[RegionGrp]]
 
   def __init__(self, regions: RegionSet):
     """
@@ -133,7 +130,7 @@ class RegionSweep(OneSweep[Regions]):
 
   ### Methods: Broadcast
 
-  def broadcast(self, event: Event[Regions], **kwargs):
+  def broadcast(self, event: Event[RegionGrp], **kwargs):
     """
     Broadcast the given event to subscribed Observers.
 

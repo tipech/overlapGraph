@@ -11,15 +11,15 @@ Classes:
 - RegionSweepOverlaps
 """
 
-from typing import Tuple, Union
+from typing import Tuple
 
 from sources.algorithms.sweepln.regionsweep import RegionSweepEvtKind
 from sources.datastructs.abstract.pubsub import Event, Subscriber
 from sources.datastructs.datasets.regiontime import RegionEvent
-from sources.datastructs.shapes.region import Region, RegionPair
+from sources.datastructs.shapes.region import RegionGrp
 
 
-class RegionSweepDebug(Subscriber[Union[Region, RegionPair]]):
+class RegionSweepDebug(Subscriber[RegionGrp]):
   """
   Class that computes a list of all of the pairwise overlapping Regions 
   using the one-pass sweep-line algorithm, through a subscription 
@@ -64,7 +64,7 @@ class RegionSweepDebug(Subscriber[Union[Region, RegionPair]]):
 
   ### Methods: Event Handlers
 
-  def on_next(self, event: Event[Union[Region, RegionPair]]):
+  def on_next(self, event: Event[RegionGrp]):
     """
     Print Events for sweep-line algorithm.
 
