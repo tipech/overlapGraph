@@ -63,7 +63,7 @@ class RegionSweepDebug(Subscriber[RegionGrp]):
     print(f'{self.counter}:')
     print(f'\tkind: {event.kind.name}')
     print(f'\tdepth: {event.depth}')
-    print(f'\tactives: {[k[0:8] for k in event.actives]}')
+    print(f'\tactives: {[k[0:8] for k in event.actives.keys()]}')
 
     if isinstance(event, RegionEvent):
       print(f'\tdimension: {event.dimension}, ' +

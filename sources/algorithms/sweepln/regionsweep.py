@@ -117,7 +117,7 @@ class RegionSweep(OneSweep[RegionGrp]):
     """
     kwargs = {
       'depth': len(self.actives) if self.actives else 0,
-      'actives': list(self.actives.keys()),
+      'actives': self.actives,
       **kwargs
     }
 
