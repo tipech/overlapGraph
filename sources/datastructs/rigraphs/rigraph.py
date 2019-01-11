@@ -3,11 +3,10 @@
 """
 Regional Intersection Graph -- Definition
 
-This script defines the programming interface for representing
-and constructing a graph of intersecting or overlapping
-multidimensional Regions. This data structure represents each Region
-as a node within the graph and intersecting Regions between them as
-edges within the graph.
+Defines the programming interface for representing and constructing a graph of
+intersecting or overlapping multidimensional Regions. This data structure
+represents each Region as a node within the graph and intersecting Regions
+between them as edges within the graph.
 
 Note:
   Within this script, we make the distinction between
@@ -20,7 +19,7 @@ Note:
     It is more general. An overlap is an intersect,
     but an intersect is not an overlap.
 
-Classes:
+Abstract Classes:
 - RIGraph
 """
 
@@ -32,10 +31,12 @@ from sources.datastructs.shapes.region import Region, RegionPair
 
 Graph = TypeVar('Graph')
 
-class RIGraph(Generic[Graph], metaclass=ABCMeta):
+class RIGraph(Generic[Graph]): # pylint: disable=E1136
   """
-  Abstract class for a graph representation of intersecting and overlapping
-  Regions. Provides a programming interface for accessing and constructing
+  Abstract Class
+
+  A graph representation of intersecting and overlapping Regions.
+  Provides a programming interface for accessing and constructing
   the data representation.
 
   Attributes:
@@ -43,26 +44,11 @@ class RIGraph(Generic[Graph], metaclass=ABCMeta):
       The internal graph representation or implementation
       for a graph of intersecting or overlapping Regions.
     dimension:
-      The number of dimensions in all of the Regions 
+      The number of dimensions in all of the Regions
       within the graph; the dimensionality of all Regions.
-
-  Abstract Properties:
-    graph:
-      The internal graph representation or implementation
-      for a graph of intersecting or overlapping Regions.
-    regions:
-      An Iterator of Regions within the graph along with
-      the Region ID or node ID within the graph.
-    overlaps:
-      An Iterator of overlapping Regions within the graph
-      along with the two Region IDs or node IDs within the
-      graph for which the two Regions are involved.
-
-  Abstract Methods:
-    Special:    __init__
-    Instance:   put_region
-                put_overlap
   """
+  __metaclass__ = ABCMeta
+
   G: Graph
   dimension: int
 
@@ -74,7 +60,7 @@ class RIGraph(Generic[Graph], metaclass=ABCMeta):
 
     Args:
       dimension:
-        The number of dimensions in all of the Regions 
+        The number of dimensions in all of the Regions
         within the graph; the dimensionality of all Regions.
       graph:
         The internal graph representation or implementation
@@ -89,7 +75,7 @@ class RIGraph(Generic[Graph], metaclass=ABCMeta):
     """
     The internal graph representation or implementation for
     a graph of intersecting or overlapping Regions.
-    
+
     Alias for:
       self.G
 

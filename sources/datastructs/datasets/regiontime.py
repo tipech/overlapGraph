@@ -3,15 +3,15 @@
 """
 Event Timeline for Region Sets
 
-This script implements the RegionTimeln class along with its helper
-classes RegionEvtKind and RegionEvent. The RegionTimeln class generates a
-sorted iteration of events for each dimension in the Regions, each Region
-results in a beginning and an ending event.
+Implements the RegionTimeln class along with its helper classes RegionEvtKind
+and RegionEvent. The RegionTimeln class generates a sorted iteration of events
+for each dimension in the Regions, each Region results in a beginning and an
+ending event.
 
 Classes:
-- RegionEvtKind   (IntEnum)
-- RegionEvent     (MdTEvent)
-- RegionTimeln    (MdTimeline)
+- RegionEvtKind
+- RegionEvent
+- RegionTimeln
 """
 
 from dataclasses import dataclass, field
@@ -37,6 +37,9 @@ class RegionEvtKind(IntEnum):
   Enumeration of allowed event `kind` values. The values denote the beginning
   and ending event of an Region's interval in a particular dimension.
 
+  Extends:
+    IntEnum
+
   Values:
     Init:   Flag at the beginning of a sweep-line pass.
     Begin:  Flag for the beginning of a Region.
@@ -53,37 +56,26 @@ class RegionEvtKind(IntEnum):
 @total_ordering
 class RegionEvent(MdTEvent[Region]):
   """
-  Data class for an event. Each event has a value for when the event occurs,
-  a specified event type, the Region context associated with the event, and
-  dimension along which the event occurs. Events are ordered by when the event
-  occurs, the kind of event and if the Region is zero-length or non-zero length
-  along the timeline dimension.
+  An event of a Region.
+
+  Each event has a value for when the event occurs, a specified event type,
+  the Region context associated with the event, and dimension along which the
+  event occurs. Events are ordered by when the event occurs, the kind of event
+  and if the Region is zero-length or non-zero length along the timeline
+  dimension.
+
+  Extends:
+    MdTEvent[Region]
 
   Attributes:
-    when:       The value (time) along the sorted
-                dimension, where this event takes place.
-    kind:       The type of event: Begin or End of Region.
-    context:    The Region associated with this event.
-    dimension:  The dimension along which events occur.
-    order:      The sort priority of the events with the
-                same 'when', occurs at the same time.
+    kind:   The type of event: Begin or End of Region, and
+            Init or Done of sweep-line pass.
 
-  Methods:
-    Special:    __init__, __eq__, __lt__
+            Redefines:
+              TEvent.when
 
-  Inherited from MdTEvent:
-    Attributes:
-      when:       The value (time) along the sorted
-                  timeline, where this event takes place.
-      context:    The object associated with this event.
-      dimension:  The dimension along which events occur.
-    Overridden Attributes:
-      kind:       The type of event.
-
-    Methods:
-      Instance:   setparams
-    Overridden Methods:
-      Special:    __eq__, __lt__
+    order:  The sort priority of the events with the
+            same 'when', occurs at the same time.
   """
   kind:   RegionEvtKind
   order:  int
@@ -91,7 +83,7 @@ class RegionEvent(MdTEvent[Region]):
   def __init__(self, kind: Union[RegionEvtKind, str],
                      context: Region, dimension: int = 0):
     """
-    Initialize a new RegionEvent with the specified kind, context & 
+    Initialize a new RegionEvent with the specified kind, context &
     dimension. The kind of event can be the RegionEvtKind enum value or
     the string name equivalent.
 
@@ -129,6 +121,9 @@ class RegionEvent(MdTEvent[Region]):
     is defined as equal when, kind and same context. Return True if
     equal otherwise False.
 
+    Overrides:
+      TEvent.__eq__
+
     Args:
       that:
         The other RegionEvent to determine if it is equal
@@ -162,14 +157,17 @@ class RegionEvent(MdTEvent[Region]):
     The ordering within the same 'when':
       <End>... <0-length Begin><0-length End> <Begin>...
 
+    Overrides:
+      TEvent.__lt__
+
     Args:
       that:
-        The other RegionEvent to determine if this 
-        RegionEvent is less than (ordered before) 
+        The other RegionEvent to determine if this
+        RegionEvent is less than (ordered before)
         that RegionEvent.
 
     Returns:
-      True:   If this RegionEvent is less than 
+      True:   If this RegionEvent is less than
               the other RegionEvent.
       False:  Otherwise.
     """
@@ -188,28 +186,18 @@ class RegionEvent(MdTEvent[Region]):
 @dataclass
 class RegionTimeln(MdTimeline[Region]):
   """
-  Data class that provides methods for generating sorted iterations of 
-  RegionEvents for each dimension in the Regions within an assigned RegionSet; 
-  each Region results in a beginning and an ending event.
+  Timeline of Region Events.
+
+  Provides methods for generating sorted iterations of RegionEvents for each
+  dimension in the Regions within an assigned RegionSet; each Region results
+  in a beginning and an ending event.
+
+  Extends:
+    MdTimeline[Region]
 
   Attributes:
-    dimension:
-      The number of dimensions within the 
-      multi-dimensional Region objects.
     regions:
       The RegionSet associated with this timeline.
-
-  Methods:
-    Special:  __init__
-    Instance: events
-
-  Inherited from MdTimeline:
-    Attributes:
-      dimension
-    Methods:
-      Special:  __getitem__
-    Abstract Methods:
-      Instance: events
   """
   regions: 'RegionSet'
 

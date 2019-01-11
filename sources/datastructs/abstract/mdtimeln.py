@@ -3,21 +3,20 @@
 """
 Abstract Multi-dimensional Event Timeline
 
-This script defines the MdTEvent and MdTimeline classes, where 
-MdTimeline is an abstract definition for several sorted sequences of 
-MdEvents (each sorted sequence is one of dimensions within the 
-MdTimeline system), and each MdTEvent is a data representation of a
-multi-dimensional point along the MdTimeline in a particular dimension and
-with a particular event type or 'kind'. The MdTimeline class defines
-methods for generating a sorted Iterators of MdEvents for each dimension,
-within the multi-dimensional space of MdTimeline.
+Defines the MdTEvent and MdTimeline classes, where MdTimeline is an abstract
+definition for several sorted sequences of MdEvents (each sorted sequence is
+one of dimensions within the MdTimeline system), and each MdTEvent is a data
+representation of a multi-dimensional point along the MdTimeline in a
+particular dimension and with a particular event type or 'kind'. The
+MdTimeline class defines methods for generating a sorted Iterators of MdEvents
+for each dimension, within the multi-dimensional space of MdTimeline.
 
 Classes:
-- MdTEvent (TEvent)
-- MdTimelineOneDimen (Timeline)
+- MdTEvent
+- MdTimelineOneDimen
 
 Abstract Classes:
-- MdTimeline (Timeline)
+- MdTimeline
 """
 
 from abc import ABCMeta, abstractmethod
@@ -35,29 +34,21 @@ T = TypeVar('T')
 @total_ordering
 class MdTEvent(TEvent[T]):
   """
-  Data class for a mult-dimensional event. Each event has a value for when 
-  the event occurs, a specified event type, the object associated with the
-  event as context, and the dimension along which events occur within the
-  multi-dimensional timeline, MdTimeline. Events should be ordered by when
-  the event occurs and the kind of event.
+  A mult-dimensional event.
+
+  Each event has a value for when the event occurs, a specified event type,
+  the object associated with the event as context, and the dimension along
+  which events occur within the multi-dimensional timeline, MdTimeline.
+  Events should be ordered by when the event occurs and the kind of event.
 
   Generics:
-    T:  Contextual object associated
-        with each MdTEvent.
+    T:  Contextual object associated with each MdTEvent.
+
+  Extends:
+    TEvent[T]
 
   Attributes:
     dimension:  The dimension along which events occur.
-
-  Inherited from TEvent:
-    Attributes:
-      when:     The value (time) along the timeline,
-                where this event takes place.
-      kind:     The type of event.
-      context:  The object associated with this event.
-
-    Methods:
-      Instance: setparams
-      Special:  __eq__, __lt__
   """
   dimension: int
 
@@ -65,23 +56,20 @@ class MdTEvent(TEvent[T]):
 @dataclass
 class MdTimeline(Timeline[T]):
   """
-  Abstract data class is a multi-dimensional timeline that provides
-  methods for generating sorted Iterators of MdEvents.
+  Abstract Class.
+
+  A multi-dimensional timeline that provides methods for
+  generating sorted Iterators of MdEvents.
 
   Generics:
-    T:  Contextual object associated
-        with each MdTEvent.
+    T:  Contextual object associated with each MdTEvent.
+
+  Extends:
+    Timeline[T]
 
   Attributes:
-    dimension:
-      The number of dimensions within the 
-      multi-dimensional contextual object.
-
-  Methods:
-    Special:  __getitem__
-
-  Abstract Methods:
-    Instance: events
+    dimension:  The number of dimensions within the
+                multi-dimensional contextual object.
   """
   __metaclass__ = ABCMeta
   dimension: int
@@ -90,6 +78,9 @@ class MdTimeline(Timeline[T]):
   def events(self, dimension: int = 0) -> Iterator[MdTEvent[T]]:
     """
     Returns an Iterator of sorted MdTEvent along the given dimension.
+
+    Redefines:
+      Timeline.events
 
     Args:
       dimension:
@@ -124,24 +115,17 @@ class MdTimeline(Timeline[T]):
 @dataclass
 class MdTimelineOneDimen(Timeline[T]):
   """
-  Data class for a Timeline along a single dimension.
+  A Timeline along a single dimension.
 
   Generics:
-    T:  Contextual object associated
-        with each MdTEvent.
+    T:  Contextual object associated with each MdTEvent.
+
+  Extends:
+    Timeline[T]
 
   Attributes:
-    timeline: 
-      The reference to parent MdTimeline object.
-    dimension:
-      The dimension along which MdEvents occur.
-
-  Methods:
-    Instance: events
-
-  Inherited for Timeline:
-    Abstract Methods:
-      Instance: events
+    timeline:   The reference to parent MdTimeline object.
+    dimension:  The dimension along which MdEvents occur.
   """
   timeline  : MdTimeline[T]
   dimension : int

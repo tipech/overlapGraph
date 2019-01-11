@@ -3,9 +3,8 @@
 """
 Unit tests for Event Timeline for Region Sets
 
-This script implements the following tests:
-  - test_regiontimeln_event_create
-  - test_regiontimeln_ordering
+- test_regiontimeln_event_create
+- test_regiontimeln_ordering
 """
 
 from unittest import TestCase

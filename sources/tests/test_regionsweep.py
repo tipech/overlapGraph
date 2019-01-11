@@ -3,9 +3,8 @@
 """
 Unit tests for Generalized One-Pass Sweep-line Algorithm
 
-This script implements the following tests:
-  - test_regionsweep_simple
-  - test_regionsweep_random
+- test_regionsweep_simple
+- test_regionsweep_random
 """
 
 from typing import List

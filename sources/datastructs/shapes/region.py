@@ -3,21 +3,22 @@
 """
 Region Data Class
 
-This script implements the Region class, a data class that defines a
-multidimensional region, with an upper and a lower vertex. Each region has a
-defined dimensionality. Provides methods for determining if there is an
-overlap between two regions, what the intersection or union regions between
-the two regions are, and randomly generate regions and points within a region.
-
-Classes:
-- Region
+Implements the Region class, a data class that defines a multidimensional
+region, with an upper and a lower vertex. Each region has a defined
+dimensionality. Provides methods for determining if there is an overlap
+between two regions, what the intersection or union regions between the two
+regions are, and randomly generate regions and points within a region.
 
 Types:
 - RegionPair
 - RegionIntxn
 - RegionGrp
+
+Classes:
+- Region
 """
 
+from collections import abc
 from dataclasses import asdict, astuple, dataclass, field
 from functools import reduce
 from numbers import Real
@@ -35,46 +36,24 @@ RegionGrp   = Union['Region', RegionIntxn, RegionPair]
 
 
 @dataclass
-class Region(IOable):
+class Region(IOable, abc.Container):
   """
-  Dataclass that defines a multidimensional region, with an upper and a
-  lower vertex. Each region has a defined dimensionality. Provides methods
-  for determining if there is an overlap between two regions, what the
-  intersection and union regions between the two regions are, and
-  randomly generate regions and points within a region.
+  A multidimensional region, with an upper and lower vertex.
+
+  Each region has a defined dimensionality. Provides methods for determining
+  if there is an overlap between two regions, what the intersection and union
+  regions between the two regions are, and randomly generate regions and
+  points within a region.
+
+  Extends:
+    IOable
+    abc.Container
 
   Attributes:
     id:         The unique identifier for this Region.
     dimension:  The number of dimensions (dimensionality).
     dimensions: The Interval (bounds) for each dimension.
     data:       Additional data properties.
-
-  Properties:
-    lower, upper:
-      The lower and upper bounding vertices.
-    lengths:
-      The distances between the lower and upper bounding
-      vertices on each dimension.
-    midpoint:
-      The point equal distance between the lower and
-      upper bounding vertices.
-    size:
-      The magnitude size of the region;
-      length, area, volume.
-
-  Methods:
-    Special:        __init__, __getitem__, __setitem__,
-                    __contains__, __eq__, __repr__
-    Instance:       contains, encloses,
-                    overlaps, intersect, union,
-                    project, random_points, random_regions
-    Class Methods:  from_intervals, from_interval,
-                    from_intersect, from_union, from_dict
-
-  Inherited from IOable:
-    Methods:        to_output
-    Class Methods:  from_text, from_source
-      Overridden:   to_object, from_object
   """
   id: str
   dimension: int = field(repr=False)

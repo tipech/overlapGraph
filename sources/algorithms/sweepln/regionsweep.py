@@ -3,7 +3,7 @@
 """
 One-Pass Sweep-line Algorithm for RegionSet
 
-This script implements an one-pass sweep-line algorithm over a set of Regions.
+Implements an one-pass sweep-line algorithm over a set of Regions.
 Implements RegionSweep class that executes the specific details and actions of
 the sweep-line algorithm, when encountering: Init, Begin, End or Done events.
 
@@ -14,9 +14,6 @@ Classes:
 
 from enum import IntEnum, auto, unique
 from typing import Dict, Iterator, List
-
-from rx import Observer
-from rx.subjects import Subject
 
 from sources.algorithms.sweepln.onesweep import OneSweep
 from sources.datastructs.abstract.pubsub import Event, Publisher
@@ -29,8 +26,12 @@ from sources.datastructs.shapes.region import Region, RegionGrp, RegionPair
 class RegionSweepEvtKind(IntEnum):
   """
   Extended RegionEvtKind enumerator.
+
   Enumeration of allowed event `kind` values. The values denote the beginning
   and ending event of an Region's interval in a particular dimension.
+
+  Extends:
+    IntEnum
 
   Values:
     Init:       At the beginning of a sweep-line pass.
@@ -48,9 +49,13 @@ class RegionSweepEvtKind(IntEnum):
 
 class RegionSweep(OneSweep[RegionGrp]):
   """
-  Class for implementing an one-pass sweep-line algorithm over a set of
-  Regions. Subscribes to and is evaluated by the one-pass sweep-line algorithm
+  An one-pass sweep-line algorithm over a set of Regions.
+
+  Subscribes to and is evaluated by the one-pass sweep-line algorithm
   along a dimension on the set of Regions.
+
+  Extends:
+    OneSweep[RegionGrp]
 
   Attributes:
     regions:    The RegionSet to evaluate sweep-line over.
@@ -58,44 +63,6 @@ class RegionSweep(OneSweep[RegionGrp]):
     actives:    The active Regions during sweep-line.
     bbuffer:    The broadcast buffer to ensure correct,
                 broadcast ordering.
-
-  Properties:
-    is_active:  Boolean flag for whether or not if the
-                sweep-line algorithm is initialized.
-
-  Methods:
-    Special:  __init__
-    Instance: broadcast, findintersects, on_init,
-              on_begin, on_intersect, on_end, on_done
-
-  Inherited from OneSweep:
-    Attributes:
-      subject:
-        The Subject for Observers to subscribe to.
-      presubj:
-        The Subject for Observers to subscribe to, whose
-        on_next are always called before, self.on_next
-        and the subjects' on_next.
-      events:
-        The registered Event types (kind).
-        If None, no register Event types.
-      eventmapper:
-        A lambda method that maps each Event to a method
-        name for a specific event handler.
-      strict:
-        Boolean flag whether or not to raise an exception
-        when Event handler not found. True, raises
-        exception; False, otherwise. Default: False.
-      timeline:
-        The Timeline to evaluate the algorithm over.
-
-    Methods:
-      Special:  __init__, __call__
-      Instance: subscribe, broadcast, evaluate,
-                on_next, on_completed, on_error
-
-    Overridden Methods:
-      Special:  __init__, broadcast
   """
   regions:    RegionSet
   dimension:  int
@@ -138,6 +105,9 @@ class RegionSweep(OneSweep[RegionGrp]):
     """
     Broadcast the given event to subscribed Observers.
 
+    Overrides:
+      Publisher.broadcast
+
     Args:
       event:
         The Event to be broadcasted.
@@ -151,10 +121,10 @@ class RegionSweep(OneSweep[RegionGrp]):
       **kwargs
     }
 
-    OneSweep.broadcast(self, event, **kwargs)
+    Publisher.broadcast(self, event, **kwargs)
 
-    for buffered_events in self.bbuffer:
-      OneSweep.broadcast(self, buffered_events, **kwargs)
+    for buffered_event in self.bbuffer:
+      Publisher.broadcast(self, buffered_event, **kwargs)
 
     if len(self.bbuffer) > 0:
       self.bbuffer = []

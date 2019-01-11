@@ -3,14 +3,13 @@
 """
 Unit tests for Regions Collection
 
-This script implements the following tests:
-  - test_create_regionset
-  - test_regionset_dimension_mismatch
-  - test_regionset_outofbounds
-  - test_regionset_from_random
-  - test_regionset_tofrom_output
-  - test_regionset_tofrom_output_backlinks
-  - test_regionset_filter
+- test_create_regionset
+- test_regionset_dimension_mismatch
+- test_regionset_outofbounds
+- test_regionset_from_random
+- test_regionset_tofrom_output
+- test_regionset_tofrom_output_backlinks
+- test_regionset_filter
 """
 
 from io import StringIO

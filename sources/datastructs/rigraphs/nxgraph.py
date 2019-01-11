@@ -3,11 +3,10 @@
 """
 Regional Intersection Graph -- NetworkX
 
-This script implements the programming interface for representing
-and constructing a NetworkX graph of intersecting or overlapping
-multidimensional Regions. This data structure represents each Region
-as a node within the graph and intersecting Regions between them as
-edges within the graph.
+Implements the programming interface for representing and constructing a
+NetworkX graph of intersecting or overlapping multidimensional Regions. This
+data structure represents each Region as a node within the graph and
+intersecting Regions between them as edges within the graph.
 
 Note:
   Within this script, we make the distinction between
@@ -36,43 +35,13 @@ from sources.datastructs.shapes.region import Region, RegionPair
 
 class NxGraph(RIGraph[nx.Graph], IOable):
   """
-  Wrapper for a NetworkX graph of intersecting and overlapping
-  Regions. Provides a programming interface for accessing and constructing
+  Wrapper for a NetworkX graph of intersecting and overlapping Regions.
+  Provides a programming interface for accessing and constructing
   the NetworkX data representation.
 
-  Inherited from RIGraph:
-
-    Attributes:
-      G:
-        The internal NetworkX graph representation or
-        implementation for a graph of intersecting or
-        overlapping Regions.
-
-    Properties:
-      graph:
-        The internal NetworkX graph representation or
-        implementation for a graph of intersecting or
-        overlapping Regions.
-
-    Overridden Properties:
-      regions:
-        An Iterator of Regions within the graph along with
-        the Region ID or node ID within the graph.
-      overlaps:
-        An Iterator of overlapping Regions within the
-        graph along with the two Region IDs or node IDs
-        within the graph for which the two Regions are
-        involved.
-
-    Overridden Methods:
-      Special:    __init__
-      Instance:   put_region
-                  put_overlap
-
-  Inherited from IOable:
-    Methods:        to_output
-    Class Methods:  from_text, from_source
-      Overridden:   to_object, from_object
+  Extends:
+    RIGraph[nx.Graph]
+    IOable
   """
 
   def __init__(self, dimension: int, graph: nx.Graph = None):

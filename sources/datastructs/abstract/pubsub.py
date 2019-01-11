@@ -3,10 +3,10 @@
 """
 Base Event Publisher and Subscriber
 
-This script implements the Event, Publisher and Subscriber classes, that
-provides a pub-sub interface for broadcasting Events from Publishers (Subject)
-to Subscribers (Observers). The Publisher is an Observer as well that enables
-rebroadcasting of Events.
+Implements the Event, Publisher and Subscriber classes, that provides a pub-
+sub interface for broadcasting Events from Publishers (Subject) to Subscribers
+(Observers). The Publisher is an Observer as well that enables rebroadcasting
+of Events.
 
 Classes:
 - Event
@@ -37,9 +37,6 @@ class Event(Generic[T]): # pylint: disable=E1136
   Attributes:
     kind:     The type of event.
     context:  The object associated with this event.
-
-  Methods:
-    Instance: setparams
   """
   kind: IntEnum
   context: T
@@ -58,32 +55,29 @@ class Event(Generic[T]): # pylint: disable=E1136
 
 class Subscriber(Observer, Generic[T]): # pylint: disable=E1136
   """
-  Class that implements the interface for an Observer.
+  Implements the wrapper for an Observer.
+
   Each Event is paired with an IntEnum event type (or kind), and invokes
   specific event handler methods for each Event type.
 
   Generics:
     T:  Contextual object associated with each Event.
 
+  Extends:
+    Observer
+
   Attributes:
     events:
       The registered Event types (kind).
       If None, no register Event types.
     eventmapper:
-      A lambda method that maps each Event to a method
-      name for a specific event handler.
+      A lambda method that maps each Event to a
+      method name for a specific event handler.
     strict:
       Boolean flag whether or not to raise an exception
-      when Event handler not found. True, raises
-      exception; False, otherwise. Default: False.
-
-  Methods:
-    Special:  __init__
-    Instance: on_next
-
-  Inherited from Observer:
-    Abstract Methods:
-      Instance: on_next, on_completed, on_error
+      when Event handler not found.
+      - True:  Raise exception when handler not found.
+      - False: Otherwise. Default.
   """
   events:       Union[IntEnum, None]
   eventmapper:  Callable[[Event[T]], str]
@@ -148,13 +142,17 @@ class Subscriber(Observer, Generic[T]): # pylint: disable=E1136
 
 class Publisher(Subscriber[T]):
   """
-  Class that implements the interface for an Observer.
+  Implements the wrapper for an Observer and a Subject.
+
   Broadcasts the Events to the subscribed Observers on the Subject.
   Each Event is paired with an IntEnum event type (or kind), and invokes
   specific event handler methods for each Event type.
 
   Generics:
     T:  Contextual object associated with each Event.
+
+  Extends:
+    Subscriber[T]
 
   Attributes:
     subject:
@@ -163,31 +161,6 @@ class Publisher(Subscriber[T]):
       The Subject for Observers to subscribe to, whose
       on_next are always called before, self.on_next
       and the subjects' on_next.
-
-  Methods:
-    Special:  __init__
-    Instance: subscribe, broadcast,
-              on_next, on_completed, on_error
-
-  Inherited from Observer:
-    Attributes:
-      events:
-        The registered Event types (kind).
-        If None, no register Event types.
-      eventmapper:
-        A lambda method that maps each Event to a method
-        name for a specific event handler.
-      strict:
-        Boolean flag whether or not to raise an exception
-        when Event handler not found. True, raises
-        exception; False, otherwise. Default: False.
-
-    Overridden Methods:
-      Special:  __init__
-      Instance: on_next
-
-    Abstract Methods:
-      Instance: on_completed, on_error
   """
   subject: Subject
   presubj: Subject
@@ -250,6 +223,9 @@ class Publisher(Subscriber[T]):
     The Event handler when an Event occurs.
     Broadcast next Event.
 
+    Overrides:
+      Subscriber.on_next
+
     Args:
       event:
         The next Event to occur.
@@ -269,6 +245,9 @@ class Publisher(Subscriber[T]):
     """
     The Event handler when no more Events. Subscription completed.
     Broadcast completion Event.
+
+    Overrides:
+      Subscriber.on_completed
     """
     self.presubj.on_completed()
     self.subject.on_completed()
@@ -277,6 +256,9 @@ class Publisher(Subscriber[T]):
     """
     The Event handler when an error occurs.
     Broadcast error Event.
+
+    Overrides:
+      Subscriber.on_error
 
     Args:
       exception:

@@ -3,10 +3,9 @@
 """
 Unit tests for Regional Intersection Graph -- NetworkX
 
-This script implements the following tests:
-  - test_nxgraph_create
-  - test_nxgraph_sweepctor
-  - test_nxgraph_sweepctor_graph
+- test_nxgraph_create
+- test_nxgraph_sweepctor
+- test_nxgraph_sweepctor_graph
 """
 
 from io import StringIO

@@ -3,16 +3,16 @@
 """
 Regions Collection
 
-This script implements the RegionSet class, a data class that represents a
-collection of Regions dataset. Provides methods for generating new datasets,
-and loading from or saving to a file, in the JSON or CSV file formats. This
-collection of Regions is then passed to the Intersection Graph construction
-algorithm.
+Implements the RegionSet class, a data class that represents a collection of
+Regions dataset. Provides methods for generating new datasets, and loading
+from or saving to a file, in the JSON or CSV file formats. This collection of
+Regions is then passed to the Intersection Graph construction algorithm.
 
 Classes:
 - RegionSet
 """
 
+from collections import abc
 from dataclasses import asdict, astuple, dataclass
 from typing import Any, Dict, Iterable, Iterator, List, Union
 from uuid import uuid4
@@ -31,11 +31,18 @@ except ImportError:
 
 
 @dataclass
-class RegionSet(Iterable[Region], IOable):
+class RegionSet(Iterable[Region], abc.Container, abc.Sized, IOable):
   """
-  Data class that represents a collection of Regions dataset.
+  A collection or dataset of Regions.
+
   Provides methods for generating new datasets, and loading from or
   saving to a file, in the JSON or CSV file formats.
+
+  Extends:
+    Iterable[Region]
+    IOable
+    abc.Container
+    abc.Sized
 
   Attributes:
     id:         The unique identifier for this Region.
@@ -44,27 +51,6 @@ class RegionSet(Iterable[Region], IOable):
     bounds:     The bounding Region that must enclose
                 all Regions in this collection.
                 Or None, for no outer bounding Region.
-
-  Properties:
-    length:     The number of Regions in this collection.
-    minbounds:  The computed minimum Region that encloses
-                all Regions in this collection within it.
-    bbox:       The Region that encloses all Regions in
-                this collection within it, either bounds
-                or minbounds.
-    timeline:   RegionTimeln instance for this RegionSet.
-
-  Methods:
-    Special:        __init__, __getitem__, __iter__, 
-                    __len__, __contains__
-    Instance:       get, add, streamadd,
-                    overlaps, intersect, filter
-    Class Methods:  from_random, from_dict
-
-  Inherited from IOable:
-    Methods:        to_output
-    Class Methods:  from_text, from_source
-      Overridden:   to_object, from_object
   """
   id: str
   dimension: int
@@ -148,9 +134,8 @@ class RegionSet(Iterable[Region], IOable):
   @property
   def bbox(self) -> Region:
     """
-    Computes the Region that encloses all member
-    Regions in this collection within it. Either the
-    defined bounds or the computed minbounds.
+    Computes the Region that encloses all member Regions in this collection
+    within it. Either the defined bounds or the computed minbounds.
 
     Returns:
       The Region that encloses all Regions

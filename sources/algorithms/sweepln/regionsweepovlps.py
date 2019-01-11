@@ -3,9 +3,9 @@
 """
 Compute Region Pairwise Overlaps by One-pass Sweep-line Algorithm
 
-This script implements the RegionSweepOverlaps class that computes a list of
-all of the pairwise overlapping Regions using the one-pass sweep-line
-algorithm, through a subscription to RegionSweep.
+Implements the RegionSweepOverlaps class that computes a list of all of the
+pairwise overlapping Regions using the one-pass sweep-line algorithm, through
+a subscription to RegionSweep.
 
 Classes:
 - RegionSweepOverlaps
@@ -21,41 +21,16 @@ from sources.datastructs.shapes.region import Region, RegionGrp, RegionPair
 
 class RegionSweepOverlaps(Subscriber[RegionGrp]):
   """
-  Class that computes a list of all of the pairwise overlapping Regions 
-  using the one-pass sweep-line algorithm, through a subscription 
+  Computes a list of all of the pairwise overlapping Regions
+  using the one-pass sweep-line algorithm, through a subscription
   to RegionSweep.
+
+  Extends:
+    Subscriber[RegionGrp]
 
   Attributes:
     overlaps:
       The List of pairwise overlapping Regions.
-
-  Properties:
-    results:
-      The resulting List of pairwise overlapping Regions.
-
-  Methods:
-    Special:  __init__
-    Instance: on_init, on_intersect
-
-  Inherited from Subscriber:
-    Attributes:
-      events:
-        The registered Event types (kind).
-        If None, no register Event types.
-      eventmapper:
-        A lambda method that maps each Event to a method
-        name for a specific event handler.
-      strict:
-        Boolean flag whether or not to raise an exception
-        when Event handler not found. True, raises
-        exception; False, otherwise. Default: False.
-
-    Methods:
-      Special:  __init__
-      Instance: on_next, on_completed, on_error
-
-    Overridden Methods:
-      Special:  __init__
   """
   overlaps: List[RegionPair]
 
@@ -78,7 +53,7 @@ class RegionSweepOverlaps(Subscriber[RegionGrp]):
     Alias for: self.overlaps
 
     Returns:
-      The resulting List of pairwise 
+      The resulting List of pairwise
       overlapping Regions.
     """
     return self.overlaps

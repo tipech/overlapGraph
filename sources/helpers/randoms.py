@@ -3,11 +3,10 @@
 """
 Random Number Generators
 
-This script implements the Randoms class, a static class
-that provides factory methods that each return Callable (lambdas)
-that are preconfigured to generate random values based on a
-particular distribution or random number generation function.
-The only missing parameters is the lower and upper bounds of the
+Implements the Randoms class, a static class that provides factory methods
+that each return Callable (lambdas) that are preconfigured to generate random
+values based on a particular distribution or random number generation
+function. The only missing parameters is the lower and upper bounds of the
 values generated and the sample size of the output.
 
 Types:

@@ -3,18 +3,19 @@
 """
 Interval Data Class
 
-This script implements the Interval class, a data class that defines
-lower and upper bounding values for an interval. Are the building blocks for
-representing multi-dimensional regions and computing for overlap between
-those regions. Provides methods for determining if there is an overlap
-between two intervals, what the intersection interval between the two
-intervals is, what the union interval between the two intervals is,
-randomly generate intervals, and randomly choose values within an interval.
+Implements the Interval class, a data class that defines lower and upper
+bounding values for an interval. Are the building blocks for representing
+multi-dimensional regions and computing for overlap between those regions.
+Provides methods for determining if there is an overlap between two intervals,
+what the intersection interval between the two intervals is, what the union
+interval between the two intervals is, randomly generate intervals, and
+randomly choose values within an interval.
 
 Classes:
 - Interval
 """
 
+from collections import abc
 from dataclasses import asdict, astuple, dataclass
 from functools import reduce
 from numbers import Real
@@ -27,37 +28,24 @@ from sources.helpers.randoms import NDArray, RandomFn, Randoms
 
 
 @dataclass(order = True)
-class Interval(IOable):
+class Interval(IOable, abc.Container, abc.Hashable):
   """
-  Dataclass that defines the lower and upper bounding values for an interval.
+  The lower and upper bounding values for an interval.
+
   Building block for representing multi-dimensional regions and computing
   for overlap between those regions. Provides methods for determining if there
   is an overlap between two intervals, what the intersection length between the
   two intervals is, what the union interval between the two intervals is,
   and randomly generate intervals.
 
+  Extends:
+    IOable
+    abc.Container
+    abc.Hashable
+
   Attributes:
     lower, upper:
       The lower and upper bounding values.
-
-  Properties:
-    length:   The distance between the lower
-              and upper bounding values.
-    midpoint: The value equal distance between the lower
-              and upper bounding values.
-
-  Methods:
-    Special:        __init__, __setattr__,
-                    __hash__, __contains__
-    Instance:       assign, contains, encloses,
-                    overlaps, intersect, union,
-                    random_values, random_intervals
-    Class Methods:  from_intersect, from_union
-
-  Inherited from IOable:
-    Methods:        to_output
-    Class Methods:  from_text, from_source
-      Overridden:   to_object, from_object
   """
   lower: float
   upper: float

@@ -3,21 +3,20 @@
 """
 Unit tests for Interval Data Class
 
-This script implements the following tests:
-  - test_create_interval
-  - test_interval_properties
-  - test_interval_conversion
-  - test_interval_hash
-  - test_interval_contains
-  - test_interval_overlaps
-  - test_interval_intersect
-  - test_interval_union
-  - test_interval_random_values
-  - test_interval_random_intervals
-  - test_interval_from_intersect
-  - test_interval_from_union
-  - test_interval_from_object
-  - test_interval_from_text
+- test_create_interval
+- test_interval_properties
+- test_interval_conversion
+- test_interval_hash
+- test_interval_contains
+- test_interval_overlaps
+- test_interval_intersect
+- test_interval_union
+- test_interval_random_values
+- test_interval_random_intervals
+- test_interval_from_intersect
+- test_interval_from_union
+- test_interval_from_object
+- test_interval_from_text
 """
 
 from dataclasses import asdict, astuple

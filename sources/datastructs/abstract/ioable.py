@@ -3,13 +3,13 @@
 """
 Base Definition for IOable class
 
-This script implements an base class for (de)serialization of certain objects
-to/from various serialized data formats: JSON and Python Literal (parseable by
-ast.literal_eval). Provides base implements for to_output, from_text and
-from_source methods. Requires the concrete classes to implement the to_object
-and from_object method.
+Defines an abstract class for serialization and deserialization of certain
+objects to/from various serialized data formats: JSON and Python Literal
+(parseable by ast.literal_eval). Provides base implements for to_output,
+from_text and from_source methods. Requires the concrete classes to implement
+the to_object and from_object method.
 
-Classes:
+Abstract Classes:
 - IOable
 """
 
@@ -24,16 +24,13 @@ from typing import Any, Callable, Dict
 
 class IOable(metaclass=ABCMeta):
   """
-  Abstract base class for (de)serialization of objects that implement
-  this class (subclasses) to/from various serialized data formats: JSON and
-  Python Literal (parseable by ast.literal_eval). Provides base implements
-  for to_output, from_text and from_source methods. Requires the concrete
-  classes to implement the to_object and from_object method.
+  Abstract Class.
 
-  Method:
-    Instance:       to_output
-    Class Methods:  from_text, from_source
-      Abstract:     to_object, from_object
+  Serialization and deserialization of objects that implement this class
+  (subclasses) to/from various serialized data formats: JSON and Python
+  Literal (parseable by ast.literal_eval). Provides base implements for
+  to_output, from_text and from_source methods. Requires the concrete
+  classes to implement the to_object and from_object method.
   """
 
   ### Methods: Serialization
@@ -156,7 +153,7 @@ class IOable(metaclass=ABCMeta):
       raise ValueError(f'Unsupported "{format}" input format')
 
   @classmethod
-  def from_source(cls, source: TextIOBase, 
+  def from_source(cls, source: TextIOBase,
                        format: str = 'json', **kwargs) -> 'IOable':
     """
     Construct a new IOable object from the conversion of the text from the

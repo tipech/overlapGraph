@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 
 """
-Compute Region Pairwise Overlaps by One-pass Sweep-line Algorithm
+Debugging for One-pass Sweep-line Algorithm over Regions
 
-This script implements the RegionSweepOverlaps class that computes a list of
-all of the pairwise overlapping Regions using the one-pass sweep-line
-algorithm, through a subscription to RegionSweep.
+Implements the RegionSweepDebug class that prints a block of debugging output
+for every Event broadcasted from the one-pass sweep-line algorithm, through a
+subscription to RegionSweep.
 
 Classes:
-- RegionSweepOverlaps
+- RegionSweepDebug
 """
 
 from typing import Tuple
@@ -21,41 +21,25 @@ from sources.datastructs.shapes.region import RegionGrp
 
 class RegionSweepDebug(Subscriber[RegionGrp]):
   """
-  Class that computes a list of all of the pairwise overlapping Regions 
-  using the one-pass sweep-line algorithm, through a subscription 
+  Debugging for One-pass Sweep-line over Regions
+
+  For every Event broadcasted from the one-pass sweep-line algorithm,
+  prints a block of debugging output, through a subscription
   to RegionSweep.
 
-  Methods:
-    Special:  __init__
-    Instance: on_next
+  Extends:
+    Subscriber[RegionGrp]
 
-  Inherited from Subscriber:
-    Attributes:
-      events:
-        The registered Event types (kind).
-        If None, no register Event types.
-      eventmapper:
-        A lambda method that maps each Event to a method
-        name for a specific event handler.
-      strict:
-        Boolean flag whether or not to raise an exception
-        when Event handler not found. True, raises
-        exception; False, otherwise. Default: False.
-
-    Methods:
-      Special:  __init__
-      Instance: on_next, on_completed, on_error
-
-    Overridden Methods:
-      Special:  __init__
-      Instance: on_next
+  Attributes:
+    counter:  The Event sequence number.
+              The number of Events previously seen.
   """
   counter: int
 
   def __init__(self):
     """
-    Initialize this class to compute a list of all of the pairwise
-    overlapping Regions using the one-pass sweep-line algorithm.
+    Initialize this class to prints a block of debugging output for
+    every Event broadcasted from the one-pass sweep-line algorithm.
     Sets the events as RegionSweepEvtKind.
     """
     Subscriber.__init__(self, RegionSweepEvtKind)
@@ -67,6 +51,9 @@ class RegionSweepDebug(Subscriber[RegionGrp]):
   def on_next(self, event: Event[RegionGrp]):
     """
     Print Events for sweep-line algorithm.
+
+    Overrides:
+      Subscriber.on_next
 
     Args:
       event:

@@ -3,10 +3,10 @@
 """
 Generalized One-Pass Sweep-line Algorithm
 
-This script implements a generalized version of a one-pass sweep-line
-algorithm. Implements OneSweep class that iterates over the Timeline
-and broadcasts Events to subscribed Observers to execute the specific
-details of the algorithm.
+Implements a generalized version of a one-pass sweep-line algorithm.
+Implements OneSweep class that iterates over the Timeline and broadcasts
+Events to subscribed Observers to execute the specific details of the
+algorithm.
 
 Classes:
 - OneSweep
@@ -28,54 +28,25 @@ class OneSweep(Sweepln[T]):
   Generics:
     T:  Objects type within the Timeline.
 
-  Methods:
-    Instance: evaluate
-
-  Inherited from Sweepln:
-    Attributes:
-      subject:
-        The Subject for Observers to subscribe to.
-      presubj:
-        The Subject for Observers to subscribe to, whose
-        on_next are always called before, self.on_next
-        and the subjects' on_next.
-      events:
-        The registered Event types (kind).
-        If None, no register Event types.
-      eventmapper:
-        A lambda method that maps each Event to a method
-        name for a specific event handler.
-      strict:
-        Boolean flag whether or not to raise an exception
-        when Event handler not found. True, raises
-        exception; False, otherwise. Default: False.
-      timeline:
-        The Timeline to evaluate the algorithm over.
-
-    Methods:
-      Special:  __init__, __call__
-      Instance: subscribe, broadcast,
-                on_next, on_completed, on_error
-
-    Abstract Methods:
-      Instance: evaluate
+  Extends:
+    Sweepln[T]
   """
 
   ### Methods: Evaluation
 
-  def evaluate(self, *args, **kwargs):
+  def evaluate(self, *args, evparams_kw = {}, **kwargs):
     """
     Execute the sweep-line algorithm over the attached Timeline.
     Broadcast Events to the Observers.
 
     Args:
-      args:   Arguments to be passed
-              to timeline.events().
-      kwargs: Keyword arguments to be passed
-              to event.setparams().
+      evparams_kw:
+        Arguments for event.setparams().
+      args, kwargs:
+        Arguments for timeline.events().
     """
-    for event in self.timeline.events(*args):
-      event.setparams(**kwargs)
+    for event in self.timeline.events(*args, **kwargs):
+      event.setparams(**evparams_kw)
       self.on_next(event)
 
     self.on_completed()

@@ -3,28 +3,27 @@
 """
 Unit tests for Region Data Class
 
-This script implements the following tests:
-  - test_create_region
-  - test_region_dimension_mismatch
-  - test_region_properties
-  - test_region_getsetitem
-  - test_region_contains
-  - test_region_equality
-  - test_region_overlaps
-  - test_region_intersect
-  - test_region_union
-  - test_region_linked_intersect
-  - test_region_linked_union
-  - test_region_project
-  - test_region_random_points
-  - test_region_random_regions
-  - test_region_from_intervals
-  - test_region_from_interval
-  - test_region_from_intersect
-  - test_region_from_union
-  - test_region_from_dict
-  - test_region_from_object
-  - test_region_from_text
+- test_create_region
+- test_region_dimension_mismatch
+- test_region_properties
+- test_region_getsetitem
+- test_region_contains
+- test_region_equality
+- test_region_overlaps
+- test_region_intersect
+- test_region_union
+- test_region_linked_intersect
+- test_region_linked_union
+- test_region_project
+- test_region_random_points
+- test_region_random_regions
+- test_region_from_intervals
+- test_region_from_interval
+- test_region_from_intersect
+- test_region_from_union
+- test_region_from_dict
+- test_region_from_object
+- test_region_from_text
 """
 
 from dataclasses import asdict, astuple

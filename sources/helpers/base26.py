@@ -3,13 +3,13 @@
 """
 Base26 Converter
 
-This script implements methods for converting from a decimal integer to a
-Base26 number and from a Base26 number back to a decimal integer. A values in
-this numeric representation are in uppercase A-Z letters. Used for generating
-shorter, more readable Region or RegionSet IDs.
+Implements methods for converting from a decimal integer to a Base26 number
+and from a Base26 number back to a decimal integer. A values in this numeric
+representation are in uppercase A-Z letters. Used for generating shorter, more
+readable Region or RegionSet IDs.
 
 Example:
-- A, B, C, ..., X, Y, Z, AA, AB, ...
+  A, B, C, ..., X, Y, Z, AA, AB, ...
 
 Methods:
 - to_base26

@@ -3,8 +3,8 @@
 """
 Abstract Event Timeline
 
-This script defines the Event and Timeline classes, where Timeline is an
-abstract definition for a sorted sequence of Events, and each Event is a data
+Defines the Event and Timeline classes, where Timeline is an abstract
+definition for a sorted sequence of Events, and each Event is a data
 representation of a point along the Timeline with a particular event type or
 'kind'. The Timeline class defines methods for generating a sorted Iterators
 of Events.
@@ -32,31 +32,22 @@ T = TypeVar('T')
 @total_ordering
 class TEvent(Event[T]):
   """
-  Data class for an timeline event. Each timeline event has a value for when
-  the event occurs, a specified event type, and the object associated with
-  the event as context. Timeline Events should be ordered by when the
-  event occurs and the kind of event.
+  A timeline event.
+
+  Each timeline event has a value for when the event occurs, a specified event
+  type, and the object associated with the event as context. Timeline Events
+  should be ordered by when the event occurs and the kind of event.
 
   Generics:
     T:  Contextual object associated
         with each Event.
 
+  Extends:
+    Event[T]
+
   Attributes:
-    when:     The value (time) along the timeline,
-              where this event takes place.
-    kind:     The type of event.
-    context:  The object associated with this event.
-
-  Methods:
-    Special:  __eq__, __lt__
-
-  Inherited from Event:
-    Attributes:
-      kind:     The type of event.
-      context:  The object associated with this event.
-
-    Methods:
-      Instance: setparams
+    when:   The value (time) along the timeline,
+            where this event takes place.
   """
   when: float
 
@@ -107,15 +98,12 @@ class TEvent(Event[T]):
 @dataclass
 class Timeline(Generic[T]): # pylint: disable=E1136
   """
-  Abstract data class for a timeline that provides methods for 
-  generating sorted Iterators of Events.
+  Abstract Class
+
+  A timeline that provides methods for generating sorted Iterators of Events.
 
   Generics:
-    T:  Contextual object associated
-        with each Event.
-
-  Abstract Methods:
-    Instance: events
+    T:  Contextual object associated with each Event.
   """
   __metaclass__ = ABCMeta
 

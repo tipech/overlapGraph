@@ -2,13 +2,13 @@
 
 """
 Regional Intersection Graph (RIG) Construction by
-One-pass Sweepline Algorithm -- NetworkX
+One-pass Sweep-line Algorithm -- NetworkX
 
-This script implements the NxGraphSweepCtor (or one-pass sweep-line regional
-intersection graph construction algorithm). This algorithm builds an
-undirected, labelled graph of all the pair-wise intersections or overlapping
-regions between a collection of regions with the same dimensionality. The
-graph representation is implemented as a NetworkX graph.
+Implements the NxGraphSweepCtor (or one-pass sweep-line regional intersection
+graph construction algorithm). This algorithm builds an undirected, labelled
+graph of all the pair-wise intersections or overlapping regions between a
+collection of regions with the same dimensionality. The graph representation
+is implemented as a NetworkX graph.
 
 Classes:
 - NxGraphSweepCtor
@@ -29,7 +29,11 @@ class NxGraphSweepCtor(Subscriber[RegionGrp]):
   pass sweep-line algorithm. This algorithm builds an undirected, weighted
   graph of all the pair-wise intersections or overlapping regions within a
   RegionSet, through a subscription to RegionSweep.
+
   The graph representation is implemented as a NetworkX graph.
+
+  Extends:
+    Subscriber[RegionGrp]
 
   Attributes:
     G:
@@ -38,35 +42,6 @@ class NxGraphSweepCtor(Subscriber[RegionGrp]):
     regions:
       The RegionSet to construct the Region
       intersection graph from.
-
-  Properties:
-    results:
-      The resulting NetworkX graph of
-      intersecting Regions.
-
-  Methods:
-    Special:  __init__
-    Instance: on_intersect
-
-  Inherited from Subscriber:
-    Attributes:
-      events:
-        The registered Event types (kind).
-        If None, no register Event types.
-      eventmapper:
-        A lambda method that maps each Event to a method
-        name for a specific event handler.
-      strict:
-        Boolean flag whether or not to raise an exception
-        when Event handler not found. True, raises
-        exception; False, otherwise. Default: False.
-
-    Methods:
-      Special:  __init__
-      Instance: on_next, on_completed, on_error
-
-    Overridden Methods:
-      Special:  __init__
   """
   regions: RegionSet
   G: NxGraph
@@ -108,7 +83,7 @@ class NxGraphSweepCtor(Subscriber[RegionGrp]):
 
   def on_intersect(self, event: Event[RegionPair]):
     """
-    Handle Event when sweep-line algorithm encounters the two or more 
+    Handle Event when sweep-line algorithm encounters the two or more
     Regions intersecting. Add the given Event's context, pairs of Regions,
     to the intersection graph as an edge. The intersection Region is added
     to the edge as an data attribute.
