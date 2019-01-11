@@ -492,12 +492,12 @@ class RegionSet(Iterable[Region], abc.Container, abc.Sized, IOable):
 
     # resolve backlinks amongst the set of Regions
     for region in regionset:
-      if 'intersect' in region.data:
-        assert all([r in regionset for r in region.data['intersect']])
-        region.data['intersect'] = list(map(lambda r: regionset[r], region.data['intersect']))
-      if 'union' in region.data:
-        assert all([r in regionset for r in region.data['union']])
-        region.data['union'] = list(map(lambda r: regionset[r], region.data['union']))
+      if 'intersect' in region:
+        assert all([r in regionset for r in region['intersect']])
+        region['intersect'] = list(map(lambda r: regionset[r], region['intersect']))
+      if 'union' in region:
+        assert all([r in regionset for r in region['union']])
+        region['union'] = list(map(lambda r: regionset[r], region['union']))
 
     return regionset
 

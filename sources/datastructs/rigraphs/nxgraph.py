@@ -238,10 +238,10 @@ class NxGraph(RIGraph[nx.Graph], IOable):
       region = Region.from_object(region_data)
       assert region.dimension == nxgraph.dimension
 
-      if 'intersect' in region.data:
-        region.data['intersect'] = to_regions(G, region.data['intersect'], (u, v))
-      if 'union' in region.data:
-        region.data['union'] = to_regions(G, region.data['union'], (u, v))
+      if 'intersect' in region:
+        region['intersect'] = to_regions(G, region['intersect'], (u, v))
+      if 'union' in region:
+        region['union'] = to_regions(G, region['union'], (u, v))
 
       G.edges[u, v]['intersect'] = region
 

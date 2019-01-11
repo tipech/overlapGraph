@@ -69,8 +69,8 @@ class TestNxGraph(TestCase):
       self.assertTrue(isinstance(aregion, Region))
       self.assertTrue(isinstance(bregion, Region))
       self.assertEqual(aregion, bregion)
-      if 'intersect' in aregion.data:
-        self.assertTrue('intersect' in bregion.data)
+      if 'intersect' in aregion:
+        self.assertTrue('intersect' in bregion)
         self.assertTrue(all([isinstance(r, Region) for r in aregion['intersect']]))
         self.assertTrue(all([isinstance(r, Region) for r in bregion['intersect']]))
         self.assertTrue(all([r in bregion['intersect'] for r in aregion['intersect']]))
@@ -129,8 +129,8 @@ class TestNxGraph(TestCase):
       self.assertTrue((u, v) in S.edges)
       bregion = S.edges[u, v]['intersect']
       self.assertEqual(aregion, bregion)
-      self.assertTrue('intersect' in aregion.data)
-      self.assertTrue('intersect' in bregion.data)
+      self.assertTrue('intersect' in aregion)
+      self.assertTrue('intersect' in bregion)
       aintersect = aregion['intersect']
       bintersect = bregion['intersect']
       self.assertTrue(all([r in bintersect for r in aintersect]))

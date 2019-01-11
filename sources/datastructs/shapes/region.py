@@ -325,32 +325,41 @@ class Region(IOable, abc.Container):
     return all([d.encloses(that[i], inc_lower, inc_upper) \
                 for i, d in enumerate(self.dimensions)])
 
-  def __contains__(self, value: Union['Region', List[float]]) -> bool:
+  def __contains__(self, value: Union['Region', List[float], str]) -> bool:
     """
     Determine if the point or Region (value) lies entirely between this
     Region's lower and upper bounding vertices, inclusively. Return True
     if point or Region is entirely within this Region, otherwise False.
 
+    Determine if this Region has the given data property, if given
+    value is a str. Return True if value is in data properties,
+    otherwise False.
+
     Is syntactic sugar for:
       value in self
 
     Overload Method that wraps:
-      self.contains when value is a point, and
-      self.encloses when value is a Region
+      self.contains when value is a point,
+      self.encloses when value is a Region, and
+      self.data.__contains__ when value is a str
 
     Args:
       value:
         The point to test if it lies within this Region's
-        bounds, or the other Region to test if it lies
-        entirely within this Region's bounds.
+        bounds, the other Region to test if it lies
+        entirely within this Region's bounds, or the data
+        property exists within this Region.
 
     Returns:
       True:   If the point or other Region lies entirely
-              within this Region's bounds.
+              within this Region's bounds, or if the data
+              property exists within this Region.
       False:  Otherwise.
     """
     if isinstance(value, Region):
       return self.encloses(value)
+    elif isinstance(value, str):
+      return value in self.data
     else:
       return self.contains(value)
 
@@ -496,9 +505,9 @@ class Region(IOable, abc.Container):
 
     data = {}
     if any([linked == True, linked == 'reference', \
-            linked == 'aggregate' and 'intersect' not in self.data]):
+            linked == 'aggregate' and 'intersect' not in self]):
       data['intersect'] = [self, that]
-    elif 'intersect' in self.data:
+    elif 'intersect' in self:
       assert isinstance(self['intersect'], List)
       data['intersect'] = self['intersect'].copy()
       data['intersect'].append(that)
@@ -560,7 +569,7 @@ class Region(IOable, abc.Container):
 
     data = {}
     if any([linked == True, linked == 'reference', \
-            linked == 'aggregate' and 'union' not in self.data]):
+            linked == 'aggregate' and 'union' not in self]):
       data['union'] = [self, that]
     elif linked == 'aggregate':
       assert isinstance(self['union'], List)
