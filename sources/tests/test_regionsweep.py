@@ -20,12 +20,8 @@ from sources.datastructs.shapes.region import Region, RegionPair
 class TestRegionSweep(TestCase):
 
   def _evaluate_regionsweep(self, regions: RegionSet, i: int) -> List[RegionPair]:
-    regionsweep = RegionSweep(regions)
-    regionsweepovlps = RegionSweepOverlaps()
-    #regionsweep.subscribe(RegionSweepDebug())
-    regionsweep.subscribe(regionsweepovlps)
-    regionsweep.evaluate(i)
-    return regionsweepovlps.results
+    subscribers = [] #[RegionSweepDebug()]
+    return RegionSweepOverlaps.evaluate(regions, *subscribers)(i)
 
   def test_regionsweep_simple(self):
     regionset = RegionSet(dimension=2)

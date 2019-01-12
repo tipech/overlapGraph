@@ -12,6 +12,7 @@ from io import StringIO
 from typing import List, Tuple
 from unittest import TestCase
 
+from sources.algorithms.sweepln.regionsweepdebug import RegionSweepDebug
 from sources.algorithms.rigctor.nxgsweepctor import NxGraphSweepCtor
 from sources.algorithms.sweepln.regionsweep import RegionSweep
 from sources.datastructs.datasets.regionset import RegionSet
@@ -36,11 +37,8 @@ class TestNxGraph(TestCase):
     return output
 
   def _nxgraphctor(self, regions: RegionSet) -> NxGraph:
-    regionsweep = RegionSweep(regions)
-    nxgraphctor = NxGraphSweepCtor(regions)
-    regionsweep.subscribe(nxgraphctor)
-    regionsweep.evaluate()
-    return nxgraphctor.results
+    subscribers = [] #[RegionSweepDebug()]
+    return NxGraphSweepCtor.evaluate(regions, *subscribers)()
 
   def naive_ctor(self, nxgraph: NxGraph):
     for region in self.test_regions:

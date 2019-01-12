@@ -11,22 +11,24 @@ Classes:
 - RegionSweepOverlaps
 """
 
-from typing import List, Tuple
+from typing import Any, Callable, Iterable, List, Tuple, Union
 
-from sources.algorithms.sweepln.regionsweep import RegionSweepEvtKind
+from sources.algorithms.sweepln.basesweep import SweepTaskRunner
+from sources.algorithms.sweepln.regionsweep import RegionSweep, RegionSweepEvtKind
 from sources.datastructs.abstract.pubsub import Event, Subscriber
+from sources.datastructs.datasets.regionset import RegionSet
 from sources.datastructs.datasets.regiontime import RegionEvent
 from sources.datastructs.shapes.region import Region, RegionGrp, RegionPair
 
 
-class RegionSweepOverlaps(Subscriber[RegionGrp]):
+class RegionSweepOverlaps(SweepTaskRunner[RegionGrp, List[RegionPair]]):
   """
   Computes a list of all of the pairwise overlapping Regions
   using the one-pass sweep-line algorithm, through a subscription
   to RegionSweep.
 
   Extends:
-    Subscriber[RegionGrp]
+    SweepTaskRunner[RegionGrp, List[RegionPair]]
 
   Attributes:
     overlaps:
@@ -86,3 +88,54 @@ class RegionSweepOverlaps(Subscriber[RegionGrp]):
     assert all([isinstance(r, Region) for r in event.context])
 
     self.overlaps.append(event.context)
+
+  ### Class Methods: Evaluation
+
+  @classmethod
+  def evaluate(cls, context: Union[RegionSet, RegionSweep] = None,
+                    *subscribers: Iterable[Subscriber[RegionGrp]]) \
+                    -> Callable[[Any], List[RegionPair]]:
+    """
+    Factory function for computes a list of all of the pairwise overlapping
+    Regions using the one-pass sweep-line algorithm.
+
+    Overrides:
+      SweepTaskRunner.evaluate
+
+    Args:
+      context:
+        Region:
+          The set of Regions to compute the list of
+          the pairwise overlapping Regions from.
+        RegionSweep:
+          An existing instance of the one-pass
+          sweep-line algorithm. If None, constructs
+          a new RegionSweep instance.
+      subscribers:
+        The other Subscribers to observe the
+        one-pass sweep-line algorithm.
+
+    Returns:
+      A function to evaluate the one-pass sweep-line
+      algorithm and compute the list of the pairwise
+      overlapping Regions.
+
+      Args:
+        args, kwargs:
+          Arguments for alg.evaluate()
+
+      Returns:
+        The resulting List of pairwise
+        overlapping Regions.
+    """
+    assert isinstance(context, (RegionSet, RegionSweep))
+
+    kwargs = {'subscribers': subscribers}
+
+    if isinstance(context, RegionSet):
+      alg = RegionSweep
+      kwargs['alg_args'] = [context]
+    else:
+      alg = context
+
+    return SweepTaskRunner.evaluate(cls, alg, **kwargs)
