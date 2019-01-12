@@ -14,6 +14,7 @@ Classes:
 - Publisher
 """
 
+from collections import abc
 from dataclasses import dataclass
 from enum import IntEnum
 from typing import Callable, Generic, TypeVar, Union
@@ -140,7 +141,7 @@ class Subscriber(Observer, Generic[T]): # pylint: disable=E1136
     """
     pass # Do nothing
 
-class Publisher(Subscriber[T]):
+class Publisher(Subscriber[T], abc.Container):
   """
   Implements the wrapper for an Observer and a Subject.
 
@@ -153,6 +154,7 @@ class Publisher(Subscriber[T]):
 
   Extends:
     Subscriber[T]
+    abc.Container
 
   Attributes:
     subject:
@@ -179,6 +181,25 @@ class Publisher(Subscriber[T]):
     self.presubj = Subject()
     self.subject = Subject()
 
+  ### Methods: Queries
+
+  def __contains__(self, observer: Observer) -> bool:
+    """
+    Determine whether or not the given is already subscribed
+    to this Publisher.
+
+    Args:
+      observer:
+        The Observer to test whether or not
+        already subscribed to this Publisher.
+
+    Returns:
+      True:   If already subscribed.
+      False:  Otherwise.
+    """
+    return observer in self.subject.observers or \
+           observer in self.presubj.observers
+
   ### Methods: Subscribe
 
   def subscribe(self, observer: Observer, before: bool = False):
@@ -194,6 +215,8 @@ class Publisher(Subscriber[T]):
         before self.on_next or after self.on_next.
         True, for before; False, otherwise.
     """
+    assert observer not in self
+
     subject = self.presubj if before else self.subject
     subject.subscribe(observer)
 
