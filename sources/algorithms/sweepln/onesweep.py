@@ -14,14 +14,14 @@ Classes:
 
 from typing import TypeVar
 
-from sources.algorithms.sweepln.sweepln import Sweepln
+from sources.algorithms.sweepln.basesweep import Sweepline
 from sources.datastructs.abstract.timeline import Timeline
 
 
 T = TypeVar('T')
 
 
-class OneSweep(Sweepln[T]):
+class OneSweep(Sweepline[T]):
   """
   The generalized one-pass sweep-line algorithm.
 
@@ -29,7 +29,7 @@ class OneSweep(Sweepln[T]):
     T:  Objects type within the Timeline.
 
   Extends:
-    Sweepln[T]
+    Sweepline[T]
   """
 
   ### Methods: Evaluation
