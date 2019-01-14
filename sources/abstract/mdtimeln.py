@@ -24,7 +24,7 @@ from dataclasses import dataclass
 from functools import total_ordering
 from typing import Generic, Iterator, TypeVar
 
-from sources.datastructs.abstract.timeline import TEvent, Timeline
+from sources.abstract.timeline import TEvent, Timeline
 
 
 T = TypeVar('T')

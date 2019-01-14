@@ -22,7 +22,7 @@ from enum import IntEnum
 from functools import total_ordering
 from typing import Generic, Iterator, TypeVar
 
-from sources.datastructs.abstract.pubsub import Event
+from sources.abstract.pubsub import Event
 
 
 T = TypeVar('T')

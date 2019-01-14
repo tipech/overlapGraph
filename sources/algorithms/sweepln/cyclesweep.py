@@ -13,9 +13,9 @@ Classes:
 
 from typing import TypeVar, Union
 
+from sources.abstract.pubsub import Subscriber
+from sources.abstract.timeline import Timeline
 from sources.algorithms.sweepln.basesweep import Sweepline
-from sources.datastructs.abstract.pubsub import Subscriber
-from sources.datastructs.abstract.timeline import Timeline
 
 
 T = TypeVar('T')

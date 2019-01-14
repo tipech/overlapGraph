@@ -13,9 +13,9 @@ Classes:
 
 from typing import Any, Callable, Iterable, List, Tuple, Union
 
+from sources.abstract.pubsub import Event, Subscriber
 from sources.algorithms.sweepln.basesweep import SweepTaskRunner
 from sources.algorithms.sweepln.regionsweep import RegionSweep, RegionSweepEvtKind
-from sources.datastructs.abstract.pubsub import Event, Subscriber
 from sources.datastructs.datasets.regionset import RegionSet
 from sources.datastructs.datasets.regiontime import RegionEvent
 from sources.datastructs.shapes.region import Region, RegionGrp, RegionPair

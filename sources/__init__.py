@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 
+from sources.abstract import *
 from sources.algorithms import *
 from sources.console import *
 from sources.datastructs import *

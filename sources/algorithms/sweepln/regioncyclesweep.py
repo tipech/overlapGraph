@@ -16,9 +16,9 @@ Classes:
 
 from typing import Iterator, List, Tuple
 
+from sources.abstract.pubsub import Event
 from sources.algorithms.sweepln.cyclesweep import CycleSweep
 from sources.algorithms.sweepln.regionsweep import RegionSweep, RegionSweepEvtKind
-from sources.datastructs.abstract.pubsub import Event
 from sources.datastructs.datasets.regionset import RegionSet
 from sources.datastructs.datasets.regiontime import RegionEvent
 from sources.datastructs.shapes.region import Region, RegionGrp, RegionIntxn, RegionPair

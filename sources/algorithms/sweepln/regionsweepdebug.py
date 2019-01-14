@@ -13,8 +13,8 @@ Classes:
 
 from typing import Tuple
 
+from sources.abstract.pubsub import Event, Subscriber
 from sources.algorithms.sweepln.regionsweep import RegionSweepEvtKind
-from sources.datastructs.abstract.pubsub import Event, Subscriber
 from sources.datastructs.datasets.regiontime import RegionEvent
 from sources.datastructs.shapes.region import RegionGrp
 
