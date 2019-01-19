@@ -11,7 +11,7 @@ from typing import Dict, Iterator, List, NamedTuple, Tuple
 from unittest import TestCase
 
 from sources.algorithms.queries.enumerate import RegionIntersect
-from sources.algorithms.queries.enumerate.bynxgsweepctor import EnumerateByNxGSweepCtor
+from sources.algorithms.queries.enumerate.bynxgraph import EnumerateByNxGSweepCtor
 from sources.algorithms.queries.enumerate.byregioncyclesweep import EnumerateByRegionCycleSweep
 from sources.algorithms.sweepln.basesweep import SweepTaskRunner
 from sources.algorithms.sweepln.regionsweepdebug import RegionSweepDebug
@@ -32,13 +32,13 @@ class TestEnumerate(TestCase):
   def setUp(self):
     definedset = RegionSet(dimension=2)
     definedset.streamadd([
-      Region([0, 0], [5, 5]),
-      Region([2, 2], [5, 10]),
-      Region([1, 5], [3, 7]),
-      Region([3, 3], [4, 7]),
-      Region([-5, 5], [1, 7]),
-      Region([-5, 5], [2, 7]),
-      Region([3, 4], [5, 6])
+      Region([0, 0], [5, 5], 'A'),
+      Region([2, 2], [5, 10], 'B'),
+      Region([1, 5], [3, 7], 'C'),
+      Region([3, 3], [4, 7], 'D'),
+      Region([-5, 5], [1, 7], 'E'),
+      Region([-5, 5], [2, 7], 'F'),
+      Region([3, 4], [5, 6], 'G')
     ])
 
     bounds = Region([0]*2, [1000]*2)
@@ -46,10 +46,10 @@ class TestEnumerate(TestCase):
     self.regions = {'definedset': definedset}
 
     for nregions in [pow(10, n) for n in range(1, 4)]:
-      for sizepc in [0.1 * n for n in range(1, 6)]:
+      for sizepc in [0.01, 0.05, *([] if nregions > 100 else [0.1])]:
         sizerng = Region([0]*2, [sizepc]*2)
         regions = RegionSet.from_random(nregions, bounds, sizepc_range=sizerng, precision=1)
-        self.regions[f'{nregions},{sizepc:.1f}'] = regions
+        self.regions[f'{nregions},{sizepc:.2f}'] = regions
 
   def run_evaluator(self, name: str, clazz: SweepTaskRunner):
     regions = self.regions[name]
