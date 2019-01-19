@@ -91,7 +91,7 @@ class RegionSweep(OneSweep[RegionGrp]):
   @property
   def is_active(self) -> bool:
     """
-    Determine whether or not if the sweep-line algorithm is initialized.
+    Determine whether or not the sweep-line algorithm is initialized.
 
     Returns:
       True:   If the algorithm is initialized
