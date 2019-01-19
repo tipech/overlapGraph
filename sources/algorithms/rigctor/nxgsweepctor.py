@@ -14,7 +14,7 @@ Classes:
 - NxGraphSweepCtor
 """
 
-from typing import Any, Callable, Iterable, Tuple, Union
+from typing import Any, Callable, Iterable, Tuple
 
 from sources.abstract.pubsub import Event, Subscriber
 from sources.algorithms.sweepln.basesweep import SweepTaskRunner
@@ -102,7 +102,7 @@ class NxGraphSweepCtor(SweepTaskRunner[RegionGrp, NxGraph]):
   ### Class Methods: Evaluation
 
   @classmethod
-  def evaluate(cls, context: Union[RegionSet, RegionSweep] = None,
+  def evaluate(cls, regions: RegionSet,
                     *subscribers: Iterable[Subscriber[RegionGrp]]) \
                     -> Callable[[Any], NxGraph]:
     """
@@ -113,14 +113,9 @@ class NxGraphSweepCtor(SweepTaskRunner[RegionGrp, NxGraph]):
       SweepTaskRunner.evaluate
 
     Args:
-      context:
-        Region:
-          The set of Regions to construct a new
-          Region intersection graph from.
-        RegionSweep:
-          An existing instance of the one-pass
-          sweep-line algorithm. If None, constructs
-          a new RegionSweep instance.
+      regions:
+        The set of Regions to construct a new
+        Region intersection graph from.
       subscribers:
         List of other Subscribers to observe the
         one-pass sweep-line algorithm.
@@ -138,16 +133,9 @@ class NxGraphSweepCtor(SweepTaskRunner[RegionGrp, NxGraph]):
         The newly constructed NetworkX-based
         Region intersection graph.
     """
-    assert isinstance(context, (RegionSet, RegionSweep))
-
-    kwargs = {'subscribers': subscribers}
-
-    if isinstance(context, RegionSet):
-      kwargs['alg_args']  = [context]
-      kwargs['task_args'] = [context]
-      alg = RegionSweep
-    else:
-      kwargs['task_args'] = [context.regions]
-      alg = context
-
-    return SweepTaskRunner.evaluate(cls, alg, **kwargs)
+    assert isinstance(regions, RegionSet)
+    return SweepTaskRunner.evaluate(cls, RegionSweep, **{
+      'subscribers': subscribers,
+      'alg_args': [regions],
+      'task_args': [regions]
+    })

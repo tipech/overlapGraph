@@ -14,7 +14,7 @@ Classes:
 - EnumerateByRegionCycleSweep
 """
 
-from typing import Any, Callable, Iterable, Iterator, List, Tuple, Union
+from typing import Any, Callable, Iterable, Iterator, List, Tuple
 
 from sources.abstract.pubsub import Event, Subscriber
 from sources.algorithms.queries.enumerate import EnumerateRegionIntersect, RegionIntersect
@@ -112,7 +112,7 @@ class EnumerateByRegionCycleSweep(EnumerateRegionIntersect):
   ### Class Methods: Evaluation
 
   @classmethod
-  def evaluate(cls, context: Union[RegionSet, RegionCycleSweep] = None,
+  def evaluate(cls, regions: RegionSet,
                     *subscribers: Iterable[Subscriber[RegionGrp]]) \
                     -> Callable[[Any], Iterator[RegionIntersect]]:
     """
@@ -123,14 +123,9 @@ class EnumerateByRegionCycleSweep(EnumerateRegionIntersect):
       SweepTaskRunner.evaluate
 
     Args:
-      context:
-        Region:
-          The set of Regions to compute the Iterator
-          of the intersecting Regions from.
-        RegionCycleSweep:
-          An existing instance of the cyclic multi-pass
-          sweep-line algorithm. If None, constructs
-          a new RegionCycleSweep instance.
+      regions:
+        The set of Regions to compute the Iterator
+        of the intersecting Regions from.
       subscribers:
         The other Subscribers to observe the cyclic
         multi-pass sweep-line algorithm.
@@ -147,14 +142,8 @@ class EnumerateByRegionCycleSweep(EnumerateRegionIntersect):
       Returns:
         The resulting Iterator of intersecting Regions.
     """
-    assert isinstance(context, (RegionSet, RegionCycleSweep))
-
-    kwargs = {'subscribers': subscribers}
-
-    if isinstance(context, RegionSet):
-      alg = RegionCycleSweep
-      kwargs['alg_args'] = [context]
-    else:
-      alg = context
-
-    return SweepTaskRunner.evaluate(cls, alg, **kwargs)
+    assert isinstance(regions, RegionSet)
+    return SweepTaskRunner.evaluate(cls, RegionCycleSweep, **{
+      'subscribers': subscribers,
+      'alg_args': [regions]
+    })

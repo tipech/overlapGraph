@@ -11,7 +11,7 @@ Classes:
 - RegionSweepOverlaps
 """
 
-from typing import Any, Callable, Iterable, List, Tuple, Union
+from typing import Any, Callable, Iterable, List, Tuple
 
 from sources.abstract.pubsub import Event, Subscriber
 from sources.algorithms.sweepln.basesweep import SweepTaskRunner
@@ -92,7 +92,7 @@ class RegionSweepOverlaps(SweepTaskRunner[RegionGrp, List[RegionPair]]):
   ### Class Methods: Evaluation
 
   @classmethod
-  def evaluate(cls, context: Union[RegionSet, RegionSweep] = None,
+  def evaluate(cls, regions: RegionSet,
                     *subscribers: Iterable[Subscriber[RegionGrp]]) \
                     -> Callable[[Any], List[RegionPair]]:
     """
@@ -103,14 +103,9 @@ class RegionSweepOverlaps(SweepTaskRunner[RegionGrp, List[RegionPair]]):
       SweepTaskRunner.evaluate
 
     Args:
-      context:
-        Region:
-          The set of Regions to compute the list of
-          the pairwise overlapping Regions from.
-        RegionSweep:
-          An existing instance of the one-pass
-          sweep-line algorithm. If None, constructs
-          a new RegionSweep instance.
+      regions:
+        The set of Regions to compute the list of
+        the pairwise overlapping Regions from.
       subscribers:
         The other Subscribers to observe the
         one-pass sweep-line algorithm.
@@ -128,14 +123,8 @@ class RegionSweepOverlaps(SweepTaskRunner[RegionGrp, List[RegionPair]]):
         The resulting List of pairwise
         overlapping Regions.
     """
-    assert isinstance(context, (RegionSet, RegionSweep))
-
-    kwargs = {'subscribers': subscribers}
-
-    if isinstance(context, RegionSet):
-      alg = RegionSweep
-      kwargs['alg_args'] = [context]
-    else:
-      alg = context
-
-    return SweepTaskRunner.evaluate(cls, alg, **kwargs)
+    assert isinstance(regions, RegionSet)
+    return SweepTaskRunner.evaluate(cls, RegionSweep, **{
+      'subscribers': subscribers,
+      'alg_args': [regions]
+    })
