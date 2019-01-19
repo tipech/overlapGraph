@@ -361,10 +361,33 @@ class RegionSet(Iterable[Region], abc.Container, abc.Sized, IOable):
     if self.bounds != None:
       assert self.bounds.encloses(bounds)
 
-    regionset = RegionSet(bounds = bounds)
+    regionset = RegionSet(bounds=bounds)
     for region in self.regions:
       if bounds.encloses(region):
         regionset.add(region)
+
+    return regionset
+
+  def subset(self, subset: List[Union[Region, str]]) -> 'RegionSet':
+    """
+    Returns a new subsetted RegionSet with the only the Regions
+    within the given, more restricted Regions subset.
+
+    Args:
+      subset:
+        The list of included Regions or Region
+        unique identifiers.
+
+    Returns:
+      The newly, created subsetted RegionSet.
+    """
+    assert isinstance(subset, List)
+    assert all([isinstance(r, (Region, str)) and r in self for r in subset])
+
+    regionset = RegionSet(bounds=self.bounds, dimension=self.dimension)
+
+    for region in subset:
+      regionset.add(region if isinstance(region, Region) else self[region])
 
     return regionset
 

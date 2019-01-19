@@ -10,6 +10,7 @@ Unit tests for Regions Collection
 - test_regionset_tofrom_output
 - test_regionset_tofrom_output_backlinks
 - test_regionset_filter
+- test_regionset_subset
 """
 
 from io import StringIO
@@ -129,3 +130,25 @@ class TestRegionSet(TestCase):
     for region in filtered:
       #print(f'{region}')
       self.assertTrue(filter_bound.encloses(region))
+
+  def test_regionset_subset(self):
+    nregions = 50
+    bounds = Region([0]*2, [10]*2)
+    sizepc_range = Region([0]*2, [0.5]*2)
+    regionset = RegionSet.from_random(nregions, bounds, sizepc_range=sizepc_range, precision=1)    
+    subset = ['A', 'C', 'E', 'G', 'I', 'K'] + [regionset[r] for r in ['AA', 'P', 'Q', 'R']]
+    subsetted = regionset.subset(subset)
+
+    self.assertEqual(regionset.bounds, subsetted.bounds)
+    self.assertGreaterEqual(len(regionset), len(subsetted))
+    self.assertEqual(len(subset), len(subsetted))
+    for r in subset:
+      if isinstance(r, str):
+        #print(f'{r}: {r in subsetted} {subsetted[r]}')
+        self.assertIn(r, subsetted)
+        self.assertIs(regionset[r], subsetted[r])
+      else:
+        #print(f'{r.id}: {r in subsetted} {r}')
+        self.assertIsInstance(r, Region)
+        self.assertIn(r, subsetted)
+        self.assertIs(regionset[r.id], subsetted[r.id])
