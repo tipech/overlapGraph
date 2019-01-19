@@ -67,6 +67,19 @@ class EnumerateByNxGraph:
       The resulting Iterator of intersecting Regions as
       tuple of Region intersection and RegionIntns.
     """
+    yield from self.compute()
+
+  ### Methods: Computations
+
+  def compute(self) -> Iterator[RegionIntersect]:
+    """
+    The resulting Iterator of intersecting Regions as tuple of
+    Region intersection and RegionIntns.
+
+    Returns:
+      The resulting Iterator of intersecting Regions as
+      tuple of Region intersection and RegionIntns.
+    """
     graph = self.G
 
     for clique in nx.enumerate_all_cliques(graph.G):
