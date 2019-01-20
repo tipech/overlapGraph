@@ -66,6 +66,19 @@ class EnumerateByRCSweep(EnumerateRegionIntersect):
       The resulting Iterator of intersecting Regions as
       tuple of Region intersection and RegionIntns.
     """
+    yield from self.compute()
+
+  ### Methods: Computations
+
+  def compute(self) -> Iterator[RegionIntersect]:
+    """
+    The resulting Iterator of intersecting Regions as tuple of
+    Region intersection and RegionIntns.
+
+    Returns:
+      The resulting Iterator of intersecting Regions as
+      tuple of Region intersection and RegionIntns.
+    """
     return iter(self.intersects)
 
   ### Methods: Event Handlers
