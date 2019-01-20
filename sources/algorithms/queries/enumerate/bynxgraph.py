@@ -6,25 +6,28 @@ Intersection Graph -- NetworkX
 
 Implements the EnumerateByNxGraph class that takes a Region intersection graph,
 based on NetworkX, and enumerates all intersecting Regions (all cliques).
-Implements the EnumerateByNxGSweepCtor class that first constructs a Region
+Provides the evaluate() class method that first constructs a Region
 intersection graph, based on NetworkX, and enumerates all intersecting Regions
-(all cliques). The construction of the Region intersection graph is performed
-via the one-pass sweep-line algorithm, through a subscription to RegionSweep.
+(all cliques).
+
+The construction of the Region intersection graph is performed via the
+one-pass sweep-line algorithm, through a subscription to RegionSweep.
+
 The enumeration outputs an Iterator of the intersecting Regions as tuple of
 Region intersection and RegionIntns in order of the number of intersecting
 Regions involved.
 
 Classes:
 - EnumerateByNxGraph
-- EnumerateByNxGSweepCtor
 """
 
-from typing import Iterator
+from typing import Any, Callable, Iterator
 
 from networkx import networkx as nx
 
-from sources.algorithms.queries.enumerate import EnumerateRegionIntersect, RegionIntersect
+from sources.algorithms.queries.enumerate import RegionIntersect
 from sources.algorithms.rigctor.nxgsweepctor import NxGraphSweepCtor
+from sources.datastructs.datasets.regionset import RegionSet
 from sources.datastructs.rigraphs.nxgraph import NxGraph
 from sources.datastructs.shapes.region import Region
 
@@ -90,34 +93,39 @@ class EnumerateByNxGraph:
         assert isinstance(region, Region)
         yield (region, intersect)
 
+  ### Class Methods: Evaluation
 
-class EnumerateByNxGSweepCtor(NxGraphSweepCtor, EnumerateRegionIntersect):
-  """
-  Enumeration of all intersecting Regions by Graph Construction
-  with One-pass Sweep-line Algorithm
-
-  Computes an Iterator of all of the intersecting Regions via graph
-  construction with one-pass sweep-line algorithm, through a subscription
-  to RegionSweep.
-
-  Extends:
-    NxGraphSweepCtor
-    SweepTaskRunner[RegionGrp, Iterator[RegionIntersect]]
-  """
-
-  ### Properties
-
-  @property
-  def results(self) -> Iterator[RegionIntersect]:
+  @classmethod
+  def evaluate(cls, regions: RegionSet, *args, **kwargs) \
+                    -> Callable[[Any], Iterator[RegionIntersect]]:
     """
-    The resulting Iterator of intersecting Regions as tuple of
-    Region intersection and RegionIntns.
+    Factory function for computes an Iterator of all of the intersecting
+    Regions using the construction of a Region intersection graph by
+    one-pass sweep-line algorithm. Wraps NxGraphSweepCtor.evaluate().
 
-    Overrides:
-      NxGraphSweepCtor.results
+    Args:
+      regions:
+        The set of Regions to construct a new
+        Region intersection graph from.
+      args, kwargs:
+        Additional arguments for class method:
+        NxGraphSweepCtor.evaluate().
 
     Returns:
-      The resulting Iterator of intersecting Regions as
-      tuple of Region intersection and RegionIntns.
+      A function to evaluate the one-pass sweep-line
+      algorithm to construct the Region intersecting graph
+      and compute the Iterator of all intersecting Regions.
+
+      Args:
+        args, kwargs:
+          Arguments for alg.evaluate()
+
+      Returns:
+        The resulting Iterator of intersecting Regions.
     """
-    return EnumerateByNxGraph(self.G).results
+    fn = NxGraphSweepCtor.evaluate(regions, *args, **kwargs)
+
+    def evaluate(*args, **kwargs):
+      return cls(fn(*args, **kwargs)).results
+
+    return evaluate
