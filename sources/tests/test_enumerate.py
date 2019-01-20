@@ -12,7 +12,7 @@ from unittest import TestCase
 
 from sources.algorithms.queries.enumerate import RegionIntersect
 from sources.algorithms.queries.enumerate.bynxgraph import EnumerateByNxGraph
-from sources.algorithms.queries.enumerate.byregioncyclesweep import EnumerateByRegionCycleSweep
+from sources.algorithms.queries.enumerate.byrcsweep import EnumerateByRCSweep
 from sources.algorithms.sweepln.basesweep import SweepTaskRunner
 from sources.algorithms.sweepln.regionsweepdebug import RegionSweepDebug
 from sources.datastructs.datasets.regionset import RegionSet
@@ -88,7 +88,7 @@ class TestEnumerate(TestCase):
   def test_enumerate_results(self):
     for name in self.regions.keys():
       nxg = self.run_evaluator(name, EnumerateByNxGraph)
-      rcs = self.run_evaluator(name, EnumerateByRegionCycleSweep)
+      rcs = self.run_evaluator(name, EnumerateByRCSweep)
 
       self.assertEqual(nxg.length, rcs.length)
       self.assertDictEqual(nxg.levels, rcs.levels)

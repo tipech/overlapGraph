@@ -11,7 +11,7 @@ of the number of intersecting Regions and the position of the last intersecting
 Region's Begin Event.
 
 Classes:
-- EnumerateByRegionCycleSweep
+- EnumerateByRCSweep
 """
 
 from typing import Any, Callable, Iterable, Iterator, List, Tuple
@@ -26,7 +26,7 @@ from sources.datastructs.datasets.regiontime import RegionEvent
 from sources.datastructs.shapes.region import Region, RegionGrp, RegionIntxn, RegionPair
 
 
-class EnumerateByRegionCycleSweep(EnumerateRegionIntersect):
+class EnumerateByRCSweep(EnumerateRegionIntersect):
   """
   Enumeration of all intersecting Regions by Cyclic Multi-pass
   Sweep-line Algorithm
