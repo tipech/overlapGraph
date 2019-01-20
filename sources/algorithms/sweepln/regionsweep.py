@@ -6,6 +6,7 @@ One-Pass Sweep-line Algorithm for RegionSet
 Implements an one-pass sweep-line algorithm over a set of Regions.
 Implements RegionSweep class that executes the specific details and actions of
 the sweep-line algorithm, when encountering: Init, Begin, End or Done events.
+Adds and handles the Intersect event.
 
 Classes:
 - RegionSweepEvtKind

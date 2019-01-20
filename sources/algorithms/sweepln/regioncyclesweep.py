@@ -5,10 +5,10 @@ Cyclic Multi-Pass Sweep-line Algorithm for RegionSet
 
 Implements a cyclic multi-pass sweep-line algorithm over a set of Regions.
 Implements RegionCycleSweep class that executes the specific details and
-actions of the sweep-line algorithm, when encountering: Init, Begin, End or
-Done events. Unlike RegionSweep, for each pass the algorithm, updates a lookup
-table of intersecting Regions, level-wise. With each subsequent pass, looks
-at the previous level's intersecting Regions.
+actions of the sweep-line algorithm, when encountering: Init, Begin, End, Done
+or Intersect events. Unlike RegionSweep, for each pass the algorithm, updates
+a lookup table of intersecting Regions, level-wise. With each subsequent pass,
+looks at the previous level's intersecting Regions.
 
 Classes:
 - RegionCycleSweep
