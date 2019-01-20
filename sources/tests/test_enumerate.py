@@ -78,7 +78,7 @@ class TestEnumerate(TestCase):
       length += 1
 
     with open(f'data/test_enumerate_results.txt', 'a') as output:
-      text = f'{"%30s" % clazz.__name__}[{name}] [{elapsetime:.4f}s]: {(length, levels)}'
+      text = f'{clazz.__name__}[{name}] [{elapsetime:.4f}s]: {(length, levels)}'
       output.write(f'{text}\n') #; print(text)
       #for intersect in enumeration:
       #  output.write(f'{[r[0:8] for r in intersect]}\n')
