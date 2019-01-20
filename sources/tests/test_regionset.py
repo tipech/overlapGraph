@@ -6,6 +6,7 @@ Unit tests for Regions Collection
 - test_create_regionset
 - test_regionset_dimension_mismatch
 - test_regionset_outofbounds
+- test_regionset_iteration
 - test_regionset_from_random
 - test_regionset_tofrom_output
 - test_regionset_tofrom_output_backlinks
@@ -52,6 +53,24 @@ class TestRegionSet(TestCase):
     regionset = RegionSet(bounds=Region([0, 0], [10, 10]))
     with self.assertRaises(AssertionError):
       regionset.add(Region([-1, -1],[5, 5]))
+
+  def test_regionset_iteration(self):
+    regionset = RegionSet.from_random(100, Region([0]*2, [10]*2), sizepc_range=Region([0]*2, [0.5]*2))
+
+    for region in regionset:
+      self.assertIsInstance(region, Region)
+      self.assertIn(region, regionset)
+
+    for region in regionset.keys():
+      self.assertIsInstance(region, str)
+      self.assertIn(region, regionset)
+
+    for rid, region in regionset.items():
+      self.assertIsInstance(rid, str)
+      self.assertIsInstance(region, Region)
+      self.assertIn(rid, regionset)
+      self.assertIn(region, regionset)
+      self.assertEqual(rid, region.id)
 
   def test_regionset_from_random(self):
     nregions = 50

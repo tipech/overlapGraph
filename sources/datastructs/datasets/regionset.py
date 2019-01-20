@@ -218,6 +218,30 @@ class RegionSet(Iterable[Region], abc.Container, abc.Sized, IOable):
     """
     return self.regions.__iter__()
 
+  def keys(self) -> Iterator[Region]:
+    """
+    Return an Iterator of Region unique identifiers, for
+    iterating over this collection of Regions.
+
+    Returns:
+      An Iterator over this collection of Regions,
+      as Region unique identifiers.
+    """
+    for region in self.regions:
+      yield region.id
+
+  def items(self) -> Iterator[Region]:
+    """
+    Return an Iterator of tuples of Region ID and Region pairs, for
+    iterating over this collection of Regions.
+
+    Returns:
+      An Iterator over this collection of Regions,
+      as tuples of Region ID and Region pairs.
+    """
+    for region in self.regions:
+      yield (region.id, region)
+
   ### Methods: Insert
 
   def add(self, region: Region):
