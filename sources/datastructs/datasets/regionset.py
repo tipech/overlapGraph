@@ -14,6 +14,7 @@ Classes:
 
 from collections import abc
 from dataclasses import asdict, astuple, dataclass
+from random import shuffle
 from typing import Any, Dict, Iterable, Iterator, List, Union
 from uuid import uuid4
 
@@ -273,6 +274,37 @@ class RegionSet(Iterable[Region], abc.Container, abc.Sized, IOable):
     """
     for region in regions:
       self.add(region)
+
+  ### Methods: Clone
+
+  def copy(self) -> 'RegionSet':
+    """
+    Clone this collection of Regions and returns the
+    copied collection of Regions.
+
+    Returns:
+      The newly, constructed copy of this
+      collection of the Regions.
+    """
+    regions = RegionSet(bounds=self.bounds, dimension=self.dimension)
+    regions.regions = self.regions
+    return regions
+
+  def shuffle(self, random: RandomFn = Randoms.uniform()) -> 'RegionSet':
+    """
+    Clone this collection of Regions and returns the
+    copied and shuffled collection of Regions.
+
+    Args:
+      random:   The random number generator.
+
+    Returns:
+      The newly, constructed shuffled copy of
+      this collection of the Regions.
+    """
+    regions = self.copy()
+    shuffle(regions.regions, random=random)
+    return regions
 
   ### Methods: Queries
 
