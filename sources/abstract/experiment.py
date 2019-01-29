@@ -22,16 +22,20 @@ from io import FileIO
 from numbers import Number
 from os.path import basename
 from time import perf_counter, strftime
-from typing import Any, Dict, Generic, List, NamedTuple, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, Generic, Iterable, List, \
+                   NamedTuple, Tuple, TypeVar, Union
 
 from matplotlib import pyplot as plt
-from numpy import arange, mean
+from numpy import amax, amin, arange, mean
 
 from sources.helpers.randoms import Randoms
 
 
-X = TypeVar('X', int, float)
-Y = TypeVar('Y', int, float, Tuple[Number, ...])
+X       = TypeVar('X', int, float)
+Y       = TypeVar('Y', int, float, Tuple[Number, ...])
+Ys      = Union[List[Y], Tuple[List[Y], ...]]
+Yn      = Union[Y, Number, Ys]
+Measure = Tuple[str, str]
 
 
 class Xseries(NamedTuple):
@@ -70,6 +74,10 @@ class Experiment(Generic[X, Y]): # pylint: disable=E1136
             over these runs.
     data:   The controlled variables values and
             additional data properties.
+    aggs:   The statistically methods for computing the
+            aggregate Y value or Y component value.
+            If 'noagg', returns all Y values as list or
+            each Y component as a list of values.
   """
   name:   str
   series: List[str]
@@ -79,6 +87,7 @@ class Experiment(Generic[X, Y]): # pylint: disable=E1136
   ynames: Union[str, List[str]]
   rounds: int
   data:   Dict[str, Any]
+  aggs:   Dict[str, Callable[[Iterable[Y]], Yn]]
 
   def __init__(self, name: str, xname: str, ynames: Union[str, List[str]],
                      series: List[str], x: List[X], rounds: int = 1, **data):
@@ -102,6 +111,8 @@ class Experiment(Generic[X, Y]): # pylint: disable=E1136
       data:   The controlled variables values and
               additional data properties.
     """
+    ytups = lambda ys: all([isinstance(y, Tuple) for y in ys])
+
     self.name   = name
     self.series = series
     self.x      = x
@@ -111,19 +122,26 @@ class Experiment(Generic[X, Y]): # pylint: disable=E1136
     self.data   = data
     self.y      = {}
 
+    self.aggs = {
+      'mean':  lambda ys: tuple(mean(ys, axis=0)) if ytups(ys) else mean(ys),
+      'max':   lambda ys: tuple(amax(ys, axis=0)) if ytups(ys) else amax(ys),
+      'min':   lambda ys: tuple(amin(ys, axis=0)) if ytups(ys) else amin(ys),
+      'noagg': lambda ys: tuple(map(list, zip(*ys))) if ytups(ys) else ys
+    }
+
   ### Methods: Getters
 
-  def gety(self, key: Union[Xseries, Tuple], measure: str = None) -> Union[Y, Number]:
+  def gety(self, key: Union[Xseries, Tuple], measure: Measure = None) -> Yn:
     """
     Returns the averaged, dependent variable, y, value for the given
     independent variable, x, and series pair. If a specific Y-component,
     measure, is given, returns on that component's average value.
 
     Args:
-      key:
-        The independent variable, x, and series pair.
-      measure:
-        The specific Y component to return.
+      key:      The independent variable, x, and series pair.
+      measure:  The specific Y component and the statistical
+                method for computing the aggregate Y value
+                or Y component value.
 
     Returns:
       The averaged, dependent variable values or the
@@ -131,21 +149,31 @@ class Experiment(Generic[X, Y]): # pylint: disable=E1136
       dependent variable.
     """
     assert isinstance(key, (Tuple, Xseries)) and len(key) == 2
+    assert isinstance(measure, (Tuple, str)) or measure is None
+
+    comp, agg = (None, 'mean')
 
     if key not in self.y or len(self.y[key]) == 0:
       return None
     if not isinstance(key, Xseries):
       key = Xseries(*key)
 
-    ys = self.y[key]
-    yv = tuple(mean(ys, axis=0)) if all([isinstance(y, Tuple) for y in ys]) else mean(ys)
+    if isinstance(measure, str):
+      comp = measure
+    if isinstance(measure, Tuple):
+      assert len(measure) == 2
+      comp, agg = measure
 
-    if isinstance(self.ynames, List) and measure in self.ynames:
-      return yv[self.ynames.index(measure)]
+    assert agg in self.aggs
+
+    yv = self.aggs[agg](self.y[key])
+
+    if isinstance(self.ynames, List) and comp in self.ynames:
+      return yv[self.ynames.index(comp)]
 
     return yv
 
-  def getseries(self, series: str, measure: str = None) -> List[Union[Y, Number]]:
+  def getseries(self, series: str, *args) -> List[Yn]:
     """
     Returns an list of averaged, dependent variable, y, values for the
     given series name, ordered by the independent variable, x, values.
@@ -157,8 +185,8 @@ class Experiment(Generic[X, Y]): # pylint: disable=E1136
         The series name for which to return averaged,
         dependent variable, y, values, ordered by the
         independent variable, x, values.
-      measure:
-        The specific Y component to return.
+      args:
+        Arguments to be passed to self.gety.
 
     Returns:
       A List of averaged, dependent variable, y, values
@@ -170,13 +198,13 @@ class Experiment(Generic[X, Y]): # pylint: disable=E1136
     kv = {}
     for x, s in self.y.keys():
       if s == series:
-        kv[x] = self.gety(Xseries(x, s), measure)
+        kv[x] = self.gety(Xseries(x, s), *args)
 
     for x in self.x: assert x in kv
 
     return [kv[x] for x in self.x]
 
-  def getxy(self, xvalue: X, measure: str = None) -> List[Union[Y, Number]]:
+  def getxy(self, xvalue: X, *args) -> List[Yn]:
     """
     Returns an dictionary mapping series names to averaged, dependent
     variable, y, values for the given independent variable, x, value.
@@ -188,8 +216,8 @@ class Experiment(Generic[X, Y]): # pylint: disable=E1136
         The independent variables, x, value for which
         to return averaged, dependent variable, y, values,
         ordered by the independent variable, x, values.
-      measure:
-        The specific Y component to return.
+      args:
+        Arguments to be passed to self.gety.
 
     Returns:
       A List of averaged, dependent variable, y, values
@@ -201,7 +229,7 @@ class Experiment(Generic[X, Y]): # pylint: disable=E1136
     kv = {}
     for x, s in self.y.keys():
       if x == xvalue:
-        kv[s] = self.gety(Xseries(x, s), measure)
+        kv[s] = self.gety(Xseries(x, s), *args)
 
     for s in self.series: assert s in kv
 
@@ -231,7 +259,7 @@ class Experiment(Generic[X, Y]): # pylint: disable=E1136
 
   ### Methods: Outputs
 
-  def output_csv(self, output: FileIO, measure: str = None, orientation = True):
+  def output_csv(self, output: FileIO, measure: Measure = None, orientation = True):
     """
     Outputs this experiment's results to the given output file
     as a comma-separate values (CSV) file.
@@ -240,7 +268,9 @@ class Experiment(Generic[X, Y]): # pylint: disable=E1136
       output:
         The CSV output file.
       measure:
-        The specific Y component to return.
+        The specific Y component and the statistical
+        method for computing the aggregate Y value
+        or Y component value.
       orientation:
         Boolean flag for orientation of the values.
         True for series as rows, x values as columns.
@@ -267,7 +297,7 @@ class Experiment(Generic[X, Y]): # pylint: disable=E1136
     for r in rows:
       writer.writerow({self.xname: r, **xy(r, measure)})
 
-  def output_lineplot(self, output: FileIO, measure: str = None, 
+  def output_lineplot(self, output: FileIO, measure: Measure = None, 
                             title: str = None, xscale: str = 'linear',
                             yscale: str = 'linear', **kwargs):
     """
@@ -276,7 +306,9 @@ class Experiment(Generic[X, Y]): # pylint: disable=E1136
 
     Args:
       output:   The output image file.
-      measure:  The specific Y component to return.
+      measure:  The specific Y component and the statistical
+                method for computing the aggregate Y value
+                or Y component value.
       title:    The title for the line plot.
       xscale:   The x-axis scale type to apply.
       yscale:   The y-axis scale type to apply.
@@ -316,7 +348,7 @@ class Experiment(Generic[X, Y]): # pylint: disable=E1136
     fig.savefig(output, **kwd('savefig'))
     plt.close(fig)
 
-  def output_barchart(self, output: FileIO, measure: str = None,
+  def output_barchart(self, output: FileIO, measure: Measure = None,
                             title: str = None, yscale: str = 'linear',
                             width: float = 0.2, **kwargs):
     """
@@ -325,7 +357,9 @@ class Experiment(Generic[X, Y]): # pylint: disable=E1136
 
     Args:
       output:   The output image file.
-      measure:  The specific Y component to return.
+      measure:  The specific Y component and the statistical
+                method for computing the aggregate Y value
+                or Y component value.
       title:    The title for the bar chart.
       yscale:   The y-axis scale type to apply.
       width:    The width of each bar in the chart.
