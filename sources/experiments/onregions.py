@@ -15,9 +15,9 @@ from abc import ABCMeta, abstractmethod
 from inspect import stack
 from io import FileIO
 from numbers import Number
-from re import fullmatch
+from re import fullmatch, match
 from sys import stdout
-from typing import Any, Callable, Dict, List, Tuple, Union
+from typing import Any, Callable, Dict, Iterator, List, Tuple, Union
 
 from sources.abstract.experiment import Experiment
 from sources.algorithms.rigctor.nxgsweepctor import NxGraphSweepCtor
@@ -244,23 +244,33 @@ class ExperimentsOnRegions(metaclass=ABCMeta):
 
     Args:
       experiments:
-        The list of experiments to evaluate. If None
-        given, evaluates all experiments.
+        The list of experiments to evaluate (including
+        experiment prefixes or regular expressions).
+        If None given, evaluates all experiments.
       logger:
         The logging output file.
       istest:
         Boolean flag for whether or not include all
-        X or series values (full experiment). True for
-        test mode with reduced X or series values;
+        X or series values (full experiment).
+        True for test mode with reduced X or series values;
         False for full experiment.
     """
     exp = cls(logger, istest)
-    if len(experiments) == 0:
+
+    def get_experiment_methods(exp) -> Iterator[str]:
       for name in dir(exp):
         if callable(getattr(exp, name)) and name.startswith('experiment_'):
-          getattr(exp, name)()
+          yield name
+
+    if len(experiments) == 0:
+      for name in get_experiment_methods(exp):
+        getattr(exp, name)()
     else:
       for experiment in experiments:
         method = f'experiment_{experiment}'
         if hasattr(exp, method) and callable(getattr(exp, method)):
           getattr(exp, method)()
+        else:
+          for name in get_experiment_methods(exp):
+            if name.startswith(method) or match(experiment, name) is not None:
+              getattr(exp, name)()
