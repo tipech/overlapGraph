@@ -18,7 +18,7 @@ Decorators:
 - argument  (console_argument)
 """
 
-from typing import Dict, List, Tuple as PyTuple
+from typing import Callable, Dict, List, Tuple as PyTuple
 
 import click
 
@@ -91,16 +91,32 @@ class ConsoleCommand(click.Command):
     paramdocs:
       The mapping of the parameter name to
       the documentation text.
+    sections:
+      The list of sections in the order that they are to
+      be displayed in the help output. All sections must
+      correspond to a method on this Command with the
+      name: 'format_{section}'. Enables custom sections
+      to be added and sections to be reordered.
+  
+  Class Attributes:
+    default_sections:
+      The default list of sections in the order that they
+      are to be displayed in the help output.
   """
+  default_sections = ['usage', 'help_text', 'arguments', 'options', 'epilog']
   paramdocs: Dict[str, str]
+  sections: List[str]
 
-  def __init__(self, *args, **kwargs):
+  def __init__(self, *args, sections = None, **kwargs):
     """
     Initialize extended click.Command to support Arguments with help strings
     and automatically, generate help documentation from Google-styled
     docstrings.
 
     Args:
+      sections:
+        The list of sections in the order that they are to
+        be displayed in the help output.
       args, kwargs:
         Additional arguments to be passed to click.Command.
     """
@@ -109,6 +125,7 @@ class ConsoleCommand(click.Command):
 
     super().__init__(*args, **kwargs)
     self.paramdocs = self._getparams(help)
+    self.sections  = sections or self.default_sections.copy()
 
   ### Method: Private Helpers
 
@@ -144,16 +161,84 @@ class ConsoleCommand(click.Command):
 
     return params
 
+  ### Method: Sections
+
+  def register_section(self, section: str, before: str = '<end>'):
+    """
+    Register the an existing section with the given section name
+    in this Command and insert the section before the given section.
+    If before is '<end>', appends the section at the end.
+    If None or unknown section, does not insert section.
+    If previously registered, first unregisters and then re-registers
+    section; reordering sections.
+
+    Args:
+      section:  The section name.
+      before:   The section to insert this new
+                section before, or <end> to append
+                this new section at the end.
+    """
+    method = f'format_{section}'
+
+    assert section != before
+    assert hasattr(self, method)
+
+    if section in self.sections:
+      self.sections.remove(section)
+
+    if before == '<end>':
+      self.sections.append(section)
+    elif before in self.sections:
+      index = self.sections.index(before)
+      self.sections.insert(index, section)
+
+  def add_section(self, section: str, before: str = '<end>') -> Callable:
+    """
+    Decorator that attaches the given function as a section of this Command,
+    with the given section name and insert the section before the given
+    section. If before is '<end>', appends the section at the end.
+    If None or unknown section, does not insert section.
+
+    Args:
+      section:  The section name.
+      before:   The section to insert this new
+                section before, or <end> to append
+                this new section at the end.
+    
+    Returns:
+      The decorator.
+    """
+    def decorator(f: Callable) -> Callable:
+      method = f'format_{section}'
+      assert not hasattr(self, method)
+      setattr(self, method, f)
+      self.register_section(section, before)
+      return f
+    return decorator
+
+  def update_section(self, section: str) -> Callable:
+    """
+    Decorator that updates an existing section with the given section name
+    in this Command with the given function.
+
+    Args:
+      section:  The section name.
+    
+    Returns:
+      The decorator.
+    """
+    def decorator(f: Callable) -> Callable:
+      method = f'format_{section}'
+      assert hasattr(self, method)
+      setattr(self, method, f)
+      return f
+    return decorator
+
+  ### Method: Formatting
+
   def format_help(self, ctx, formatter):
     """
     Writes the help into the formatter if it exists.
-    
-    This calls into the following methods:
-      - format_usage
-      - format_help_text
-      - format_arguments
-      - format_options
-      - format_epilog
 
     Overrides:
       click.Command.format_help
@@ -164,11 +249,10 @@ class ConsoleCommand(click.Command):
       formatter:
         The formatter object.
     """
-    self.format_usage(ctx, formatter)
-    self.format_help_text(ctx, formatter)
-    self.format_arguments(ctx, formatter)
-    self.format_options(ctx, formatter)
-    self.format_epilog(ctx, formatter)
+    for section in self.sections:
+      format_section = getattr(self, f'format_{section}')
+      if callable(format_section):
+        format_section(ctx, formatter)
 
   def format_options(self, ctx, formatter):
     """

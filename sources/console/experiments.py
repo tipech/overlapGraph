@@ -1,5 +1,15 @@
 #!/usr/bin/env python
 
+"""
+Experiments Console Command-line
+Implements the console command-line for the 'experiments' command.
+
+Methods:
+- main
+"""
+
+from itertools import chain
+from typing import Iterable
 from sys import argv, stdout
 
 from sources.console.console import File, argument, command, option
@@ -39,6 +49,30 @@ def main(logger = stdout, test = True, experiments = []):
   with logger as output:
     ExperimentsOnRIGScale.evaluate(experiments, output, test)
     ExperimentsOnRIQPerf.evaluate(experiments, output, test)
+
+
+def _list_experiments() -> Iterable[str]:
+  """
+  Dynamically generate and return a list of the
+  available experiment names.
+
+  Returns:
+    The list of available experiments.
+  """
+  experiment_classes     = [ExperimentsOnRIGScale, ExperimentsOnRIQPerf]
+  is_experiment          = lambda exp, name: callable(getattr(exp, name)) and name.startswith('experiment_')
+  get_experiment_methods = lambda exp: [name.replace('experiment_', '') for name in dir(exp) if is_experiment(exp, name)]
+  experiments            = chain(*map(get_experiment_methods, experiment_classes))
+
+  return experiments
+
+
+@main.add_section('experiments', 'arguments')
+def format_experiments(ctx, formatter):
+  with formatter.section('Available Experiments'):
+    formatter.write_paragraph()
+    for experiment in _list_experiments():
+      formatter.write_text(f'- {experiment}')
 
 
 if __name__ == "__main__":
