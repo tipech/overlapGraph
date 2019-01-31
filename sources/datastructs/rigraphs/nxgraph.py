@@ -107,7 +107,7 @@ class NxGraph(RIGraph[nx.Graph], IOable):
     """
     self.G.add_node(region.id, region=region)
 
-  def put_overlap(self, overlap: RegionPair, **kwargs):
+  def put_overlap(self, overlap: RegionPair):
     """
     Add the given pair of Regions as a newly created edge in the graph.
     The two regions must be intersecting or overlapping.
@@ -116,14 +116,72 @@ class NxGraph(RIGraph[nx.Graph], IOable):
       overlap:
         The pair of Regions to be added
         as an intersection.
-      kwargs:
-        Additional arguments.
     """
     assert isinstance(overlap, Tuple) and len(overlap) == 2
     assert all([isinstance(r, Region) for r in overlap])
 
-    self.G.add_edge(overlap[0].id, overlap[1].id, \
-                    intersect=overlap[0].intersect(overlap[1], 'reference'))
+    a, b = overlap
+    self.G.add_edge(a.id, b.id, intersect=a.intersect(b, 'reference'))
+
+  ### Methods: Temporary Overlaps
+
+  def put_temporary_overlap(self, overlap: RegionPair):
+    """
+    Add the given pair of Regions as a newly created edge in the graph.
+    The two regions must be overlapping in at least one dimension.
+    If two regions are has an edge between them, increment to overlap weight.
+
+    Args:
+      overlap:
+        The pair of Regions to be added
+        as a temporary overlap.
+    """
+    G = self.G
+
+    assert isinstance(overlap, Tuple) and len(overlap) == 2
+    assert all([isinstance(r, Region) for r in overlap])
+
+    rid = lambda r: r.id
+    overlap = tuple([rid(r) for r in overlap])
+
+    if overlap in G.edges:
+      edge = G.edges[overlap]
+      assert 'overlaps' in edge and edge['overlaps'] < self.dimension
+      edge['overlaps'] += 1
+    else:
+      G.add_edge(*overlap, overlaps=1, intersect=None)
+
+  def finalize_overlap(self, overlap: Tuple[str, str]):
+    """
+    Update the edge associated with given pair of Region IDs in the graph,
+    with the computed intersection Region between the two Regions.
+    If the Regions do not overlap, remove the edge between the two Regions.
+
+    Args:
+      overlap:
+        The Region IDs to finalize the edge
+        into a permanent intersection or remove if
+        not intersecting.
+    """
+    G = self.G
+
+    assert isinstance(overlap, Tuple) and len(overlap) == 2
+    assert all([isinstance(r, str) and r in G.nodes for r in overlap])
+    assert overlap in G.edges; edge = G.edges[overlap]
+    assert 'overlaps' in edge; overlaps = edge['overlaps']
+
+    def intersect(a, b) -> Region:
+      assert isinstance(a, Region) and isinstance(b, Region)
+      ab = a.intersect(b, 'reference')
+      assert isinstance(ab, Region)
+      return ab
+
+    if self.dimension == overlaps:
+      a, b = tuple([G.nodes[r]['region'] for r in overlap])
+      edge['intersect'] = intersect(a, b)
+      del edge['overlaps']
+    else:
+      G.remove_edge(*overlap)
 
   ### Class Methods: Serialization
 

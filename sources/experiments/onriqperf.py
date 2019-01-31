@@ -12,7 +12,7 @@ a given subset, and a specific Region + its neighbors.
 
 Fixed:  - bounds:     0, 1000
         - dimension:  2
-Series: - method:     'base', 'rigctor', 'rigprector'
+Series: - method:     'base', 'rigctor', 'rigmdctor', 'rigprector'
 X:      - nregions:   10, 50, 100, 500, 1000, 5000, 10000, 50000, 100000
         - qsizepc:    0.01, 0.02, 0.05, 0.1, 0.2, 0.5
         - sizepc:     0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1
@@ -43,6 +43,7 @@ from sources.algorithms.queries.enumerate.bynxgraph import EnumerateByNxGraph
 from sources.algorithms.queries.enumerate.byrcsweep import EnumerateByRCSweep
 from sources.algorithms.queries.rstdenumerate.bynxgraph import NeighboredEnumByNxGraph, SubsettedEnumByNxGraph
 from sources.algorithms.queries.rstdenumerate.byrcsweep import NeighboredEnumByRCSweep, SubsettedEnumByRCSweep
+from sources.algorithms.rigctor.nxgmdsweepctor import NxGraphMdSweepCtor
 from sources.algorithms.rigctor.nxgsweepctor import NxGraphSweepCtor
 from sources.datastructs.datasets.regionset import RegionSet
 from sources.datastructs.rigraphs.nxgraph import NxGraph
@@ -86,7 +87,7 @@ class ExperimentsOnRIQPerf(ExperimentsOnRegions):
     self.xmap['nregions']    = [10, 50, 100, 500, 1000] + self._addtests([5000, 10000, 50000, 100000])
     self.xmap['sizepc']      = [0.001, 0.002, 0.005, 0.01] + self._addtests([0.02, 0.05, 0.1])
     self.xmap['qsizepc']     = [0.01, 0.02, 0.05, 0.1]  + self._addtests([0.2, 0.5])
-    self.seriesmap['method'] = ['base', 'rigctor', 'rigprector']
+    self.seriesmap['method'] = ['base', 'rigctor', 'rigmdctor', 'rigprector']
     self.measures['elapsed'] = getattr(self, 'measure_performance')
 
   ### Methods: Helpers
@@ -223,6 +224,7 @@ class ExperimentsOnRIQPerf(ExperimentsOnRegions):
     self.common_experiment(exp, ctor, query, {
       'base':       lambda r, g, q: EnumerateByRCSweep.evaluate(r)(),
       'rigctor':    lambda r, g, q: EnumerateByNxGraph.evaluate(r)(),
+      'rigmdctor':  lambda r, g, q: EnumerateByNxGraph.evaluate(r, ctor=NxGraphMdSweepCtor)(),
       'rigprector': lambda r, g, q: EnumerateByNxGraph(g).results
     })
 
@@ -241,6 +243,7 @@ class ExperimentsOnRIQPerf(ExperimentsOnRegions):
     self.common_experiment(exp, ctor, query, {
       'base':       lambda r, g, q: SubsettedEnumByRCSweep.evaluate(r, q)(),
       'rigctor':    lambda r, g, q: SubsettedEnumByNxGraph.evaluate(r, q)(),
+      'rigmdctor':  lambda r, g, q: SubsettedEnumByNxGraph.evaluate(r, q, ctor=NxGraphMdSweepCtor)(),
       'rigprector': lambda r, g, q: SubsettedEnumByNxGraph(g, q).results
     })
 
@@ -259,6 +262,7 @@ class ExperimentsOnRIQPerf(ExperimentsOnRegions):
     self.common_experiment(exp, ctor, query, {
       'base':       lambda r, g, q: NeighboredEnumByRCSweep.evaluate(r, q)(),
       'rigctor':    lambda r, g, q: NeighboredEnumByNxGraph.evaluate(r, q)(),
+      'rigmdctor':  lambda r, g, q: NeighboredEnumByNxGraph.evaluate(r, q, ctor=NxGraphMdSweepCtor)(),
       'rigprector': lambda r, g, q: NeighboredEnumByNxGraph(g, q).results
     })
 

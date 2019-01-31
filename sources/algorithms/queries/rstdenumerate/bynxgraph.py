@@ -93,7 +93,8 @@ class SubsettedEnumByNxGraph(EnumerateByNxGraph):
   @classmethod
   def evaluate(cls, context: Union[RegionSet, NxGraph],
                     subset: List[Union[Region, str]],
-                    *subscribers: Iterable[Subscriber[RegionGrp]]) \
+                    *subscribers: Iterable[Subscriber[RegionGrp]],
+                    ctor = NxGraphSweepCtor) \
                     -> Callable[[Any], Iterator[RegionIntersect]]:
     """
     Factory function for computing an Iterator of subsetted intersecting
@@ -114,6 +115,8 @@ class SubsettedEnumByNxGraph(EnumerateByNxGraph):
                     enumeration of intersecting Regions.
       subscribers:  List of other Subscribers to observe
                     the one-pass sweep-line algorithm.
+      ctor:         The Region intersection graph
+                    construction algorithm.
 
     Returns:
       A function to evaluate the one-pass sweep-line alg.
@@ -133,7 +136,7 @@ class SubsettedEnumByNxGraph(EnumerateByNxGraph):
       if isinstance(context, NxGraph):
         return cls(context, subset).results
       else:
-        fn = NxGraphSweepCtor.evaluate(context, *subscribers)
+        fn = ctor.evaluate(context, *subscribers)
         return cls(fn(*args, **kwargs), subset).results
 
     return evaluate
@@ -207,7 +210,8 @@ class NeighboredEnumByNxGraph(SubsettedEnumByNxGraph):
   @classmethod
   def evaluate(cls, context: Union[RegionSet, NxGraph],
                     region: Union[Region, str],
-                    *subscribers: Iterable[Subscriber[RegionGrp]]) \
+                    *subscribers: Iterable[Subscriber[RegionGrp]],
+                    ctor = NxGraphSweepCtor) \
                     -> Callable[[Any], Iterator[RegionIntersect]]:
     """
     Factory function for computing an Iterator of intersecting Regions that
@@ -228,6 +232,8 @@ class NeighboredEnumByNxGraph(SubsettedEnumByNxGraph):
                     resulting intersections.
       subscribers:  List of other Subscribers to observe
                     the one-pass sweep-line algorithm.
+      ctor:         The Region intersection graph
+                    construction algorithm.
 
     Returns:
       A function to evaluate the one-pass sweep-line
@@ -249,7 +255,7 @@ class NeighboredEnumByNxGraph(SubsettedEnumByNxGraph):
       if isinstance(context, NxGraph):
         return cls(context, region).results
       else:
-        fn = NxGraphSweepCtor.evaluate(context, *subscribers)
+        fn = ctor.evaluate(context, *subscribers)
         return cls(fn(*args, **kwargs), region).results
 
     return evaluate
