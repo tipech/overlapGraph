@@ -1,0 +1,45 @@
+#!/usr/bin/env python
+
+from sys import argv, stdout
+
+from sources.console.console import File, argument, command, option
+from sources.experiments.onrigscale import ExperimentsOnRIGScale
+from sources.experiments.onriqperf import ExperimentsOnRIQPerf
+
+
+@command()
+@option('--logger', type=File('w'), default=stdout)
+@option('--test/--full', default=True)
+@argument('experiments', nargs=-1)
+def main(logger = stdout, test = True, experiments = []):
+  """
+  Evaluate experiments that are specified by the given list of experiments,
+  as exact/prefix matches or regular expressions.
+
+  Experiments to analyze relationship between the number of Regions and the
+  number of Region overlaps, as well as relationship with between Regions and
+  overlaps when the density and size of Regions is changed. Experiments to
+  analyze the performance of queries over Region sets and Region intersection
+  graphs. Analyzes the performance of the algorithms for each query type. \f
+
+  Args:
+    logger:
+      The logging output file.
+    test:   
+      Boolean flag for whether or not include all
+      X or series values (full experiment).
+      True for test mode with reduced X or series values;
+      False for full experiment.
+    experiments:
+      The list of experiments to evaluate (including
+      experiment prefixes or regular expressions).
+      If None given, evaluates all experiments.
+  """
+  experiments = list(experiments)
+  with logger as output:
+    ExperimentsOnRIGScale.evaluate(experiments, output, test)
+    ExperimentsOnRIQPerf.evaluate(experiments, output, test)
+
+
+if __name__ == "__main__":
+  main()
