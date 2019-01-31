@@ -1,8 +1,10 @@
 Click==7.0
 decorator==4.3.0
+docutils==0.14
 matplotlib==3.0.1
 networkx==2.2
 numpy==1.15.3
 Rx==1.6.1
 scipy==1.1.0
 sortedcontainers==2.0.5
+sphinxcontrib-napoleon==0.7

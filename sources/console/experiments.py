@@ -2,8 +2,7 @@
 
 from sys import argv, stdout
 
-from click import File, argument, command, option
-
+from sources.console.console import File, argument, command, option
 from sources.experiments.onrigscale import ExperimentsOnRIGScale
 from sources.experiments.onriqperf import ExperimentsOnRIQPerf
 
