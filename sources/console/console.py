@@ -120,11 +120,8 @@ class ConsoleCommand(click.Command):
       args, kwargs:
         Additional arguments to be passed to click.Command.
     """
-    if 'help' in kwargs:
-      help = kwargs['help']
-
     super().__init__(*args, **kwargs)
-    self.paramdocs = self._getparams(help)
+    self.paramdocs = self._getparams(kwargs.get('help', ''))
     self.sections  = sections or self.default_sections.copy()
 
   ### Method: Private Helpers

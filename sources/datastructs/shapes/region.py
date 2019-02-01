@@ -1056,14 +1056,8 @@ class Region(IOable, abc.Container):
         combinations of fields.
     """
     assert isinstance(object, Dict)
-
-    if 'id' in object:
-      id = object['id']
-
-    data = {}
-    if 'data' in object:
-      assert isinstance(object['data'], Dict)
-      data = object['data']
+    id, data = object.get('id', id), object.get('data', {})
+    assert isinstance(data, Dict)
 
     if 'dimension' in object and any([k in object for k in ['lower', 'upper']]):
       assert isinstance(object['dimension'], int) and 0 < object['dimension']

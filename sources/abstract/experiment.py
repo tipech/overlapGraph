@@ -323,8 +323,8 @@ class Experiment(Generic[X, Y]): # pylint: disable=E1136
 
     rng  = Randoms.uniform()
     plot = lambda s: {'color': rng(3), 'label': s}
-    kw   = lambda k, df: {**df, **kwargs[k]} if k in kwargs else df
-    kwd  = lambda k: kw(k, dfs[k] if k in dfs else {})
+    kw   = lambda k, df: {**df, **kwargs.get(k, {})}
+    kwd  = lambda k: kw(k, dfs.get(k, {}))
 
     if isinstance(self.ynames, List):
       assert measure in self.ynames
@@ -375,8 +375,8 @@ class Experiment(Generic[X, Y]): # pylint: disable=E1136
     rng  = Randoms.uniform()
     plot = lambda s: {'color': rng(3), 'label': s}
     bar  = lambda ind, w, i: ind - w*len(self.series)/2 + w*(i + 1/2)
-    kw   = lambda k, df: {**df, **kwargs[k]} if k in kwargs else df
-    kwd  = lambda k: kw(k, dfs[k] if k in dfs else {})
+    kw   = lambda k, df: {**df, **kwargs.get(k, {})}
+    kwd  = lambda k: kw(k, dfs.get(k, {}))
 
     if isinstance(self.ynames, List):
       assert measure in self.ynames

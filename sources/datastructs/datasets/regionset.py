@@ -604,8 +604,7 @@ class RegionSet(Iterable[Region], abc.Container, abc.Sized, IOable):
     assert isinstance(object, Dict)
     assert 'regions' in object and isinstance(object['regions'], List)
 
-    if 'id' in object:
-      id = object['id']
+    id = object.get('id', id)
 
     if 'length' in object:
       assert isinstance(object['length'], int) and 0 < object['length']
