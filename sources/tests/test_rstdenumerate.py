@@ -9,7 +9,6 @@ Unit tests for Restricted Enumeration of Region Intersections
 
 from inspect import stack
 from math import ceil
-from random import shuffle
 from time import perf_counter
 from typing import Dict, Iterator, List, NamedTuple, Tuple, Union
 from unittest import TestCase
@@ -66,7 +65,7 @@ class TestRestrictedEnumerate(TestCase):
           size = round(subsetpc * len(regions))
           if 0 < size < len(regions):
             subname = f'{subsetpc:.2f}'
-            shuffled = regions.regions.copy(); shuffle(shuffled)
+            shuffled = regions.shuffle()
             self.subsets[name][subname] = [r.id for i, r in enumerate(shuffled) if i < size]
 
   def run_evaluator(self, name: str, subname: str, 
@@ -122,7 +121,7 @@ class TestRestrictedEnumerate(TestCase):
   def test_rstdenumerate_neighbor_results(self):
 
     for name in self.regions.keys():
-      shuffled = self.regions[name].regions.copy(); shuffle(shuffled)
+      shuffled = self.regions[name].shuffle()
 
       for region in shuffled[0:ceil(0.01 * len(shuffled))]:
         r = region.id
