@@ -55,7 +55,7 @@ class TestRegionSet(TestCase):
       regionset.add(Region([-1, -1],[5, 5]))
 
   def test_regionset_iteration(self):
-    regionset = RegionSet.from_random(100, Region([0]*2, [10]*2), sizepc_range=Region([0]*2, [0.5]*2))
+    regionset = RegionSet.from_random(100, Region([0]*2, [10]*2), sizepc=Region([0]*2, [0.5]*2))
 
     for region in regionset:
       self.assertIsInstance(region, Region)
@@ -75,15 +75,15 @@ class TestRegionSet(TestCase):
   def test_regionset_from_random(self):
     nregions = 50
     bounds = Region([0]*2, [10]*2)
-    sizepc_range = Region([0]*2, [0.5]*2)
-    regionset = RegionSet.from_random(nregions, bounds, sizepc_range=sizepc_range, precision=1)
+    sizepc = Region([0]*2, [0.5]*2)
+    regionset = RegionSet.from_random(nregions, bounds, sizepc=sizepc, precision=1)
     self._test_regionset(regionset, nregions, bounds, regionset)
 
   def test_regionset_tofrom_output(self):
     nregions = 10
     bounds = Region([0]*2, [100]*2)
-    sizepc_range = Region([0]*2, [0.5]*2)
-    regionset = RegionSet.from_random(nregions, bounds, sizepc_range=sizepc_range, precision=1)
+    sizepc = Region([0]*2, [0.5]*2)
+    regionset = RegionSet.from_random(nregions, bounds, sizepc=sizepc, precision=1)
 
     with StringIO() as output:
       RegionSet.to_output(regionset, output, options={'compact': True})
@@ -103,8 +103,8 @@ class TestRegionSet(TestCase):
   def test_regionset_tofrom_output_backlinks(self):
     nregions = 10
     bounds = Region([0]*2, [100]*2)
-    sizepc_range = Region([0]*2, [0.5]*2)
-    regionset = RegionSet.from_random(nregions, bounds, sizepc_range=sizepc_range, precision=1)
+    sizepc = Region([0]*2, [0.5]*2)
+    regionset = RegionSet.from_random(nregions, bounds, sizepc=sizepc, precision=1)
     regions = []
 
     for first in regionset:
@@ -137,8 +137,8 @@ class TestRegionSet(TestCase):
   def test_regionset_filter(self):
     nregions = 50
     bounds = Region([0]*2, [10]*2)
-    sizepc_range = Region([0]*2, [0.5]*2)
-    regionset = RegionSet.from_random(nregions, bounds, sizepc_range=sizepc_range, precision=1)    
+    sizepc = Region([0]*2, [0.5]*2)
+    regionset = RegionSet.from_random(nregions, bounds, sizepc=sizepc, precision=1)    
     filter_bound = Region([5]*2, [10]*2)
     filtered = regionset.filter(filter_bound)
 
@@ -153,8 +153,8 @@ class TestRegionSet(TestCase):
   def test_regionset_subset(self):
     nregions = 50
     bounds = Region([0]*2, [10]*2)
-    sizepc_range = Region([0]*2, [0.5]*2)
-    regionset = RegionSet.from_random(nregions, bounds, sizepc_range=sizepc_range, precision=1)    
+    sizepc = Region([0]*2, [0.5]*2)
+    regionset = RegionSet.from_random(nregions, bounds, sizepc=sizepc, precision=1)    
     subset = ['A', 'C', 'E', 'G', 'I', 'K'] + [regionset[r] for r in ['AA', 'P', 'Q', 'R']]
     subsetted = regionset.subset(subset)
 

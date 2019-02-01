@@ -48,7 +48,7 @@ class TestEnumerate(TestCase):
     for nregions in [pow(10, n) for n in range(1, 4)]:
       for sizepc in [0.01, 0.05, *([] if nregions > 100 else [0.1])]:
         sizerng = Region([0]*2, [sizepc]*2)
-        regions = RegionSet.from_random(nregions, bounds, sizepc_range=sizerng, precision=1)
+        regions = RegionSet.from_random(nregions, bounds, sizepc=sizerng, precision=1)
         self.regions[f'{nregions},{sizepc:.2f}'] = regions
 
   def run_evaluator(self, name: str, clazz: SweepTaskRunner):

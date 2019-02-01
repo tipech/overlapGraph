@@ -431,7 +431,7 @@ class Interval(IOable, abc.Container, abc.Hashable):
 
     return randomng(nvalues, self.lower, self.upper)
 
-  def random_intervals(self, nintervals: int = 1, sizepc_range: 'Interval' = None,
+  def random_intervals(self, nintervals: int = 1, sizepc: 'Interval' = None,
                              posnrng: RandomFn = Randoms.uniform(),
                              sizerng: RandomFn = Randoms.uniform(),
                              precision: int = None) -> List['Interval']:
@@ -449,32 +449,32 @@ class Interval(IOable, abc.Container, abc.Hashable):
     arbitrary precision.
 
     Args:
-      nintervals:   The number of Intervals to be generated.
-      sizepc_range: The size range as a percentage of the
-                    total Interval length.
-      posnrng:      The random number generator for choosing
-                    the position of the Interval.
-      sizerng:      The random number generator for choosing
-                    the size of the Interval.
-      precision:    The number of digits after the decimal
-                    point for the lower and upper bounding
-                    values, or None for arbitrary precision.
+      nintervals: The number of Intervals to be generated.
+      sizepc:     The size range as a percentage of the
+                  total Interval length.
+      posnrng:    The random number generator for choosing
+                  the position of the Interval.
+      sizerng:    The random number generator for choosing
+                  the size of the Interval.
+      precision:  The number of digits after the decimal
+                  point for the lower and upper bounding
+                  values, or None for arbitrary precision.
 
     Returns:
       List of randonly generated Intervals
       within this Interval.
     """
-    if sizepc_range == None:
-      sizepc_range = Interval(0, 1)
+    if sizepc == None:
+      sizepc = Interval(0, 1)
     if precision != None:
       assert isinstance(precision, int)
 
-    assert isinstance(sizepc_range, Interval) and Interval(0, 1).encloses(sizepc_range)
+    assert isinstance(sizepc, Interval) and Interval(0, 1).encloses(sizepc)
     assert isinstance(posnrng, Callable) and isinstance(sizerng, Callable)
 
     intervals = []
     positions = self.random_values(nintervals, posnrng)
-    lengths   = [s * self.length for s in sizepc_range.random_values(nintervals, sizerng)]
+    lengths   = [s * self.length for s in sizepc.random_values(nintervals, sizerng)]
 
     for i in range(nintervals):
       length = lengths[i]

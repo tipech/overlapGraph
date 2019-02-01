@@ -137,7 +137,7 @@ class ExperimentsOnRegions(metaclass=ABCMeta):
     """
     bounds  = Region([0]*dimension, [experiment.data['maxbound']]*dimension)
     sizepr  = Region([0]*dimension, [sizepc]*dimension)
-    regions = RegionSet.from_random(nregions, bounds=bounds, sizepc_range=sizepr)
+    regions = RegionSet.from_random(nregions, bounds=bounds, sizepc=sizepr)
 
     self.output_log(experiment, {
       'nregions': nregions,

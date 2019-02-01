@@ -41,7 +41,7 @@ class TestRegionSweep(TestCase):
       self.assertEqual(len(expect), len(actual))
 
   def test_regionsweep_random(self):
-    regionset = RegionSet.from_random(30, Region([0]*3, [100]*3), sizepc_range=Region([0]*3, [0.5]*3), precision=0)
+    regionset = RegionSet.from_random(30, Region([0]*3, [100]*3), sizepc=Region([0]*3, [0.5]*3), precision=0)
     actuals = []
     #for region in regionset: print(f'{region}')
     for i in range(regionset.dimension):

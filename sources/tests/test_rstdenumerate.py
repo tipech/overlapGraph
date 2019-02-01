@@ -55,8 +55,8 @@ class TestRestrictedEnumerate(TestCase):
     for nregions in [pow(10, n) for n in range(1, 4)]:
       for sizepc in [0.01, 0.05, 0.1]:
         name = f'{nregions},{sizepc:.2f}'
-        sizerng = Region([0]*2, [sizepc]*2)
-        regions = RegionSet.from_random(nregions, bounds, sizepc_range=sizerng, precision=1)
+        sizepcr = Region([0]*2, [sizepc]*2)
+        regions = RegionSet.from_random(nregions, bounds, sizepc=sizepcr, precision=1)
 
         self.regions[name] = regions
         self.subsets[name] = {}
