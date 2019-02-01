@@ -266,6 +266,57 @@ class Region(IOable, abc.Container):
 
     return f'{self.__class__.__name__}({dictkvpairs})'
 
+  ### Methods: Data Assignment
+
+  def getdata(self, key: str, default: Any = None) -> Any:
+    """
+    Return the data value for key if key is in this Region's data
+    dictionary, else 'default'. If 'default' is not given, it defaults to None,
+    so that this method never raises a KeyError.
+
+    Args:
+      key, default:
+        Arguments for self.data.get().
+    
+    Returns:
+      This Region's data value or the default.
+    """
+    return self.data.get(key, default)
+
+  def initdata(self, key: str, default: Any = None) -> Any:
+    """
+    If key is in this Region's data dictionary, return its value.
+    If not, insert key with a value of 'default' and return 'default'.
+    'default' defaults to None.
+
+    Args:
+      key, default:
+        Arguments for self.data.setdefault().
+    
+    Returns:
+      This Region's data value or the default.
+    """
+    return self.data.setdefault(key, default)
+
+  def removedata(self, key: str, default: Any = None) -> Any:
+    """
+    If key is in this Region's data dictionary, remove it and return its
+    value, else return 'default'. If 'default' is not given and key is not
+    in the data dictionary, a KeyError is raised.
+
+    Args:
+      key, default:
+        Arguments for self.data.pop().
+    
+    Returns:
+      This Region's removed data value or the default.
+    
+    Raises:
+      KeyError: If 'default' is not given and 
+                key is not in the data dictionary.
+    """
+    return self.data.pop(key, default)
+
   ### Methods: Queries
 
   def contains(self, point: List[float], inc_lower = True, inc_upper = True) -> bool:
