@@ -86,7 +86,7 @@ class TestRegionSet(TestCase):
     regionset = RegionSet.from_random(nregions, bounds, sizepc_range=sizepc_range, precision=1)
 
     with StringIO() as output:
-      regionset.to_output(output, options={'compact': True})
+      RegionSet.to_output(regionset, output, options={'compact': True})
       before = output.getvalue()
       #print(before)
       output.seek(0)
@@ -95,7 +95,7 @@ class TestRegionSet(TestCase):
 
       output.truncate(0)
       output.seek(0)
-      newregionset.to_output(output, options={'compact': True})
+      RegionSet.to_output(newregionset, output, options={'compact': True})
       after = output.getvalue()
       #print(after)
       self.assertEqual(before, after)
@@ -119,7 +119,7 @@ class TestRegionSet(TestCase):
       regionset.add(region)
 
     with StringIO() as output:
-      regionset.to_output(output, options={'compact': True})
+      RegionSet.to_output(regionset, output, options={'compact': True})
       #print(output.getvalue())
       output.seek(0)
       newregionset = RegionSet.from_source(output, 'json')

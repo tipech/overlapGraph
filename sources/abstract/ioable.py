@@ -35,13 +35,16 @@ class IOable(metaclass=ABCMeta):
 
   ### Methods: Serialization
 
-  def to_output(self, output: TextIOBase, format: str = 'json',
-                      options: Dict = {}, **kwargs):
+  @classmethod
+  def to_output(cls, object: 'IOable',
+                     output: TextIOBase, format: str = 'json',
+                     options: Dict = {}, **kwargs):
     """
-    Outputs this object to the given output stream in the specified output
-    data representation format.
+    Outputs the given object to the given output stream in
+    the specified output data representation format.
 
     Args:
+      object:   The object to serialize.
       output:   The output stream to serialize object to.
       format:   The output serialization format: 'json'.
       options:  The options to be passed to to_object
@@ -69,7 +72,7 @@ class IOable(metaclass=ABCMeta):
       if 'indent' not in kwargs:
         kwargs['indent'] = 2
       encoder = JSONEncoder(default=json_encoder, **kwargs)
-      for chunk in encoder.iterencode(self):
+      for chunk in encoder.iterencode(object):
         output.write(chunk)
     else:
       raise ValueError(f'Unsupported "{format}" output format')

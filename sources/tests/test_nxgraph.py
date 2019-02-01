@@ -89,7 +89,7 @@ class TestNxGraph(TestCase):
       for json_graph in ['node_link', 'adjacency']:
         options = { 'json_graph': json_graph, 'compact': True }
         output.truncate(0)
-        nxgraph.to_output(self._reset_output(output), options=options)
+        NxGraph.to_output(nxgraph, self._reset_output(output), options=options)
         #json_output = output.getvalue()
         #print(f'{json_graph}:')
         #print(f'{json_output}')
@@ -106,7 +106,7 @@ class TestNxGraph(TestCase):
       for json_graph in ['node_link', 'adjacency']:
         options = { 'json_graph': json_graph, 'compact': True }
         output.truncate(0)
-        nxgraph.to_output(self._reset_output(output), options=options)
+        NxGraph.to_output(nxgraph, self._reset_output(output), options=options)
         #json_output = output.getvalue()
         #print(f'{json_graph}:')
         #print(f'{json_output}')
@@ -123,7 +123,7 @@ class TestNxGraph(TestCase):
       for json_graph in ['node_link', 'adjacency']:
         options = { 'json_graph': json_graph, 'compact': True }
         output.truncate(0)
-        nxgraph.to_output(self._reset_output(output), options=options)
+        NxGraph.to_output(nxgraph, self._reset_output(output), options=options)
         #json_output = output.getvalue()
         #print(f'{json_graph}:')
         #print(f'{json_output}')
