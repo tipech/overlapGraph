@@ -152,7 +152,7 @@ class Interval(IOable, abc.Container, abc.Hashable):
       object.__setattr__(self, 'lower', float(lower))
       object.__setattr__(self, 'upper', float(upper))
 
-  ### Methods: Queries
+  ### Methods: Hash
 
   def __hash__(self) -> str:
     """
@@ -164,6 +164,31 @@ class Interval(IOable, abc.Container, abc.Hashable):
       The hash value for this object.
     """
     return hash(astuple(self))
+
+  ### Methods: Clone
+
+  def __copy__(self) -> 'Interval':
+    """
+    Create a shallow copy of this Interval and return it.
+
+    Returns:
+      The newly created Interval copy.
+    """
+    return Interval(*astuple(self))
+
+  def copy(self) -> 'Interval':
+    """
+    Create a shallow copy of this Interval and return it.
+
+    Alias for:
+      self.__copy__()
+
+    Returns:
+      The newly created Interval copy.
+    """
+    return self.__copy__()
+
+  ### Methods: Queries
 
   def contains(self, value: float, inc_lower = True, inc_upper = True) -> bool:
     """

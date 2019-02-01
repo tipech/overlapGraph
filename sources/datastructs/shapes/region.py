@@ -266,6 +266,81 @@ class Region(IOable, abc.Container):
 
     return f'{self.__class__.__name__}({dictkvpairs})'
 
+  ### Methods: Clone
+
+  def __copy__(self) -> 'Region':
+    """
+    Create a shallow copy of this Region and return it. The lower and upper
+    values will remain the same. The 'id' is different. The data property
+    object is copied, but the object items are references to original values.
+
+    Returns:
+      The newly created Region copy.
+    """
+    return Region(self.lower, self.upper, **self.data)
+
+  def copy(self) -> 'Region':
+    """
+    Create a shallow copy of this Region and return it. The lower and upper
+    values will remain the same. The 'id' is different. The data property
+    object is copied, but the object items are references to original values.
+
+    Alias for:
+      self.__copy__(self)
+
+    Returns:
+      The newly created Region copy.
+    """
+    return self.__copy__()
+
+  def __deepcopy__(self, memo: Dict = {}) -> 'Region':
+    """
+    Create a deep copy of this Region and return it. The lower and upper
+    values will remain the same. The 'id' is different. The data property
+    object is copied with each item recursively copied.
+
+    Args:
+      memo: The dictionary of objects already copied
+            during the current copying pass.
+
+    Returns:
+      The newly created Region copy.
+    """
+    mkey, data = id(self), self.data.copy()
+
+    if mkey in memo:
+      return memo[mkey]
+
+    for k, v in data.items():
+      if callable(getattr(v, '__deepcopy__')):
+        data[k] = memo.setdefault(id(v), v.__deepcopy__(memo))
+      elif callable(getattr(v, '__copy__')):
+        data[k] = memo.setdefault(id(v), v.__copy__())
+      else:
+        data[k] = memo.setdefault(id(v), v)
+
+    region = Region(self.lower, self.upper, **data)
+    memo[mkey] = region
+    return region
+
+  def deepcopy(self, memo: Dict = {}) -> 'Region':
+    """
+    Create a deep copy of this Region and return it. The lower and upper
+    values will remain the same. The 'id' is different. The data property
+    object is copied with each item recursively copied.
+
+    Aliases:
+      self.__deepcopy__(memo)
+
+    Args:
+      memo: The dictionary of objects already copied
+            during the current copying pass.
+
+    Returns:
+      The newly created Region copy.
+    """
+    return self.__deepcopy__(memo)
+
   ### Methods: Data Assignment
 
   def getdata(self, key: str, default: Any = None) -> Any:
@@ -277,7 +352,7 @@ class Region(IOable, abc.Container):
     Args:
       key, default:
         Arguments for self.data.get().
-    
+
     Returns:
       This Region's data value or the default.
     """
@@ -292,7 +367,7 @@ class Region(IOable, abc.Container):
     Args:
       key, default:
         Arguments for self.data.setdefault().
-    
+
     Returns:
       This Region's data value or the default.
     """
@@ -307,12 +382,12 @@ class Region(IOable, abc.Container):
     Args:
       key, default:
         Arguments for self.data.pop().
-    
+
     Returns:
       This Region's removed data value or the default.
-    
+
     Raises:
-      KeyError: If 'default' is not given and 
+      KeyError: If 'default' is not given and
                 key is not in the data dictionary.
     """
     return self.data.pop(key, default)

@@ -277,18 +277,71 @@ class RegionSet(Iterable[Region], abc.Container, abc.Sized, IOable):
 
   ### Methods: Clone
 
-  def copy(self) -> 'RegionSet':
+  def __copy__(self) -> 'RegionSet':
     """
-    Clone this collection of Regions and returns the
-    copied collection of Regions.
+    Shallow clone this collection of Regions and
+    returns the copied collection of Regions.
 
     Returns:
-      The newly, constructed copy of this
-      collection of the Regions.
+      The newly, constructed shallow copy of
+      this collection of the Regions.
     """
-    regions = RegionSet(bounds=self.bounds, dimension=self.dimension)
-    regions.regions = self.regions
+    bounds  = self.bounds.copy() if self.bounds else None
+    regions = RegionSet(bounds=bounds, dimension=self.dimension)
+    regions.regions = self.regions.copy()
     return regions
+
+  def copy(self) -> 'RegionSet':
+    """
+    Shallow clone this collection of Regions and
+    returns the copied collection of Regions.
+
+    Alias for:
+      self.__copy__()
+
+    Returns:
+      The newly, constructed shallow copy of
+      this collection of the Regions.
+    """
+    return self.__copy__()
+
+  def __deepcopy__(self, memo: Dict = {}) -> 'RegionSet':
+    """
+    Deep clone this collection of Regions and
+    returns the copied collection of Regions.
+
+    Args:
+      memo: The dictionary of objects already copied
+            during the current copying pass.
+
+    Returns:
+      The newly, constructed deep copy of
+      this collection of the Regions.
+    """
+    bounds  = self.bounds.deepcopy(memo) if self.bounds else None
+    regions = RegionSet(bounds=bounds, dimension=self.dimension)
+    regions.streamadd([r.deepcopy(memo) for r in self.regions])
+    return regions
+
+  def deepcopy(self, memo: Dict = {}) -> 'RegionSet':
+    """
+    Deep clone this collection of Regions and
+    returns the copied collection of Regions.
+
+    Alias for:
+      self.__deepcopy__(memo)
+
+    Args:
+      memo: The dictionary of objects already copied
+            during the current copying pass.
+
+    Returns:
+      The newly, constructed deep copy of
+      this collection of the Regions.
+    """
+    return self.__deepcopy__(memo)
+
+  ### Methods: Shuffle
 
   def shuffle(self, random: RandomFn = Randoms.uniform()) -> 'RegionSet':
     """
