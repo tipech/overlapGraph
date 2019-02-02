@@ -14,7 +14,7 @@ Classes:
 - RegionCycleSweep
 """
 
-from typing import Iterator, List, Tuple
+from typing import Dict, Iterator, List, Tuple
 
 from sources.abstract.pubsub import Event
 from sources.algorithms.sweepln.cyclesweep import CycleSweep
@@ -43,9 +43,18 @@ class RegionCycleSweep(RegionSweep, CycleSweep[RegionGrp]):
       A list of list. Each list in the outer list
       represents a single pass of the algorithm, a level.
       Each item in the list is an intersecting Region.
+    intersects:
+      A mapping from base Regions to intersecting Regions
+      involving the corresponding Region.
+    nextintxs:
+      A mapping from base Regions to intersecting Regions
+      involving the corresponding Region for the next
+      iteration (pass) of the sweep-line algorithm.
   """
-  iteration: int
-  levels: List[List[Region]]
+  iteration:  int
+  levels:     List[List[Region]]
+  intersects: Dict[str, List[Region]]
+  nextintxs:  Dict[str, List[Region]]
 
   def __init__(self, regions: RegionSet):
     """
@@ -60,38 +69,10 @@ class RegionCycleSweep(RegionSweep, CycleSweep[RegionGrp]):
 
     self.iteration = -1
     self.levels = []
+    self.intersects = {}
 
-  ### Methods: Intersections
-
-  def findintersects(self, region: Region) -> Iterator[RegionPair]:
-    """
-    Return an iterator over all the pairs of overlaps between the
-    given Region and the currently active Regions, as RegionPairs.
-
-    Overrides:
-      RegionSweep.findintersects
-
-    Args:
-      region:   The Region to find pairs of overlaps with
-                currently active Regions, as RegionPairs.
-
-    Returns:
-      An iterator over all the pairs of overlaps between
-      the Region and currently active Regions.
-    """
-    assert len(self.levels) == self.iteration + 1
-
-    if self.iteration == 0:
-      for a, b in RegionSweep.findintersects(self, region):
-        yield (a, b)
-    else:
-      for intersect in self.levels[-2]:
-        if intersect[self.dimension].lower > region[self.dimension].lower:
-          break
-        if region in intersect['intersect']:
-          break
-        if region.overlaps(intersect):
-          yield (intersect, region)
+    for region in regions:
+      self.intersects[region.id] = [region]
 
   ### Methods: Event Handlers
 
@@ -114,6 +95,31 @@ class RegionCycleSweep(RegionSweep, CycleSweep[RegionGrp]):
 
     self.levels.append([])
     self.iteration += 1
+    self.nextintxs = {}
+
+  def on_begin(self, event: RegionEvent):
+    """
+    Handle Event when sweep-line algorithm encounters
+    the beginning of a Region.
+
+    Overrides:
+      RegionSweep.on_begin
+
+    Args:
+      event:
+        The Region beginning Event.
+    """
+    assert self.is_active
+    assert event.kind == RegionSweepEvtKind.Begin
+
+    region = event.context
+    self.nextintxs[region.id] = []
+
+    for a, b in self.findintersects(region):
+      self.on_intersect(Event(RegionSweepEvtKind.Intersect, (a, b)))
+
+    for intersect in self.intersects[region.id]:
+      self.actives[intersect.id] = intersect
 
   def on_intersect(self, event: Event[RegionPair]):
     """
@@ -142,8 +148,29 @@ class RegionCycleSweep(RegionSweep, CycleSweep[RegionGrp]):
     event.setparams(iteration=self.iteration, levels=self.levels,
                     aggregate=region['intersect'], intersect=region)
 
+    self.nextintxs[b.id].append(region)
     self.levels[-1].append(region)
     self.bbuffer.append(event)
+
+  def on_end(self, event: RegionEvent):
+    """
+    Handle Event when sweep-line algorithm encounters
+    the ending of a Region.
+
+    Overrides:
+      RegionSweep.on_end
+
+    Args:
+      event:
+        The Region ending Event.
+    """
+    assert self.is_active
+    assert event.kind == RegionSweepEvtKind.End
+
+    region = event.context
+
+    for intersect in self.intersects[region.id]:
+      del self.actives[intersect.id]
 
   def on_done(self, event: RegionEvent):
     """
@@ -165,6 +192,8 @@ class RegionCycleSweep(RegionSweep, CycleSweep[RegionGrp]):
     if len(self.levels[-1]) == 0:
       assert hasattr(event, 'stopiteration')
       event.stopiteration()
+
+    self.intersects = self.nextintxs
 
   ### Methods: Evaluation
 

@@ -61,7 +61,8 @@ class RestrictedRegionCycleSweep(RestrictedRegionSweep, RegionCycleSweep):
     Args:
       event:  The Region beginning Event.
     """
-    RestrictedRegionSweep.on_begin(self, event)
+    if self._should_process(event):
+      RegionCycleSweep.on_begin(self, event)
 
   def on_end(self, event: RegionEvent):
     """
@@ -75,4 +76,5 @@ class RestrictedRegionCycleSweep(RestrictedRegionSweep, RegionCycleSweep):
     Args:
       event:  The Region ending Event.
     """
-    RestrictedRegionSweep.on_end(self, event)
+    if self._should_process(event):
+      RegionCycleSweep.on_end(self, event)
