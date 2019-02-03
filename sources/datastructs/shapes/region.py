@@ -999,8 +999,10 @@ class Region(IOable, abc.Container):
     assert isinstance(object, Region)
 
     fieldnames = ['id', 'dimension', 'dimensions', 'data']
+    iscompact  = 'compact' in kwargs and kwargs['compact']
+    regionid   = lambda r: r.id if iscompact else r['id']
 
-    if 'compact' in kwargs and kwargs['compact']:
+    if iscompact:
       dictobj = dict(map(lambda f: (f, getattr(object, f)), fieldnames))
     else:
       dictobj = asdict(object)
@@ -1009,9 +1011,9 @@ class Region(IOable, abc.Container):
       if dictobj['data'] is object.data:
         dictobj['data'] = dictobj['data'].copy()
       if 'intersect' in dictobj['data']:
-        dictobj['data']['intersect'] = list(map(lambda r: r.id, dictobj['data']['intersect']))
+        dictobj['data']['intersect'] = list(map(regionid, dictobj['data']['intersect']))
       if 'union' in dictobj['data']:
-        dictobj['data']['union'] = list(map(lambda r: r.id, dictobj['data']['union']))
+        dictobj['data']['union'] = list(map(regionid, dictobj['data']['union']))
       for k, _ in dictobj['data'].items():
         if k.startswith('_'):
           del dictobj['data'][k]
