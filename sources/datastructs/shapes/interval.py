@@ -588,10 +588,10 @@ class Interval(IOable, abc.Container, abc.Hashable):
       The newly constructed Interval.
     """
     if isinstance(object, Dict):
-      assert 'lower' in object and isinstance(object['lower'], Real)
-      assert 'upper' in object and isinstance(object['upper'], Real)
+      assert 'lower' in object and isinstance(object['lower'], (Real, str))
+      assert 'upper' in object and isinstance(object['upper'], (Real, str))
       return Interval(**object)
     else:
       assert isinstance(object, (List, Tuple)) and len(object) == 2
-      assert all([isinstance(item, Real) for item in object])
+      assert all([isinstance(item, (Real, str)) for item in object])
       return Interval(*object)
