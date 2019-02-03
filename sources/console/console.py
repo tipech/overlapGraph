@@ -139,6 +139,9 @@ class ConsoleCommand(click.Command):
       The dictionary mapping the parameter name to
       the parameter text.
     """
+    if docstring is None:
+      return {}
+
     def elementByTagName(tagname: str):
       return lambda n: isinstance(n, Element) and n.tagname == tagname
     def getvalue(node, tagname: str) -> str:
