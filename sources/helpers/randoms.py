@@ -20,12 +20,12 @@ Classes:
 
 from typing import Callable, Dict, List, Union
 
-from numpy import ndarray, random
+from numpy import ndarray, mean, random
 
 
 ShapeSize = Union[None, int, List[int]]
 NDArray   = ndarray
-RandomFn  = Callable[[float, float, ShapeSize], NDArray]
+RandomFn  = Callable[[ShapeSize, float, float], NDArray]
 
 
 class Randoms:
@@ -35,10 +35,6 @@ class Randoms:
   particular distribution or random number generation function. The only
   missing parameters is the lower and upper bounds of the values generated
   and the sample size of the output.
-
-  Methods:
-    Class Methods:
-      get, uniform, triangular
   """
 
   @classmethod
@@ -76,6 +72,24 @@ class Randoms:
     return getattr(cls, name)(**kwargs)
 
   @classmethod
+  def list(cls) -> List[str]:
+    """
+    Returns the list of available random number
+    generators (distributions).
+
+    Returns:
+      The list of available random number
+      generators (distributions).
+    """
+    excluded = ['get', 'list']
+    israndng = lambda f: all([callable(getattr(cls, f)), f not in excluded,
+                              not f.startswith('_')])
+
+    return [f for f in dir(cls) if israndng(f)]
+
+  ### Class Methods: Random Number Generators
+
+  @classmethod
   def uniform(cls) -> RandomFn:
     """
     Returns a function that draws samples from a uniform distribution.
@@ -93,7 +107,7 @@ class Randoms:
     return uniform_rng
 
   @classmethod
-  def triangular(cls, mode: float) -> RandomFn:
+  def triangular(cls, mode: float = 0.5) -> RandomFn:
     """
     Returns a function that draws samples from the triangular distribution
     over the interval [left, right]. The triangular distribution is a
@@ -104,13 +118,14 @@ class Randoms:
     Args:
       mode:
         The peak value of the triangular
-        distribution.
+        distribution as a percentage of the
+        total length.
 
     Returns:
       A factory function that draws samples
       from a triangular distribution.
     """
-    def triangular_rng(size: int = 1, left: float = 0, right: float = mode):
-      return random.triangular(left, mode, right, size)
+    def triangular_rng(size: int = 1, left: float = 0, right: float = 1):
+      return random.triangular(left, (right - left)*mode + left, right, size)
 
     return triangular_rng
