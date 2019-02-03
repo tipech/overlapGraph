@@ -4,6 +4,7 @@ docutils==0.14
 matplotlib==3.0.1
 networkx==2.2
 numpy==1.15.3
+pandas==0.24.0
 Rx==1.6.1
 scipy==1.1.0
 sortedcontainers==2.0.5
