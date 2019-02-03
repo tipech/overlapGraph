@@ -18,7 +18,7 @@ Classes:
 from collections import abc
 from dataclasses import asdict, astuple, dataclass
 from functools import reduce
-from numbers import Real
+from numbers import Number, Real
 from typing import Any, Callable, Dict, List, Tuple, Union
 
 from numpy import floor
@@ -50,7 +50,7 @@ class Interval(IOable, abc.Container, abc.Hashable):
   lower: float
   upper: float
 
-  def __init__(self, lower, upper):
+  def __init__(self, lower: Number, upper: Number):
     """
     Initialize a new Interval, with the lower and upper bounding values.
     Converts input values to floating point numbers, and assigns
