@@ -222,7 +222,7 @@ class NxGraph(RIGraph[nx.Graph], IOable):
       else:
         raise ValueError(f'Unsupported json_graph format.')
 
-    datafmt = kwargs['json_graph'] if 'json_graph' in kwargs else 'node-link'
+    datafmt = kwargs['json_graph'] if 'json_graph' in kwargs else 'node_link'
     data = {
       'dimension': object.dimension,
       'json_graph': datafmt,
