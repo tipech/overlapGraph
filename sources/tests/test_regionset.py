@@ -125,14 +125,11 @@ class TestRegionSet(TestCase):
       newregionset = RegionSet.from_source(output, 'json')
 
       for region in regions:
-        if 'intersect' in region:
-          self.assertTrue('intersect' in newregionset[region.id])
-          self.assertTrue(all([isinstance(r, Region) for r in newregionset[region.id]['intersect']]))
-          self.assertListEqual(region['intersect'], newregionset[region.id]['intersect'])
-        if 'union' in region:
-          self.assertTrue('union' in newregionset[region.id])
-          self.assertTrue(all([isinstance(r, Region) for r in newregionset[region.id]['union']]))
-          self.assertListEqual(region['union'], newregionset[region.id]['union'])
+        for field in ['intersect', 'union']:
+          if field in region:
+            self.assertTrue(field in newregionset[region.id])
+            self.assertTrue(all([isinstance(r, Region) for r in newregionset[region.id][field]]))
+            self.assertListEqual(region[field], newregionset[region.id][field])
 
   def test_regionset_filter(self):
     nregions = 50
