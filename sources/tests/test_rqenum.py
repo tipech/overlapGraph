@@ -3,8 +3,8 @@
 """
 Unit tests for Restricted Enumeration of Region Intersections
 
-- test_rstdenumerate_mrqenum_results
-- test_rstdenumerate_srqenum_results
+- test_mrqenum_results
+- test_srqenum_results
 """
 
 from inspect import stack
@@ -19,13 +19,13 @@ from sources.algorithms import \
 from sources.datastructs import Region, RegionIntxn, RegionSet
 
 
-class TestRestrictedEnumerateResult(NamedTuple):
+class TestRQEnumResult(NamedTuple):
   length: int
   levels: Dict[int, int]
   intersects: List[Tuple[str]]
 
 
-class TestRestrictedEnumerate(TestCase):
+class TestRQEnumerate(TestCase):
 
   regions: Dict[str, RegionSet]
   subsets: Dict[str, List[str]]
@@ -100,9 +100,9 @@ class TestRestrictedEnumerate(TestCase):
       #for intersect in results:
       #  output.write(f'{[r[0:8] for r in intersect]}\n')
 
-    return TestRestrictedEnumerateResult(length, levels, results)
+    return TestRQEnumResult(length, levels, results)
 
-  def test_rstdenumerate_mrqenum_results(self):
+  def test_mrqenum_results(self):
 
     for name in self.regions.keys():
       for s, subset in self.subsets[name].items():
@@ -115,7 +115,7 @@ class TestRestrictedEnumerate(TestCase):
         for intersect in nxg.intersects:
           self.assertIn(intersect, rcs.intersects)
 
-  def test_rstdenumerate_srqenum_results(self):
+  def test_srqenum_results(self):
 
     for name in self.regions.keys():
       shuffled = self.regions[name].shuffle()
