@@ -29,8 +29,8 @@ from networkx import networkx as nx
 from sources.abstract import IOable
 from sources.algorithms import \
      EnumerateByNxGraph, EnumerateByRCSweep, \
-     NeighboredEnumByNxGraph, NeighboredEnumByRCSweep, NxGraphSweepCtor, \
-     SubsettedEnumByNxGraph, SubsettedEnumByRCSweep
+     MRQEnumByNxGraph, MRQEnumByRCSweep, NxGraphSweepCtor, \
+     SRQEnumByNxGraph, SRQEnumByRCSweep
 from sources.datastructs import NxGraph, Region, RegionSet
 from sources.helpers import Randoms
 from sources.visualize import draw_regions, draw_rigraph
@@ -265,13 +265,13 @@ def enumerate(source: FileIO, output: FileIO, naive: bool, queries = []):
   algorithms = {
     'nxgraph': [
       lambda r:     EnumerateByNxGraph(r).results,
-      lambda r, q:  NeighboredEnumByNxGraph(r, q).results,
-      lambda r, q:  SubsettedEnumByNxGraph(r, q).results
+      lambda r, q:  SRQEnumByNxGraph(r, q).results,
+      lambda r, q:  MRQEnumByNxGraph(r, q).results
     ],
     'rcsweep': [
       lambda r:     EnumerateByRCSweep.evaluate(r)(),
-      lambda r, q:  NeighboredEnumByRCSweep.evaluate(r, q)(),
-      lambda r, q:  SubsettedEnumByRCSweep.evaluate(r, q)()
+      lambda r, q:  SRQEnumByRCSweep.evaluate(r, q)(),
+      lambda r, q:  MRQEnumByRCSweep.evaluate(r, q)()
     ]
   }
 

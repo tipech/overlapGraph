@@ -21,10 +21,10 @@ Y:      - elapsed:    The average elapsed time to evaluate each query.
 Implements the Experiments:
 - enumerate:  series(method), x(nregions) -> y, fixed(rounds=10, sizepc=0.01)
               series(method), x(sizepc)   -> y, fixed(rounds=10, nregions=1000)
-- subset:     series(method), x(nregions) -> y, fixed(rounds=100, qsizepc=0.1)
+- mrqenum:    series(method), x(nregions) -> y, fixed(rounds=100, qsizepc=0.1)
               series(method), x(qsizepc)  -> y, fixed(rounds=100, sizepc=0.01)
               series(method), x(sizepc)   -> y, fixed(rounds=100, nregions=1000)
-- neighbor:   series(method), x(nregions) -> y, fixed(rounds=100, sizepc=0.01)
+- srqenum:    series(method), x(nregions) -> y, fixed(rounds=100, sizepc=0.01)
               series(method), x(sizepc)   -> y, fixed(rounds=100, nregions=1000)
 
 Classes:
@@ -40,9 +40,9 @@ from typing import Callable, Dict, Iterator, List, Tuple
 from sources.abstract import Experiment
 from sources.algorithms import \
      EnumerateByNxGraph, EnumerateByRCSweep, \
-     NeighboredEnumByNxGraph, NeighboredEnumByRCSweep, \
+     MRQEnumByNxGraph, MRQEnumByRCSweep, \
      NxGraphMdSweepCtor, NxGraphSweepCtor, RegionIntersect, \
-     SubsettedEnumByNxGraph, SubsettedEnumByRCSweep
+     SRQEnumByNxGraph, SRQEnumByRCSweep
 from sources.datastructs import NxGraph, Region, RegionSet
 from sources.helpers import Randoms
 
@@ -225,7 +225,7 @@ class ExperimentsOnRIQPerf(ExperimentsOnRegions):
       'rigprector': lambda r, g, q: EnumerateByNxGraph(g).results
     })
 
-  def common_experiment_subsettedenum(self, exp: Experiment, ctor: RegionDSCtor, query: RegionQueryRnd):
+  def common_experiment_mrqenum(self, exp: Experiment, ctor: RegionDSCtor, query: RegionQueryRnd):
     """
     Evaluate the given experiment for subsetted enumeration queries.
 
@@ -238,13 +238,13 @@ class ExperimentsOnRIQPerf(ExperimentsOnRegions):
               of Regions to include in query.
     """
     self.common_experiment(exp, ctor, query, {
-      'base':       lambda r, g, q: SubsettedEnumByRCSweep.evaluate(r, q)(),
-      'rigctor':    lambda r, g, q: SubsettedEnumByNxGraph.evaluate(r, q)(),
-      'rigmdctor':  lambda r, g, q: SubsettedEnumByNxGraph.evaluate(r, q, ctor=NxGraphMdSweepCtor)(),
-      'rigprector': lambda r, g, q: SubsettedEnumByNxGraph(g, q).results
+      'base':       lambda r, g, q: MRQEnumByRCSweep.evaluate(r, q)(),
+      'rigctor':    lambda r, g, q: MRQEnumByNxGraph.evaluate(r, q)(),
+      'rigmdctor':  lambda r, g, q: MRQEnumByNxGraph.evaluate(r, q, ctor=NxGraphMdSweepCtor)(),
+      'rigprector': lambda r, g, q: MRQEnumByNxGraph(g, q).results
     })
 
-  def common_experiment_neighboredenum(self, exp: Experiment, ctor: RegionDSCtor, query: RegionQueryRnd):
+  def common_experiment_srqenum(self, exp: Experiment, ctor: RegionDSCtor, query: RegionQueryRnd):
     """
     Evaluate the given experiment for neighbored enumeration queries.
 
@@ -257,10 +257,10 @@ class ExperimentsOnRIQPerf(ExperimentsOnRegions):
               of Regions to include in query.
     """
     self.common_experiment(exp, ctor, query, {
-      'base':       lambda r, g, q: NeighboredEnumByRCSweep.evaluate(r, q)(),
-      'rigctor':    lambda r, g, q: NeighboredEnumByNxGraph.evaluate(r, q)(),
-      'rigmdctor':  lambda r, g, q: NeighboredEnumByNxGraph.evaluate(r, q, ctor=NxGraphMdSweepCtor)(),
-      'rigprector': lambda r, g, q: NeighboredEnumByNxGraph(g, q).results
+      'base':       lambda r, g, q: SRQEnumByRCSweep.evaluate(r, q)(),
+      'rigctor':    lambda r, g, q: SRQEnumByNxGraph.evaluate(r, q)(),
+      'rigmdctor':  lambda r, g, q: SRQEnumByNxGraph.evaluate(r, q, ctor=NxGraphMdSweepCtor)(),
+      'rigprector': lambda r, g, q: SRQEnumByNxGraph(g, q).results
     })
 
   ### Methods: Experiments
@@ -277,36 +277,36 @@ class ExperimentsOnRIQPerf(ExperimentsOnRegions):
       lambda exp, x: self.construct_graph(exp, 1000, x, 2)
     )
 
-  def experiment_subsettedenum_nregions(self):
-    self.common_experiment_subsettedenum(
+  def experiment_mrqenum_nregions(self):
+    self.common_experiment_mrqenum(
       self.construct_experiment(('method', 'nregions'), rounds=100),
       lambda exp, x: self.construct_graph(exp, x, 0.01, 2),
       lambda exp, r, x: self.choose_query_subset(r, 0.1)
     )
 
-  def experiment_subsettedenum_sizepc(self):
-    self.common_experiment_subsettedenum(
+  def experiment_mrqenum_sizepc(self):
+    self.common_experiment_mrqenum(
       self.construct_experiment(('method', 'sizepc'), rounds=100),
       lambda exp, x: self.construct_graph(exp, 1000, x, 2),
       lambda exp, r, x: self.choose_query_subset(r, 0.1)
     )
 
-  def experiment_subsettedenum_qsizepc(self):
-    self.common_experiment_subsettedenum(
+  def experiment_mrqenum_qsizepc(self):
+    self.common_experiment_mrqenum(
       self.construct_experiment(('method', 'qsizepc'), rounds=100),
       lambda exp, x: self.construct_graph(exp, 1000, 0.01, 2),
       lambda exp, r, x: self.choose_query_subset(r, x)
     )
 
-  def experiment_neighboredenum_nregions(self):
-    self.common_experiment_neighboredenum(
+  def experiment_srqenum_nregions(self):
+    self.common_experiment_srqenum(
       self.construct_experiment(('method', 'nregions'), rounds=100),
       lambda exp, x: self.construct_graph(exp, x, 0.01, 2),
       lambda exp, r, x: self.choose_query_region(r)
     )
 
-  def experiment_neighboredenum_sizepc(self):
-    self.common_experiment_neighboredenum(
+  def experiment_srqenum_sizepc(self):
+    self.common_experiment_srqenum(
       self.construct_experiment(('method', 'sizepc'), rounds=100),
       lambda exp, x: self.construct_graph(exp, 1000, x, 2),
       lambda exp, r, x: self.choose_query_region(r)

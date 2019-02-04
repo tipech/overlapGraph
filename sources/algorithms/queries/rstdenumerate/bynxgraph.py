@@ -8,12 +8,12 @@ Implements the enumeration of intersecting Regions from a subsetted set of
 Regions or intersecting Regions to intersect with a specified Region, via a
 Region intersection graph.
 
-Implements the SubsettedEnumByNxGraph class that takes a Region intersection
+Implements the MRQEnumByNxGraph class that takes a Region intersection
 graph, based on NetworkX and a subset of Regions. Subgraphs the given Region
 intersection graph with the given Region subset and enumerates all intersecting
 Regions (all cliques) with the generated subgraph.
 
-Implements the NeighboredEnumByNxGraph class that takes a Region intersection
+Implements the SRQEnumByNxGraph class that takes a Region intersection
 graph, based on NetworkX and a specific Region within the graph. Subgraphs the
 given Region intersection graph with the specified Region and its neighbors,
 then enumerates all intersecting Regions (all cliques) with the generated
@@ -26,8 +26,8 @@ outputs an Iterator of the intersecting Regions as tuple of Region intersection
 and RegionIntns in order of the number of intersecting Regions involved.
 
 Classes:
-- SubsettedEnumByNxGraph
-- NeighboredEnumByNxGraph
+- MRQEnumByNxGraph
+- SRQEnumByNxGraph
 """
 
 from typing import Any, Callable, Iterable, Iterator, List, Union
@@ -40,7 +40,7 @@ from sources.datastructs import NxGraph, Region, RegionGrp, RegionSet
 from ..enumerate import EnumerateByNxGraph, NxGraphSweepCtor, RegionIntersect
 
 
-class SubsettedEnumByNxGraph(EnumerateByNxGraph):
+class MRQEnumByNxGraph(EnumerateByNxGraph):
   """
   Enumeration of subsetted intersecting Regions by Region Intersection Graph
 
@@ -139,7 +139,7 @@ class SubsettedEnumByNxGraph(EnumerateByNxGraph):
     return evaluate
 
 
-class NeighboredEnumByNxGraph(SubsettedEnumByNxGraph):
+class SRQEnumByNxGraph(MRQEnumByNxGraph):
   """
   Enumeration of the intersecting Regions that all intersect with
   a specific Region by Region Intersection Graph
@@ -151,7 +151,7 @@ class NeighboredEnumByNxGraph(SubsettedEnumByNxGraph):
   cliques that include the specified Region.
 
   Extends:
-    SubsettedEnumByNxGraph
+    MRQEnumByNxGraph
 
   Attributes:
     region:
@@ -180,7 +180,7 @@ class NeighboredEnumByNxGraph(SubsettedEnumByNxGraph):
 
     assert r in G.nodes
 
-    SubsettedEnumByNxGraph.__init__(self, graph, [r, *nx.neighbors(G, r)])
+    MRQEnumByNxGraph.__init__(self, graph, [r, *nx.neighbors(G, r)])
     self.region = G.nodes[r]['region']
 
   ### Methods: Computations

@@ -4,9 +4,9 @@
 Enumeration of restricted Intersecting Regions with Cyclic
 Multi-pass Sweep-line Algorithm
 
-Implements the SubsettedEnumByRCSweep class that performs the enumeration of
+Implements the MRQEnumByRCSweep class that performs the enumeration of
 subsetted intersecting Regions within a RegionSet via a subscription to
-RegionCycleSweep. Implements the NeighboredEnumByRCSweep class that performs
+RegionCycleSweep. Implements the SRQEnumByRCSweep class that performs
 the enumeration of intersecting Regions within a RegionSet that all intersect
 with a specified Region via a subscription to RegionCycleSweep.
 
@@ -16,8 +16,8 @@ intersecting Regions and the position of the last intersecting Region's
 Begin Event.
 
 Classes:
-- SubsettedEnumByRCSweep
-- NeighboredEnumByRCSweep
+- MRQEnumByRCSweep
+- SRQEnumByRCSweep
 """
 
 from typing import Any, Callable, Iterable, Iterator, List, Union
@@ -29,7 +29,7 @@ from sources.datastructs import Region, RegionGrp, RegionSet
 from ..enumerate import EnumerateByRCSweep, RegionIntersect
 
 
-class SubsettedEnumByRCSweep(EnumerateByRCSweep):
+class MRQEnumByRCSweep(EnumerateByRCSweep):
   """
   Enumeration of subsetted intersecting Regions by Cyclic Multi-pass
   Sweep-line Algorithm. Computes an Iterator of subsetted intersecting Regions
@@ -81,7 +81,7 @@ class SubsettedEnumByRCSweep(EnumerateByRCSweep):
     })
 
 
-class NeighboredEnumByRCSweep(EnumerateByRCSweep):
+class SRQEnumByRCSweep(EnumerateByRCSweep):
   """
   Enumeration of intersecting Regions all intersecting with specific Region by
   Cyclic Multi-pass Sweep-line Algorithm. Computes an Iterator of intersecting

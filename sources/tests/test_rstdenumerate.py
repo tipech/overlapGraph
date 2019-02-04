@@ -3,8 +3,8 @@
 """
 Unit tests for Restricted Enumeration of Region Intersections
 
-- test_rstdenumerate_subset_results
-- test_rstdenumerate_neighbor_results
+- test_rstdenumerate_mrqenum_results
+- test_rstdenumerate_srqenum_results
 """
 
 from inspect import stack
@@ -14,11 +14,9 @@ from typing import Dict, Iterator, List, NamedTuple, Tuple, Union
 from unittest import TestCase
 
 from sources.algorithms import \
-     NeighboredEnumByNxGraph, NeighboredEnumByRCSweep, \
-     RegionIntersect, RegionSweepDebug, \
-     SubsettedEnumByNxGraph, SubsettedEnumByRCSweep, SweepTaskRunner
-from sources.datastructs import \
-     Region, RegionIntxn, RegionSet
+     MRQEnumByNxGraph, MRQEnumByRCSweep, RegionIntersect, RegionSweepDebug, \
+     SRQEnumByNxGraph, SRQEnumByRCSweep, SweepTaskRunner
+from sources.datastructs import Region, RegionIntxn, RegionSet
 
 
 class TestRestrictedEnumerateResult(NamedTuple):
@@ -104,12 +102,12 @@ class TestRestrictedEnumerate(TestCase):
 
     return TestRestrictedEnumerateResult(length, levels, results)
 
-  def test_rstdenumerate_subset_results(self):
+  def test_rstdenumerate_mrqenum_results(self):
 
     for name in self.regions.keys():
       for s, subset in self.subsets[name].items():
-        nxg = self.run_evaluator(name, s, subset, SubsettedEnumByNxGraph)
-        rcs = self.run_evaluator(name, s, subset, SubsettedEnumByRCSweep)
+        nxg = self.run_evaluator(name, s, subset, MRQEnumByNxGraph)
+        rcs = self.run_evaluator(name, s, subset, MRQEnumByRCSweep)
 
         self.assertEqual(nxg.length, rcs.length)
         self.assertDictEqual(nxg.levels, rcs.levels)
@@ -117,15 +115,15 @@ class TestRestrictedEnumerate(TestCase):
         for intersect in nxg.intersects:
           self.assertIn(intersect, rcs.intersects)
 
-  def test_rstdenumerate_neighbor_results(self):
+  def test_rstdenumerate_srqenum_results(self):
 
     for name in self.regions.keys():
       shuffled = self.regions[name].shuffle()
 
       for region in shuffled[0:ceil(0.01 * len(shuffled))]:
         r = region.id
-        nxg = self.run_evaluator(name, r, region, NeighboredEnumByNxGraph)
-        rcs = self.run_evaluator(name, r, region, NeighboredEnumByRCSweep)
+        nxg = self.run_evaluator(name, r, region, SRQEnumByNxGraph)
+        rcs = self.run_evaluator(name, r, region, SRQEnumByRCSweep)
 
         self.assertEqual(nxg.length, rcs.length)
         self.assertDictEqual(nxg.levels, rcs.levels)
