@@ -16,12 +16,12 @@ Classes:
 
 from typing import Dict, Iterator, List, Tuple
 
-from sources.abstract.pubsub import Event
-from sources.algorithms.sweepln.cyclesweep import CycleSweep
-from sources.algorithms.sweepln.regionsweep import RegionSweep, RegionSweepEvtKind
-from sources.datastructs.datasets.regionset import RegionSet
-from sources.datastructs.datasets.regiontime import RegionEvent
-from sources.datastructs.shapes.region import Region, RegionGrp, RegionIntxn, RegionPair
+from sources.abstract import Event
+from sources.datastructs import \
+     Region, RegionEvent, RegionGrp, RegionIntxn, RegionPair, RegionSet
+
+from .cyclesweep import CycleSweep
+from .regionsweep import RegionSweep, RegionSweepEvtKind
 
 
 class RegionCycleSweep(RegionSweep, CycleSweep[RegionGrp]):

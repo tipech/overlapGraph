@@ -26,7 +26,7 @@ Abstract Classes:
 from abc import ABCMeta, abstractmethod
 from typing import Any, Generic, Iterator, Tuple, TypeVar
 
-from sources.datastructs.shapes.region import Region, RegionPair
+from ..shapes import Region, RegionPair
 
 
 Graph = TypeVar('Graph')

@@ -12,9 +12,9 @@ from itertools import chain
 from typing import Iterable
 from sys import argv, stdout
 
-from sources.console.console import File, argument, command, option
-from sources.experiments.onrigscale import ExperimentsOnRIGScale
-from sources.experiments.onriqperf import ExperimentsOnRIQPerf
+from sources.experiments import ExperimentsOnRIGScale, ExperimentsOnRIQPerf
+
+from .console import File, argument, command, option
 
 
 @command()
@@ -73,7 +73,3 @@ def format_experiments(ctx, formatter):
     formatter.write_paragraph()
     for experiment in _list_experiments():
       formatter.write_text(f'- {experiment}')
-
-
-if __name__ == "__main__":
-  main()

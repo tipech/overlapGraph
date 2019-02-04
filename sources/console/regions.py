@@ -26,18 +26,16 @@ from matplotlib import pyplot
 from matplotlib.colors import to_rgb
 from networkx import networkx as nx
 
-from sources.abstract.ioable import IOable
-from sources.algorithms.queries.enumerate.bynxgraph import EnumerateByNxGraph
-from sources.algorithms.queries.enumerate.byrcsweep import EnumerateByRCSweep
-from sources.algorithms.queries.rstdenumerate.bynxgraph import SubsettedEnumByNxGraph, NeighboredEnumByNxGraph
-from sources.algorithms.queries.rstdenumerate.byrcsweep import SubsettedEnumByRCSweep, NeighboredEnumByRCSweep
-from sources.algorithms.rigctor.nxgsweepctor import NxGraphSweepCtor
-from sources.console.console import Choice, File, argument, group, option
-from sources.datastructs.datasets.regionset import RegionSet
-from sources.datastructs.rigraphs.nxgraph import NxGraph
-from sources.datastructs.shapes.region import Region
-from sources.helpers.randoms import Randoms
+from sources.abstract import IOable
+from sources.algorithms import \
+     EnumerateByNxGraph, EnumerateByRCSweep, \
+     NeighboredEnumByNxGraph, NeighboredEnumByRCSweep, NxGraphSweepCtor, \
+     SubsettedEnumByNxGraph, SubsettedEnumByRCSweep
+from sources.datastructs import NxGraph, Region, RegionSet
+from sources.helpers import Randoms
 from sources.visualize import draw_regions, draw_rigraph
+
+from .console import Choice, File, argument, group, option
 
 
 def colorize(regions: RegionSet, graph: NxGraph = None):
@@ -318,7 +316,3 @@ def enumerate(source: FileIO, output: FileIO, naive: bool, queries = []):
   }
 
   IOable.to_output(data, output, options={'compact': True})
-
-
-if __name__ == "__main__":
-  main()

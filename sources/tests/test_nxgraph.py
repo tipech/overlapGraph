@@ -14,13 +14,10 @@ from io import StringIO
 from typing import List, Tuple
 from unittest import TestCase
 
-from sources.algorithms.sweepln.regionsweepdebug import RegionSweepDebug
-from sources.algorithms.rigctor.nxgsweepctor import NxGraphSweepCtor
-from sources.algorithms.rigctor.nxgmdsweepctor import NxGraphMdSweepCtor
-from sources.algorithms.sweepln.regionsweep import RegionSweep
-from sources.datastructs.datasets.regionset import RegionSet
-from sources.datastructs.rigraphs.nxgraph import NxGraph
-from sources.datastructs.shapes.region import Region, RegionPair
+from sources.algorithms import \
+     NxGraphMdSweepCtor, NxGraphSweepCtor, RegionSweep, RegionSweepDebug
+from sources.datastructs import \
+     NxGraph, Region, RegionPair, RegionSet
 
 
 class TestNxGraph(TestCase):

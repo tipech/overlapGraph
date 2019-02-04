@@ -28,9 +28,10 @@ from typing import Any, Callable, Dict, Generic, Iterator, List, Tuple, TypeVar
 from networkx import networkx as nx
 from networkx.readwrite import json_graph
 
-from sources.abstract.ioable import IOable
-from sources.datastructs.rigraphs.rigraph import RIGraph
-from sources.datastructs.shapes.region import Region, RegionPair
+from sources.abstract import IOable
+
+from ..shapes import Region, RegionPair
+from .rigraph import RIGraph
 
 
 class NxGraph(RIGraph[nx.Graph], IOable):

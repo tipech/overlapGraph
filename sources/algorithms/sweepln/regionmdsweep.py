@@ -14,12 +14,12 @@ Classes:
 
 from typing import Iterator
 
-from sources.abstract.pubsub import Event
-from sources.algorithms.sweepln.multidimensweep import MultidimenSweep
-from sources.algorithms.sweepln.regionsweep import RegionSweep, RegionSweepEvtKind
-from sources.datastructs.datasets.regionset import RegionSet
-from sources.datastructs.datasets.regiontime import RegionEvent, RegionTimeln
-from sources.datastructs.shapes.region import Region, RegionGrp, RegionPair
+from sources.abstract import Event
+from sources.datastructs import \
+     Region, RegionEvent, RegionGrp, RegionPair, RegionSet, RegionTimeln
+
+from .multidimensweep import MultidimenSweep
+from .regionsweep import RegionSweep, RegionSweepEvtKind
 
 
 class RegionMdSweep(RegionSweep, MultidimenSweep[RegionGrp]):

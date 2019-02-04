@@ -19,8 +19,7 @@ from collections import abc
 from functools import wraps
 from typing import Any, Callable, Generic, Iterable, Type, TypeVar, Union
 
-from sources.abstract.pubsub import Publisher, Subscriber
-from sources.abstract.timeline import Timeline
+from sources.abstract import Publisher, Subscriber, Timeline
 
 
 T = TypeVar('T')

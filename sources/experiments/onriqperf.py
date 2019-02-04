@@ -37,19 +37,16 @@ from math import floor
 from time import perf_counter
 from typing import Callable, Dict, Iterator, List, Tuple
 
-from sources.abstract.experiment import Experiment
-from sources.algorithms.queries.enumerate import RegionIntersect
-from sources.algorithms.queries.enumerate.bynxgraph import EnumerateByNxGraph
-from sources.algorithms.queries.enumerate.byrcsweep import EnumerateByRCSweep
-from sources.algorithms.queries.rstdenumerate.bynxgraph import NeighboredEnumByNxGraph, SubsettedEnumByNxGraph
-from sources.algorithms.queries.rstdenumerate.byrcsweep import NeighboredEnumByRCSweep, SubsettedEnumByRCSweep
-from sources.algorithms.rigctor.nxgmdsweepctor import NxGraphMdSweepCtor
-from sources.algorithms.rigctor.nxgsweepctor import NxGraphSweepCtor
-from sources.datastructs.datasets.regionset import RegionSet
-from sources.datastructs.rigraphs.nxgraph import NxGraph
-from sources.datastructs.shapes.region import Region
-from sources.experiments.onregions import ExperimentsOnRegions
-from sources.helpers.randoms import Randoms
+from sources.abstract import Experiment
+from sources.algorithms import \
+     EnumerateByNxGraph, EnumerateByRCSweep, \
+     NeighboredEnumByNxGraph, NeighboredEnumByRCSweep, \
+     NxGraphMdSweepCtor, NxGraphSweepCtor, RegionIntersect, \
+     SubsettedEnumByNxGraph, SubsettedEnumByRCSweep
+from sources.datastructs import NxGraph, Region, RegionSet
+from sources.helpers import Randoms
+
+from .onregions import ExperimentsOnRegions
 
 
 RegionDataset   = Tuple[RegionSet, NxGraph]

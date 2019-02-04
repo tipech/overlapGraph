@@ -14,8 +14,9 @@ Classes:
 
 from typing import TypeVar
 
-from sources.abstract.mdtimeln import MdTimeline
-from sources.algorithms.sweepln.basesweep import Sweepline
+from sources.abstract import MdTimeline
+
+from .basesweep import Sweepline
 
 
 T = TypeVar('T')

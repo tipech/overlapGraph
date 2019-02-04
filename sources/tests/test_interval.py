@@ -25,7 +25,7 @@ from unittest import TestCase
 
 from numpy import mean
 
-from sources.datastructs.shapes.interval import Interval
+from sources.datastructs import Interval
 
 
 class TestInterval(TestCase):

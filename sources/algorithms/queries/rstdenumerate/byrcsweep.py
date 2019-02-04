@@ -22,13 +22,11 @@ Classes:
 
 from typing import Any, Callable, Iterable, Iterator, List, Union
 
-from sources.abstract.pubsub import Subscriber
-from sources.algorithms.queries.enumerate import RegionIntersect
-from sources.algorithms.queries.enumerate.byrcsweep import EnumerateByRCSweep
-from sources.algorithms.sweepln.basesweep import SweepTaskRunner
-from sources.algorithms.sweepln.rstdregioncyclesweep import RestrictedRegionCycleSweep
-from sources.datastructs.datasets.regionset import RegionSet
-from sources.datastructs.shapes.region import Region, RegionGrp
+from sources.abstract import Subscriber
+from sources.algorithms import RestrictedRegionCycleSweep, SweepTaskRunner
+from sources.datastructs import Region, RegionGrp, RegionSet
+
+from ..enumerate import EnumerateByRCSweep, RegionIntersect
 
 
 class SubsettedEnumByRCSweep(EnumerateByRCSweep):
@@ -93,7 +91,7 @@ class NeighboredEnumByRCSweep(EnumerateByRCSweep):
 
   Extends:
     EnumerateByRCSweep
-  
+
   Attributes:
     region:
       The specific Region that filters

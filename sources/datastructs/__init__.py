@@ -1,5 +1,5 @@
 #!/usr/bin/env python
 
-from sources.datastructs.datasets import *
-from sources.datastructs.rigraphs import *
-from sources.datastructs.shapes import *
+from .shapes import *
+from .datasets import *
+from .rigraphs import *

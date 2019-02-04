@@ -23,8 +23,8 @@ from typing import Any, Callable, Dict, List, Tuple, Union
 
 from numpy import floor
 
-from sources.abstract.ioable import IOable
-from sources.helpers.randoms import NDArray, RandomFn, Randoms
+from sources.abstract import IOable
+from sources.helpers import NDArray, RandomFn, Randoms
 
 
 @dataclass(order = True)

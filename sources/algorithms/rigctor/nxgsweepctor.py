@@ -16,12 +16,10 @@ Classes:
 
 from typing import Any, Callable, Iterable, Tuple
 
-from sources.abstract.pubsub import Event, Subscriber
-from sources.algorithms.sweepln.basesweep import SweepTaskRunner
-from sources.algorithms.sweepln.regionsweep import RegionSweep, RegionSweepEvtKind
-from sources.datastructs.datasets.regionset import RegionSet
-from sources.datastructs.rigraphs.nxgraph import NxGraph
-from sources.datastructs.shapes.region import Region, RegionGrp, RegionPair
+from sources.abstract import Event, Subscriber
+from sources.datastructs import NxGraph, Region, RegionGrp, RegionPair, RegionSet
+
+from ..sweepln import RegionSweep, RegionSweepEvtKind, SweepTaskRunner
 
 
 class NxGraphSweepCtor(SweepTaskRunner[RegionGrp, NxGraph]):

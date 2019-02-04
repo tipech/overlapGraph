@@ -34,13 +34,10 @@ from typing import Any, Callable, Iterable, Iterator, List, Union
 
 from networkx import networkx as nx
 
-from sources.abstract.pubsub import Subscriber
-from sources.algorithms.queries.enumerate import RegionIntersect
-from sources.algorithms.queries.enumerate.bynxgraph import EnumerateByNxGraph
-from sources.algorithms.rigctor.nxgsweepctor import NxGraphSweepCtor
-from sources.datastructs.datasets.regionset import RegionSet
-from sources.datastructs.rigraphs.nxgraph import NxGraph
-from sources.datastructs.shapes.region import Region, RegionGrp
+from sources.abstract import Subscriber
+from sources.datastructs import NxGraph, Region, RegionGrp, RegionSet
+
+from ..enumerate import EnumerateByNxGraph, NxGraphSweepCtor, RegionIntersect
 
 
 class SubsettedEnumByNxGraph(EnumerateByNxGraph):

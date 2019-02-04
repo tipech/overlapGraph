@@ -18,15 +18,14 @@ from random import shuffle
 from typing import Any, Dict, Iterable, Iterator, List, Union
 from uuid import uuid4
 
-from sources.abstract.ioable import IOable
-from sources.datastructs.datasets.regiontime import RegionEvtKind
-from sources.datastructs.shapes.interval import Interval
-from sources.datastructs.shapes.region import Region, RegionPair
-from sources.helpers.base26 import to_base26
-from sources.helpers.randoms import RandomFn, Randoms
+from sources.abstract import IOable
+from sources.helpers import RandomFn, Randoms, to_base26
+
+from ..shapes import Interval, Region, RegionPair
+from .regiontime import RegionEvtKind
 
 try: # cyclic codependency
-  from sources.datastructs.datasets.regiontime import RegionTimeln
+  from .regiontime import RegionTimeln
 except ImportError:
   pass
 

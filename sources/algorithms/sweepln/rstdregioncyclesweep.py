@@ -18,9 +18,10 @@ Classes:
 
 from typing import List
 
-from sources.algorithms.sweepln.regioncyclesweep import RegionCycleSweep
-from sources.algorithms.sweepln.rstdregionsweep import RestrictedRegionSweep
-from sources.datastructs.datasets.regiontime import RegionEvent
+from sources.datastructs import RegionEvent
+
+from .regioncyclesweep import RegionCycleSweep
+from .rstdregionsweep import RestrictedRegionSweep
 
 
 class RestrictedRegionCycleSweep(RestrictedRegionSweep, RegionCycleSweep):

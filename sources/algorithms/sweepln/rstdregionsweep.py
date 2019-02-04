@@ -18,11 +18,10 @@ Classes:
 
 from typing import Dict, List, Union
 
-from sources.abstract.pubsub import Event
-from sources.algorithms.sweepln.regionsweep import RegionSweep, RegionSweepEvtKind
-from sources.datastructs.datasets.regionset import RegionSet
-from sources.datastructs.datasets.regiontime import RegionEvent
-from sources.datastructs.shapes.region import Region
+from sources.abstract import Event
+from sources.datastructs import Region, RegionEvent, RegionSet
+
+from .regionsweep import RegionSweep, RegionSweepEvtKind
 
 
 class RestrictedRegionSweep(RegionSweep):

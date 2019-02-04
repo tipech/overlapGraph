@@ -16,14 +16,13 @@ Classes:
 
 from typing import Any, Callable, Iterable, Iterator, List, Tuple
 
-from sources.abstract.pubsub import Event, Subscriber
-from sources.algorithms.queries.enumerate import EnumerateRegionIntersect, RegionIntersect
-from sources.algorithms.sweepln.basesweep import SweepTaskRunner
-from sources.algorithms.sweepln.regioncyclesweep import RegionCycleSweep
-from sources.algorithms.sweepln.regionsweep import RegionSweepEvtKind
-from sources.datastructs.datasets.regionset import RegionSet
-from sources.datastructs.datasets.regiontime import RegionEvent
-from sources.datastructs.shapes.region import Region, RegionGrp, RegionIntxn, RegionPair
+from sources.abstract import Event, Subscriber
+from sources.algorithms import \
+     RegionCycleSweep, RegionSweepEvtKind, SweepTaskRunner
+from sources.datastructs import \
+     Region, RegionEvent, RegionGrp, RegionIntxn, RegionPair, RegionSet
+
+from .common import EnumerateRegionIntersect, RegionIntersect
 
 
 class EnumerateByRCSweep(EnumerateRegionIntersect):

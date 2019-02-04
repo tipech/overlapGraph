@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
-from sources.algorithms.queries import *
-from sources.algorithms.rigctor import *
-from sources.algorithms.sweepln import *
+from .sweepln import *
+from .rigctor import *
+from .queries import *
+

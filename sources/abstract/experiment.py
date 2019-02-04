@@ -22,13 +22,14 @@ from io import FileIO
 from numbers import Number
 from os.path import basename
 from time import perf_counter, strftime
-from typing import Any, Callable, Dict, Generic, Iterable, List, \
-                   NamedTuple, Tuple, TypeVar, Union
+from typing import \
+     Any, Callable, Dict, Generic, Iterable, List, \
+     NamedTuple, Tuple, TypeVar, Union
 
 from matplotlib import pyplot as plt
 from numpy import amax, amin, arange, mean
 
-from sources.helpers.randoms import Randoms
+from sources.helpers import Randoms
 
 
 X       = TypeVar('X', int, float)

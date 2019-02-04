@@ -25,11 +25,10 @@ from typing import Any, Callable, Iterator
 
 from networkx import networkx as nx
 
-from sources.algorithms.queries.enumerate import RegionIntersect
-from sources.algorithms.rigctor.nxgsweepctor import NxGraphSweepCtor
-from sources.datastructs.datasets.regionset import RegionSet
-from sources.datastructs.rigraphs.nxgraph import NxGraph
-from sources.datastructs.shapes.region import Region
+from sources.algorithms import NxGraphSweepCtor
+from sources.datastructs import NxGraph, Region, RegionSet
+
+from .common import RegionIntersect
 
 
 class EnumerateByNxGraph:

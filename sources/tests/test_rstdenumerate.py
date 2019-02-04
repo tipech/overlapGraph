@@ -13,13 +13,12 @@ from time import perf_counter
 from typing import Dict, Iterator, List, NamedTuple, Tuple, Union
 from unittest import TestCase
 
-from sources.algorithms.queries.enumerate import RegionIntersect
-from sources.algorithms.queries.rstdenumerate.bynxgraph import SubsettedEnumByNxGraph, NeighboredEnumByNxGraph
-from sources.algorithms.queries.rstdenumerate.byrcsweep import SubsettedEnumByRCSweep, NeighboredEnumByRCSweep
-from sources.algorithms.sweepln.basesweep import SweepTaskRunner
-from sources.algorithms.sweepln.regionsweepdebug import RegionSweepDebug
-from sources.datastructs.datasets.regionset import RegionSet
-from sources.datastructs.shapes.region import Region, RegionIntxn
+from sources.algorithms import \
+     NeighboredEnumByNxGraph, NeighboredEnumByRCSweep, \
+     RegionIntersect, RegionSweepDebug, \
+     SubsettedEnumByNxGraph, SubsettedEnumByRCSweep, SweepTaskRunner
+from sources.datastructs import \
+     Region, RegionIntxn, RegionSet
 
 
 class TestRestrictedEnumerateResult(NamedTuple):

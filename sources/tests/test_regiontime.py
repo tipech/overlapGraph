@@ -9,9 +9,7 @@ Unit tests for Event Timeline for Region Sets
 
 from unittest import TestCase
 
-from sources.datastructs.datasets.regionset import RegionSet
-from sources.datastructs.datasets.regiontime import RegionEvent, RegionEvtKind
-from sources.datastructs.shapes.region import Region
+from sources.datastructs import Region, RegionEvent, RegionEvtKind, RegionSet
 
 
 class TestRegionTimeln(TestCase):
