@@ -18,7 +18,7 @@ from matplotlib import pyplot
 from matplotlib.axes import Axes
 from matplotlib.patches import Rectangle
 
-from sources.datastructs import Region, RegionSet
+from sources.core import Region, RegionSet
 
 
 def draw_regions(regions: RegionSet, plot: Axes, **kwargs):

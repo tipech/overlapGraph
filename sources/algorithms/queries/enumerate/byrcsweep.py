@@ -19,7 +19,7 @@ from typing import Any, Callable, Iterable, Iterator, List, Tuple
 from sources.abstract import Event, Subscriber
 from sources.algorithms import \
      RegionCycleSweep, RegionSweepEvtKind, SweepTaskRunner
-from sources.datastructs import \
+from sources.core import \
      Region, RegionEvent, RegionGrp, RegionIntxn, RegionPair, RegionSet
 
 from .common import EnumerateRegionIntersect, RegionIntersect

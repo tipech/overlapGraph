@@ -16,7 +16,7 @@ from unittest import TestCase
 from sources.algorithms import \
      MRQEnumByNxGraph, MRQEnumByRCSweep, RegionIntersect, RegionSweepDebug, \
      SRQEnumByNxGraph, SRQEnumByRCSweep, SweepTaskRunner
-from sources.datastructs import Region, RegionIntxn, RegionSet
+from sources.core import Region, RegionIntxn, RegionSet
 
 
 class TestRQEnumResult(NamedTuple):

@@ -33,7 +33,7 @@ from unittest import TestCase
 
 from numpy import mean
 
-from sources.datastructs import Interval, Region
+from sources.core import Interval, Region
 
 
 class TestRegion(TestCase):

@@ -18,7 +18,7 @@ Classes:
 
 from typing import List
 
-from sources.datastructs import RegionEvent
+from sources.core import RegionEvent
 
 from .regioncyclesweep import RegionCycleSweep
 from .rstdregionsweep import RestrictedRegionSweep

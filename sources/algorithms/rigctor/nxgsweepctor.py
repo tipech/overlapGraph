@@ -17,7 +17,7 @@ Classes:
 from typing import Any, Callable, Iterable, Tuple
 
 from sources.abstract import Event, Subscriber
-from sources.datastructs import NxGraph, Region, RegionGrp, RegionPair, RegionSet
+from sources.core import NxGraph, Region, RegionGrp, RegionPair, RegionSet
 
 from ..sweepln import RegionSweep, RegionSweepEvtKind, SweepTaskRunner
 

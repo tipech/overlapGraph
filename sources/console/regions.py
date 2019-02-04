@@ -31,7 +31,7 @@ from sources.algorithms import \
      EnumerateByNxGraph, EnumerateByRCSweep, \
      MRQEnumByNxGraph, MRQEnumByRCSweep, NxGraphSweepCtor, \
      SRQEnumByNxGraph, SRQEnumByRCSweep
-from sources.datastructs import NxGraph, Region, RegionSet
+from sources.core import NxGraph, Region, RegionSet
 from sources.helpers import Randoms
 from sources.visualize import draw_regions, draw_rigraph
 

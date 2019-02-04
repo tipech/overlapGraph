@@ -19,7 +19,7 @@ Classes:
 from typing import Dict, List, Union
 
 from sources.abstract import Event
-from sources.datastructs import Region, RegionEvent, RegionSet
+from sources.core import Region, RegionEvent, RegionSet
 
 from .regionsweep import RegionSweep, RegionSweepEvtKind
 

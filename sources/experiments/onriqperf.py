@@ -43,7 +43,7 @@ from sources.algorithms import \
      MRQEnumByNxGraph, MRQEnumByRCSweep, \
      NxGraphMdSweepCtor, NxGraphSweepCtor, RegionIntersect, \
      SRQEnumByNxGraph, SRQEnumByRCSweep
-from sources.datastructs import NxGraph, Region, RegionSet
+from sources.core import NxGraph, Region, RegionSet
 from sources.helpers import Randoms
 
 from .onregions import ExperimentsOnRegions

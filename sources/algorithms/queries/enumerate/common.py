@@ -14,7 +14,7 @@ Types:
 from typing import Iterator, Tuple
 
 from sources.algorithms import SweepTaskRunner
-from sources.datastructs import Region, RegionGrp, RegionIntxn
+from sources.core import Region, RegionGrp, RegionIntxn
 
 RegionIntersect = Tuple[Region, RegionIntxn]
 EnumerateRegionIntersect = SweepTaskRunner[RegionGrp, Iterator[RegionIntersect]]

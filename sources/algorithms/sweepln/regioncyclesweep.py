@@ -17,7 +17,7 @@ Classes:
 from typing import Dict, Iterator, List, Tuple
 
 from sources.abstract import Event
-from sources.datastructs import \
+from sources.core import \
      Region, RegionEvent, RegionGrp, RegionIntxn, RegionPair, RegionSet
 
 from .cyclesweep import CycleSweep

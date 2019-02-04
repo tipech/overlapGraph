@@ -16,7 +16,7 @@ from unittest import TestCase
 
 from sources.algorithms import \
      NxGraphMdSweepCtor, NxGraphSweepCtor, RegionSweep, RegionSweepDebug
-from sources.datastructs import \
+from sources.core import \
      NxGraph, Region, RegionPair, RegionSet
 
 

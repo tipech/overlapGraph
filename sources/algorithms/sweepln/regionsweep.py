@@ -17,7 +17,7 @@ from enum import IntEnum, auto, unique
 from typing import Dict, Iterator, List
 
 from sources.abstract import Event, Publisher
-from sources.datastructs import \
+from sources.core import \
      Region, RegionEvent, RegionEvtKind, RegionGrp, RegionPair, RegionSet
 
 from .onesweep import OneSweep

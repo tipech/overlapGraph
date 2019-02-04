@@ -26,7 +26,7 @@ from typing import Any, Callable, Iterable, Iterator, List, Union
 from networkx import networkx as nx
 
 from sources.abstract import Subscriber
-from sources.datastructs import NxGraph, Region, RegionGrp, RegionSet
+from sources.core import NxGraph, Region, RegionGrp, RegionSet
 
 from ..enumerate import EnumerateByNxGraph, NxGraphSweepCtor, RegionIntersect
 

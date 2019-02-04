@@ -15,7 +15,7 @@ Classes:
 from typing import Iterator
 
 from sources.abstract import Event
-from sources.datastructs import \
+from sources.core import \
      Region, RegionEvent, RegionGrp, RegionPair, RegionSet, RegionTimeln
 
 from .multidimensweep import MultidimenSweep

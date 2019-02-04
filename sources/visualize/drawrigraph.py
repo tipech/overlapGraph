@@ -15,7 +15,7 @@ from matplotlib.axes import Axes
 from networkx import networkx as nx
 from pandas import DataFrame
 
-from sources.datastructs import NxGraph, Region
+from sources.core import NxGraph, Region
 
 
 def draw_rigraph(graph: NxGraph, plot: Axes, **kwargs):

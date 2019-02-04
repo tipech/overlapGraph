@@ -14,7 +14,7 @@ Classes:
 from typing import Tuple
 
 from sources.abstract import Event, Subscriber
-from sources.datastructs import RegionEvent, RegionGrp
+from sources.core import RegionEvent, RegionGrp
 
 from .regionsweep import RegionSweepEvtKind
 

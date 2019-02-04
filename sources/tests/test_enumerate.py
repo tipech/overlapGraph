@@ -13,7 +13,7 @@ from unittest import TestCase
 from sources.algorithms.queries import \
      EnumerateByNxGraph, EnumerateByRCSweep, RegionIntersect
 from sources.algorithms.sweepln import RegionSweepDebug, SweepTaskRunner
-from sources.datastructs import Region, RegionIntxn, RegionSet
+from sources.core import Region, RegionIntxn, RegionSet
 
 
 class TestEnumerateResult(NamedTuple):

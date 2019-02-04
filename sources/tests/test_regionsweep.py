@@ -12,7 +12,7 @@ from unittest import TestCase
 
 from sources.algorithms import \
      RegionSweep, RegionSweepDebug, RegionSweepOverlaps
-from sources.datastructs import \
+from sources.core import \
      Region, RegionPair, RegionSet
 
 

@@ -21,7 +21,7 @@ from typing import Any, Callable, Iterable, Iterator, List, Union
 
 from sources.abstract import Subscriber
 from sources.algorithms import RestrictedRegionCycleSweep, SweepTaskRunner
-from sources.datastructs import Region, RegionGrp, RegionSet
+from sources.core import Region, RegionGrp, RegionSet
 
 from ..enumerate import EnumerateByRCSweep, RegionIntersect
 

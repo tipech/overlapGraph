@@ -21,7 +21,7 @@ from typing import Any, Callable, Dict, Iterator, List, Tuple, Union
 
 from sources.abstract import Experiment
 from sources.algorithms import NxGraphSweepCtor
-from sources.datastructs import NxGraph, Region, RegionSet
+from sources.core import NxGraph, Region, RegionSet
 
 
 class ExperimentsOnRegions(metaclass=ABCMeta):

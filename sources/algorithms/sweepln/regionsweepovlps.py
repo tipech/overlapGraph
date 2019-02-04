@@ -14,7 +14,7 @@ Classes:
 from typing import Any, Callable, Iterable, List, Tuple
 
 from sources.abstract import Event, Subscriber
-from sources.datastructs import \
+from sources.core import \
      Region, RegionEvent, RegionGrp, RegionPair, RegionSet
 
 from .basesweep import SweepTaskRunner
