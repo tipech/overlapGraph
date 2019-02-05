@@ -118,11 +118,11 @@ class SweepTaskRunner(Subscriber[T], Generic[T, R]): # pylint: disable=E1136
   ### Class Methods: Evaluation
 
   @staticmethod
-  def evaluate(cls: Type['SweepTaskRunner'],
-               alg: Union[Sweepline, Type[Sweepline]],
-               subscribers: Iterable[Subscriber[T]] = [],
-               alg_args = [], alg_kw = {}, task_args = [], task_kw = {}) \
-               -> Callable[[Any], R]:
+  def prepare(cls: Type['SweepTaskRunner'],
+              alg: Union[Sweepline, Type[Sweepline]],
+              subscribers: Iterable[Subscriber[T]] = [],
+              alg_args = [], alg_kw = {}, task_args = [], task_kw = {}) \
+              -> Callable[[Any], R]:
     """
     Factory function for constructing a new sweep-line task runner
     based on the sweep-line algorithm given. 

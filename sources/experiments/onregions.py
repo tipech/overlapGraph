@@ -164,7 +164,7 @@ class ExperimentsOnRegions(metaclass=ABCMeta):
       of Regions + its associated Region intersection graph.
     """
     regions = self.construct_regions(experiment, nregions, sizepc, dimension)
-    graph   = NxGraphSweepCtor.evaluate(regions)()
+    graph   = NxGraphSweepCtor.prepare(regions)()
 
     self.output_log(experiment, {
       'nregions': nregions,

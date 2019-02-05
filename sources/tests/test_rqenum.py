@@ -73,7 +73,7 @@ class TestRQEnumerate(TestCase):
     subscribers = [] #[RegionSweepDebug()]
     length, lvl = 0, 0
     levels, results = {}, []
-    evaluator = clazz.evaluate(regions, context, *subscribers)
+    evaluator = clazz.prepare(regions, context, *subscribers)
     starttime = perf_counter()
 
     for _, (_, intersect) in enumerate(evaluator()):

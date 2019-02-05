@@ -80,18 +80,18 @@ class MRQEnumByNxGraph(EnumerateByNxGraph):
   ### Class Methods: Evaluation
 
   @classmethod
-  def evaluate(cls, context: Union[RegionSet, NxGraph],
-                    subset: List[Union[Region, str]],
-                    *subscribers: Iterable[Subscriber[RegionGrp]],
-                    ctor = NxGraphSweepCtor) \
-                    -> Callable[[Any], Iterator[RegionIntersect]]:
+  def prepare(cls, context: Union[RegionSet, NxGraph],
+                   subset: List[Union[Region, str]],
+                   *subscribers: Iterable[Subscriber[RegionGrp]],
+                   ctor = NxGraphSweepCtor) \
+                   -> Callable[[Any], Iterator[RegionIntersect]]:
     """
     Factory function for computing an Iterator of subsetted intersecting
     Regions using the newly constructed or given Region intersection graph
-    by one-pass sweep-line algorithm. Wraps NxGraphSweepCtor.evaluate().
+    by one-pass sweep-line algorithm. Wraps NxGraphSweepCtor.prepare().
 
     Overrides:
-      EnumerateByNxGraph.evaluate
+      EnumerateByNxGraph.prepare
 
     Args:
       context:
@@ -125,7 +125,7 @@ class MRQEnumByNxGraph(EnumerateByNxGraph):
       if isinstance(context, NxGraph):
         return cls(context, subset).results
       else:
-        fn = ctor.evaluate(context, *subscribers)
+        fn = ctor.prepare(context, *subscribers)
         return cls(fn(*args, **kwargs), subset).results
 
     return evaluate

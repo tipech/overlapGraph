@@ -40,7 +40,7 @@ from .console import Choice, File, argument, group, option
 
 def colorize(regions: RegionSet, graph: NxGraph = None):
   if graph is None:
-    graph = NxGraphSweepCtor.evaluate(regions)()
+    graph = NxGraphSweepCtor.prepare(regions)()
 
   random = Randoms.uniform()
   components = nx.connected_components(graph.G)
@@ -170,7 +170,7 @@ def graph(source: FileIO, output: FileIO, colored: bool):
   assert output.writable()
 
   regions = RegionSet.from_source(source)
-  graph   = NxGraphSweepCtor.evaluate(regions)()
+  graph   = NxGraphSweepCtor.prepare(regions)()
 
   if colored:
     colorize(regions, graph)
@@ -210,7 +210,7 @@ def vgraph(source: FileIO, output: FileIO, forced: bool, colored: bool):
   assert output.writable()
 
   regions = RegionSet.from_source(source, 'json')
-  graph = NxGraphSweepCtor.evaluate(regions)()
+  graph = NxGraphSweepCtor.prepare(regions)()
 
   if colored:
     colorize(regions, graph)
@@ -269,9 +269,9 @@ def enumerate(source: FileIO, output: FileIO, naive: bool, queries = []):
       lambda r, q:  MRQEnumByNxGraph(r, q).results
     ],
     'rcsweep': [
-      lambda r:     EnumerateByRCSweep.evaluate(r)(),
-      lambda r, q:  SRQEnumByRCSweep.evaluate(r, q)(),
-      lambda r, q:  MRQEnumByRCSweep.evaluate(r, q)()
+      lambda r:     EnumerateByRCSweep.prepare(r)(),
+      lambda r, q:  SRQEnumByRCSweep.prepare(r, q)(),
+      lambda r, q:  MRQEnumByRCSweep.prepare(r, q)()
     ]
   }
 
@@ -291,7 +291,7 @@ def enumerate(source: FileIO, output: FileIO, naive: bool, queries = []):
     elapse_ctor = 0
   else:
     methods = algorithms['nxgraph']
-    context = NxGraphSweepCtor.evaluate(regions)()
+    context = NxGraphSweepCtor.prepare(regions)()
     elapse_ctor = perf_counter() - start
 
   for region, intersect in get_enumeration_results():

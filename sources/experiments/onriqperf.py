@@ -219,9 +219,9 @@ class ExperimentsOnRIQPerf(ExperimentsOnRegions):
     query = lambda exp, r, x: []
 
     self.common_experiment(exp, ctor, query, {
-      'base':       lambda r, g, q: EnumerateByRCSweep.evaluate(r)(),
-      'rigctor':    lambda r, g, q: EnumerateByNxGraph.evaluate(r)(),
-      'rigmdctor':  lambda r, g, q: EnumerateByNxGraph.evaluate(r, ctor=NxGraphMdSweepCtor)(),
+      'base':       lambda r, g, q: EnumerateByRCSweep.prepare(r)(),
+      'rigctor':    lambda r, g, q: EnumerateByNxGraph.prepare(r)(),
+      'rigmdctor':  lambda r, g, q: EnumerateByNxGraph.prepare(r, ctor=NxGraphMdSweepCtor)(),
       'rigprector': lambda r, g, q: EnumerateByNxGraph(g).results
     })
 
@@ -238,9 +238,9 @@ class ExperimentsOnRIQPerf(ExperimentsOnRegions):
               of Regions to include in query.
     """
     self.common_experiment(exp, ctor, query, {
-      'base':       lambda r, g, q: MRQEnumByRCSweep.evaluate(r, q)(),
-      'rigctor':    lambda r, g, q: MRQEnumByNxGraph.evaluate(r, q)(),
-      'rigmdctor':  lambda r, g, q: MRQEnumByNxGraph.evaluate(r, q, ctor=NxGraphMdSweepCtor)(),
+      'base':       lambda r, g, q: MRQEnumByRCSweep.prepare(r, q)(),
+      'rigctor':    lambda r, g, q: MRQEnumByNxGraph.prepare(r, q)(),
+      'rigmdctor':  lambda r, g, q: MRQEnumByNxGraph.prepare(r, q, ctor=NxGraphMdSweepCtor)(),
       'rigprector': lambda r, g, q: MRQEnumByNxGraph(g, q).results
     })
 
@@ -257,9 +257,9 @@ class ExperimentsOnRIQPerf(ExperimentsOnRegions):
               of Regions to include in query.
     """
     self.common_experiment(exp, ctor, query, {
-      'base':       lambda r, g, q: SRQEnumByRCSweep.evaluate(r, q)(),
-      'rigctor':    lambda r, g, q: SRQEnumByNxGraph.evaluate(r, q)(),
-      'rigmdctor':  lambda r, g, q: SRQEnumByNxGraph.evaluate(r, q, ctor=NxGraphMdSweepCtor)(),
+      'base':       lambda r, g, q: SRQEnumByRCSweep.prepare(r, q)(),
+      'rigctor':    lambda r, g, q: SRQEnumByNxGraph.prepare(r, q)(),
+      'rigmdctor':  lambda r, g, q: SRQEnumByNxGraph.prepare(r, q, ctor=NxGraphMdSweepCtor)(),
       'rigprector': lambda r, g, q: SRQEnumByNxGraph(g, q).results
     })
 

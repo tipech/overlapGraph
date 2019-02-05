@@ -53,7 +53,7 @@ class TestEnumerate(TestCase):
     subscribers = [] #[RegionSweepDebug()]
     length, lvl = 0, 0
     levels, enumeration = {}, []
-    evaluator = clazz.evaluate(regions, *subscribers)
+    evaluator = clazz.prepare(regions, *subscribers)
     starttime = perf_counter()
 
     for _, (_, intersect) in enumerate(evaluator()):

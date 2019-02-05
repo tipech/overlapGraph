@@ -100,19 +100,19 @@ class SRQEnumByNxGraph(MRQEnumByNxGraph):
   ### Class Methods: Evaluation
 
   @classmethod
-  def evaluate(cls, context: Union[RegionSet, NxGraph],
-                    region: Union[Region, str],
-                    *subscribers: Iterable[Subscriber[RegionGrp]],
-                    ctor = NxGraphSweepCtor) \
-                    -> Callable[[Any], Iterator[RegionIntersect]]:
+  def prepare(cls, context: Union[RegionSet, NxGraph],
+                   region: Union[Region, str],
+                   *subscribers: Iterable[Subscriber[RegionGrp]],
+                   ctor = NxGraphSweepCtor) \
+                   -> Callable[[Any], Iterator[RegionIntersect]]:
     """
     Factory function for computing an Iterator of intersecting Regions that
     all intersect with a specific Region using the newly constructed or given
     Region intersection graph by one-pass sweep-line algorithm.
-    Wraps NxGraphSweepCtor.evaluate().
+    Wraps NxGraphSweepCtor.prepare().
 
     Overrides:
-      EnumerateByNxGraph.evaluate
+      EnumerateByNxGraph.prepare
 
     Args:
       context:
@@ -147,7 +147,7 @@ class SRQEnumByNxGraph(MRQEnumByNxGraph):
       if isinstance(context, NxGraph):
         return cls(context, region).results
       else:
-        fn = ctor.evaluate(context, *subscribers)
+        fn = ctor.prepare(context, *subscribers)
         return cls(fn(*args, **kwargs), region).results
 
     return evaluate

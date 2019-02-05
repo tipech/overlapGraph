@@ -38,11 +38,11 @@ class TestNxGraph(TestCase):
 
   def _nxgraphctor(self, regions: RegionSet) -> NxGraph:
     subscribers = [] #[RegionSweepDebug()]
-    return NxGraphSweepCtor.evaluate(regions, *subscribers)()
+    return NxGraphSweepCtor.prepare(regions, *subscribers)()
 
   def _nxgraphmdctor(self, regions: RegionSet) -> NxGraph:
     subscribers = [] #[RegionSweepDebug()]
-    return NxGraphMdSweepCtor.evaluate(regions, *subscribers)()
+    return NxGraphMdSweepCtor.prepare(regions, *subscribers)()
 
   def _naive_ctor(self, nxgraph: NxGraph):
     for region in self.test_regions:

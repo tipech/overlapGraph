@@ -100,15 +100,15 @@ class NxGraphSweepCtor(SweepTaskRunner[RegionGrp, NxGraph]):
   ### Class Methods: Evaluation
 
   @classmethod
-  def evaluate(cls, regions: RegionSet,
-                    *subscribers: Iterable[Subscriber[RegionGrp]]) \
-                    -> Callable[[Any], NxGraph]:
+  def prepare(cls, regions: RegionSet,
+                   *subscribers: Iterable[Subscriber[RegionGrp]]) \
+                   -> Callable[[Any], NxGraph]:
     """
     Factory function for constructing a new Region intersecting graph, based
     on NetworkX, using the one-pass sweep-line algorithm.
 
     Overrides:
-      SweepTaskRunner.evaluate
+      SweepTaskRunner.prepare
 
     Args:
       regions:
@@ -132,7 +132,7 @@ class NxGraphSweepCtor(SweepTaskRunner[RegionGrp, NxGraph]):
         Region intersection graph.
     """
     assert isinstance(regions, RegionSet)
-    return SweepTaskRunner.evaluate(cls, RegionSweep, **{
+    return SweepTaskRunner.prepare(cls, RegionSweep, **{
       'subscribers': subscribers,
       'alg_args': [regions],
       'task_args': [regions]

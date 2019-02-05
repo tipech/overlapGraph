@@ -79,17 +79,17 @@ class SRQEnumByRCSweep(EnumerateByRCSweep):
   ### Class Methods: Evaluation
 
   @classmethod
-  def evaluate(cls, regions: RegionSet,
-                    region: Union[Region, str],
-                    *subscribers: Iterable[Subscriber[RegionGrp]]) \
-                    -> Callable[[Any], Iterator[RegionIntersect]]:
+  def prepare(cls, regions: RegionSet,
+                   region: Union[Region, str],
+                   *subscribers: Iterable[Subscriber[RegionGrp]]) \
+                   -> Callable[[Any], Iterator[RegionIntersect]]:
     """
     Factory function for computing an Iterator of intersecting Regions
     that all intersect with the given Region via the restricted cyclic
     multi-pass sweep-line algorithm.
 
     Overrides:
-      EnumerateByRCSweep.evaluate
+      EnumerateByRCSweep.prepare
 
     Args:
       regions:      The set of Regions to compute the
@@ -118,7 +118,7 @@ class SRQEnumByRCSweep(EnumerateByRCSweep):
     if isinstance(region, str):
       region = regions[region]
 
-    return SweepTaskRunner.evaluate(cls, RestrictedRegionCycleSweep, **{
+    return SweepTaskRunner.prepare(cls, RestrictedRegionCycleSweep, **{
       'subscribers': subscribers,
       'alg_args': [regions],
       'alg_kw': {'region': region},

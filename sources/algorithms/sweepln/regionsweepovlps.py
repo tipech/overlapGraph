@@ -92,15 +92,15 @@ class RegionSweepOverlaps(SweepTaskRunner[RegionGrp, List[RegionPair]]):
   ### Class Methods: Evaluation
 
   @classmethod
-  def evaluate(cls, regions: RegionSet,
-                    *subscribers: Iterable[Subscriber[RegionGrp]]) \
-                    -> Callable[[Any], List[RegionPair]]:
+  def prepare(cls, regions: RegionSet,
+                   *subscribers: Iterable[Subscriber[RegionGrp]]) \
+                   -> Callable[[Any], List[RegionPair]]:
     """
     Factory function for computes a list of all of the pairwise overlapping
     Regions using the one-pass sweep-line algorithm.
 
     Overrides:
-      SweepTaskRunner.evaluate
+      SweepTaskRunner.prepare
 
     Args:
       regions:
@@ -124,7 +124,7 @@ class RegionSweepOverlaps(SweepTaskRunner[RegionGrp, List[RegionPair]]):
         overlapping Regions.
     """
     assert isinstance(regions, RegionSet)
-    return SweepTaskRunner.evaluate(cls, RegionSweep, **{
+    return SweepTaskRunner.prepare(cls, RegionSweep, **{
       'subscribers': subscribers,
       'alg_args': [regions]
     })

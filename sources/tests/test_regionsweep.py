@@ -20,7 +20,7 @@ class TestRegionSweep(TestCase):
 
   def _evaluate_regionsweep(self, regions: RegionSet, i: int) -> List[RegionPair]:
     subscribers = [] #[RegionSweepDebug()]
-    return RegionSweepOverlaps.evaluate(regions, *subscribers)(i)
+    return RegionSweepOverlaps.prepare(regions, *subscribers)(i)
 
   def test_regionsweep_simple(self):
     regionset = RegionSet(dimension=2)

@@ -40,16 +40,16 @@ class MRQEnumByRCSweep(EnumerateByRCSweep):
   ### Class Methods: Evaluation
 
   @classmethod
-  def evaluate(cls, regions: RegionSet,
-                    subset: List[Union[Region, str]],
-                    *subscribers: Iterable[Subscriber[RegionGrp]]) \
-                    -> Callable[[Any], Iterator[RegionIntersect]]:
+  def prepare(cls, regions: RegionSet,
+                   subset: List[Union[Region, str]],
+                   *subscribers: Iterable[Subscriber[RegionGrp]]) \
+                   -> Callable[[Any], Iterator[RegionIntersect]]:
     """
     Factory function for computing an Iterator of subsetted intersecting
     Regions via the restricted cyclic multi-pass sweep-line algorithm.
 
     Overrides:
-      EnumerateByRCSweep.evaluate
+      EnumerateByRCSweep.prepare
 
     Args:
       regions, subset:
@@ -71,7 +71,7 @@ class MRQEnumByRCSweep(EnumerateByRCSweep):
         intersecting Regions.
     """
     assert isinstance(regions, RegionSet)
-    return SweepTaskRunner.evaluate(cls, RestrictedRegionCycleSweep, **{
+    return SweepTaskRunner.prepare(cls, RestrictedRegionCycleSweep, **{
       'subscribers': subscribers,
       'alg_args': [regions],
       'alg_kw': {'subset': subset}
