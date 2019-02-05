@@ -222,7 +222,7 @@ class ExperimentsOnRIQPerf(ExperimentsOnRegions):
       'base':       lambda r, g, q: EnumerateByRCSweep.prepare(r)(),
       'rigctor':    lambda r, g, q: EnumerateByNxGraph.prepare(r)(),
       'rigmdctor':  lambda r, g, q: EnumerateByNxGraph.prepare(r, ctor=NxGraphMdSweepCtor)(),
-      'rigprector': lambda r, g, q: EnumerateByNxGraph(g).results
+      'rigprector': lambda r, g, q: EnumerateByNxGraph.prepare(g)()
     })
 
   def common_experiment_mrqenum(self, exp: Experiment, ctor: RegionDSCtor, query: RegionQueryRnd):
@@ -241,7 +241,7 @@ class ExperimentsOnRIQPerf(ExperimentsOnRegions):
       'base':       lambda r, g, q: MRQEnumByRCSweep.prepare(r, q)(),
       'rigctor':    lambda r, g, q: MRQEnumByNxGraph.prepare(r, q)(),
       'rigmdctor':  lambda r, g, q: MRQEnumByNxGraph.prepare(r, q, ctor=NxGraphMdSweepCtor)(),
-      'rigprector': lambda r, g, q: MRQEnumByNxGraph(g, q).results
+      'rigprector': lambda r, g, q: MRQEnumByNxGraph.prepare(g, q)()
     })
 
   def common_experiment_srqenum(self, exp: Experiment, ctor: RegionDSCtor, query: RegionQueryRnd):
@@ -260,7 +260,7 @@ class ExperimentsOnRIQPerf(ExperimentsOnRegions):
       'base':       lambda r, g, q: SRQEnumByRCSweep.prepare(r, q)(),
       'rigctor':    lambda r, g, q: SRQEnumByNxGraph.prepare(r, q)(),
       'rigmdctor':  lambda r, g, q: SRQEnumByNxGraph.prepare(r, q, ctor=NxGraphMdSweepCtor)(),
-      'rigprector': lambda r, g, q: SRQEnumByNxGraph(g, q).results
+      'rigprector': lambda r, g, q: SRQEnumByNxGraph.prepare(g, q)()
     })
 
   ### Methods: Experiments

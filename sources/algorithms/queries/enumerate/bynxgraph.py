@@ -21,7 +21,7 @@ Classes:
 - EnumerateByNxGraph
 """
 
-from typing import Any, Callable, Iterator
+from typing import Any, Callable, Iterator, Union
 
 from networkx import networkx as nx
 
@@ -95,7 +95,8 @@ class EnumerateByNxGraph:
   ### Class Methods: Evaluation
 
   @classmethod
-  def prepare(cls, regions: RegionSet, *args, ctor = NxGraphSweepCtor,
+  def prepare(cls, context: Union[RegionSet, NxGraph],
+                   *args, ctor = NxGraphSweepCtor,
                    **kwargs) -> Callable[[Any], Iterator[RegionIntersect]]:
     """
     Factory function for computes an Iterator of all of the intersecting
@@ -103,9 +104,12 @@ class EnumerateByNxGraph:
     one-pass sweep-line algorithm. Wraps NxGraphSweepCtor.evaluate().
 
     Args:
-      regions:
-        The set of Regions to construct a new
-        Region intersection graph from.
+      context:
+        RegionSet:
+          The set of Regions to construct a new
+          Region intersection graph from.
+        NxGraph:
+          The preconstructed Region intersection graph.
       ctor:
         The Region intersection graph
         construction algorithm.
@@ -125,7 +129,12 @@ class EnumerateByNxGraph:
       Returns:
         The resulting Iterator of intersecting Regions.
     """
-    fn = ctor.prepare(regions, *args, **kwargs)
+    assert isinstance(context, (RegionSet, NxGraph))
+
+    if isinstance(context, NxGraph):
+      fn = lambda: context
+    else:
+      fn = ctor.prepare(context, *args, **kwargs)      
 
     def evaluate(*args, **kwargs):
       return cls(fn(*args, **kwargs)).results

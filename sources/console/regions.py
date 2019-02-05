@@ -263,34 +263,37 @@ def enumerate(source: FileIO, output: FileIO, naive: bool, queries = []):
   intersects = RegionSet(dimension=regions.dimension)
   counts = {}
   algorithms = {
-    'nxgraph': [
-      lambda r:     EnumerateByNxGraph(r).results,
-      lambda r, q:  SRQEnumByNxGraph(r, q).results,
-      lambda r, q:  MRQEnumByNxGraph(r, q).results
-    ],
-    'rcsweep': [
-      lambda r:     EnumerateByRCSweep.prepare(r)(),
-      lambda r, q:  SRQEnumByRCSweep.prepare(r, q)(),
-      lambda r, q:  MRQEnumByRCSweep.prepare(r, q)()
-    ]
+    'nxgraph': {
+      'enumerate': EnumerateByNxGraph,
+      'srqenum':   SRQEnumByNxGraph,
+      'mrqenum':   MRQEnumByNxGraph
+    },
+    'rcsweep': {
+      'enumerate': EnumerateByRCSweep,
+      'srqenum':   SRQEnumByRCSweep,
+      'mrqenum':   MRQEnumByRCSweep
+    }
   }
+
+  def get_enumeration(alg, *args):
+    return algs[alg].prepare(context, *args)()
 
   def get_enumeration_results():
     if len(queries) == 0:
-      return methods[0](context)
+      return get_enumeration('enumerate')
     elif len(queries) == 1:
-      return methods[1](context, queries[0])
+      return get_enumeration('srqenum', queries[0])
     else:
-      return methods[2](context, list(queries))
+      return get_enumeration('mrqenum', list(queries))
 
   start = perf_counter()
 
   if naive:
-    methods = algorithms['rcsweep']
+    algs = algorithms['rcsweep']
     context = regions
     elapse_ctor = 0
   else:
-    methods = algorithms['nxgraph']
+    algs = algorithms['nxgraph']
     context = NxGraphSweepCtor.prepare(regions)()
     elapse_ctor = perf_counter() - start
 
