@@ -2,4 +2,4 @@
 
 from .shapes import *
 from .datasets import *
-from .rigraphs import *
+from .graphs import *
