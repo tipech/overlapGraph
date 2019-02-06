@@ -14,8 +14,8 @@ from io import StringIO
 from typing import List, Tuple
 from unittest import TestCase
 
-from sources.algorithms import \
-     NxGraphMdSweepCtor, NxGraphSweepCtor, RegionSweep, RegionSweepDebug
+from sources.algorithms.rigctor import NxGraphMdSweepCtor, NxGraphSweepCtor
+from sources.algorithms.sweepln import RegionSweep, RegionSweepDebug
 from sources.core import \
      NxGraph, Region, RegionPair, RegionSet
 
