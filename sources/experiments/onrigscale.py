@@ -39,7 +39,7 @@ from numpy import mean
 
 from sources.abstract import Experiment
 from sources.algorithms import NxGraphSweepCtor
-from sources.core import NxGraph, Region, RegionSet
+from sources.core import Region, RegionSet
 
 from .onregions import ExperimentsOnRegions
 

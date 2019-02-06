@@ -23,14 +23,15 @@ Classes:
 - NxGraph
 """
 
-from typing import Any, Callable, Dict, Generic, Iterator, List, Tuple, TypeVar
+from typing import \
+     Any, Callable, Dict, Generic, Iterator, List, Tuple, TypeVar, Union
 
 from networkx import networkx as nx
 from networkx.readwrite import json_graph
 
 from sources.abstract import IOable
 
-from ..shapes import Region, RegionPair
+from ..shapes import Region, RegionId, RegionIdPair, RegionPair
 from .rigraph import RIGraph
 
 
@@ -43,7 +44,15 @@ class NxGraph(RIGraph[nx.Graph], IOable):
   Extends:
     RIGraph[nx.Graph]
     IOable
+
+  Class Attributes:
+    NodeRegion:   The data property for the Region
+                  associated with each node.
+    EdgeRegion:   The data property for the intersecting
+                  Region associated with each node.
   """
+  NodeRegion = 'region'
+  EdgeRegion = 'intersect'
 
   def __init__(self, dimension: int, graph: nx.Graph = None):
     """
@@ -72,117 +81,211 @@ class NxGraph(RIGraph[nx.Graph], IOable):
   ### Properties: Getters
 
   @property
-  def regions(self) -> Iterator[Tuple[str, Region]]:
+  def regions(self) -> Iterator[Tuple[str, Region, Dict]]:
     """
     Returns an Iterator of Regions within the graph
-    along with the Region ID or node ID within the graph
+    along with the Region ID or node ID and any additional
+    associated data properties for each node within the graph
     as a Tuple.
 
     Returns:
-      An Iterator of Regions and their IDs.
+      An Iterator of Regions, their IDs and
+      their node's data properties.
     """
-    return self.G.nodes(data='region')
+    nodekey = self.NodeRegion
+    region  = lambda d: d[nodekey] if nodekey in d else None
+
+    for node, data in self.G.nodes(data=True):
+      yield (node, region(data), data)
 
   @property
-  def overlaps(self) -> Iterator[Tuple[str, str, Region]]:
+  def overlaps(self) -> Iterator[Tuple[str, str, Region, Dict]]:
     """
     Returns an Iterator of overlapping Regions within the graph
     along with the two Region IDs or node IDs within the graph
-    for which the two Regions are involved as a Tuple.
+    for which the two Regions are involved as a Tuple. Includes
+    any additional associated data properties for each edge within
+    the graph as the last field in the Tuple.
 
     Returns:
-      An Iterator of overlapping Regions and
-      the Region IDs of the two Regions involved.
+      An Iterator of overlapping Regions, the
+      Region IDs of the two Regions involved, and
+      the edge's data properties.
     """
-    return self.G.edges(data='intersect')
+    edgekey   = self.EdgeRegion
+    intersect = lambda d: d[edgekey] if edgekey in d else None
+
+    for u, v, data in self.G.edges(data=True):
+      yield (u, v, intersect(data), data)
+
+  ### Methods: Private Helpers
+
+  def _convert(self, key: Union[RegionId, RegionIdPair]) -> Union[str, Tuple[str,str]]:
+    """
+    Converts the given Region or pair of Regions into the corresponding
+    Region ID or pair of Region IDs.
+
+    Args:
+      key:  The Region or pair of Regions 
+            to convert to IDs.
+
+    Returns:
+      The Region ID or pair of Region IDs.
+    """
+    def regionid(r) -> str:
+      return r.id if isinstance(r, Region) else r
+
+    if isinstance(key, Tuple) and any([isinstance(k, Region) for k in key]):
+      return tuple(regionid(k) for k in key)
+    else:
+      return regionid(key)
+
+  ### Methods: Queries
+
+  def __getitem__(self, key: Union[RegionId, RegionIdPair]) -> Tuple[Region, Dict]:
+    """
+    Retrieve the Region or intersecting Region for the given Region ID or
+    pair of Region IDs. Also, retrieves the data properties for the Region
+    (node) or intersecting Region (edge). Returns None if Region or
+    intersecting Region is not contained as node or edge within the graph.
+
+    Syntactic Sugar:
+      self[key]
+
+    Args:
+      key:  The unique identifier for Region or
+            intersecting Region to be retrieved.
+    
+    Returns:
+      The retrieved Region or intersecting Region
+      and the associated data properties.
+      None, if Region or intersecting Region is not
+      contained as node or edge within the graph.
+    """
+    get = lambda d, k: d[k] if k in d else None
+
+    if key not in self:
+      return None
+
+    key = self._convert(key)
+
+    if isinstance(key, Tuple):
+      data = self.G.edges[key]
+      region = get(data, self.EdgeRegion)
+    else:
+      data = self.G.nodes[key]
+      region = get(data, self.NodeRegion)
+
+    return (region, data)
+
+  def __delitem__(self, key: Union[RegionId, RegionIdPair]):
+    """
+    Remove the Region (node) or intersecting Region (edge) associated
+    with the given Region ID or pair of Regions IDs within the graph.
+
+    Syntactic Sugar:
+      del self[key]
+
+    Args:
+      key:  The unique identifier for Region or
+            intersecting Region to be removed.
+    """
+    key = self._convert(key)
+
+    if key not in self:
+      return
+    elif isinstance(key, Tuple):
+      self.G.remove_edge(*key)
+    else:
+      self.G.remove_node(key)
+
+  def __contains__(self, key: Union[RegionId, RegionIdPair]) -> bool:
+    """
+    Determine if the given Region ID or pair of Regions IDs are
+    contained as nodes or edges within the graph.
+
+    Syntactic Sugar:
+      key in self
+
+    Args:
+      key:    The unique identifier for Region or
+              intersecting Region to be queried.
+
+    Returns:
+      True:   If Region or intersecting Region is
+              contained as node or edge within the graph.
+      False:  Otherwise.
+    """
+    key = self._convert(key)
+
+    if isinstance(key, Tuple):
+      return key in self.G.edges
+    else:
+      return key in self.G.nodes
 
   ### Methods: Insertion
 
-  def put_region(self, region: Region):
+  def put_region(self, region: Region, **kwargs):
     """
     Add the given Region as a newly created node in the graph.
 
     Args:
       region:
         The Region to be added.
+      kwargs:
+        Additional data properties to be added
+        to the newly created node.
     """
-    self.G.add_node(region.id, region=region)
+    datakey = self.NodeRegion
+    self.G.add_node(region.id, **{datakey: region})
 
-  def put_overlap(self, overlap: RegionPair):
+  def put_overlap(self, overlap: RegionIdPair, intersect = True, **kwargs):
     """
     Add the given pair of Regions as a newly created edge in the graph.
     The two regions must be intersecting or overlapping.
 
     Args:
       overlap:
-        The pair of Regions to be added
-        as an intersection.
+        The pair of Regions or Region IDs to be
+        added as an intersection.
+      intersect:
+        True:
+          Computes the intersect between the pair of Regions
+          and assigns the value as the 'intersect' data
+          property. Check if the Regions actually
+          intersects; removes edge if not.
+        False:
+          Don't assign any value as the 'intersect'
+          data property.
+        Any:
+          Value to assign as the 'intersect'
+          data property.
+      kwargs:
+        Additional data properties to be added
+        to the newly created edge.
     """
     assert isinstance(overlap, Tuple) and len(overlap) == 2
-    assert all([isinstance(r, Region) for r in overlap])
+    assert all([isinstance(r, (Region, str)) for r in overlap])
 
-    a, b = overlap
-    self.G.add_edge(a.id, b.id, intersect=a.intersect(b, 'reference'))
+    region   = lambda r: r if isinstance(r, Region) else self.region(r)
+    regionid = lambda r: r.id if isinstance(r, Region) else r
+    a, b     = tuple(regionid(r) for r in overlap)
 
-  ### Methods: Temporary Overlaps
+    assert isinstance(a, str) and a in self
+    assert isinstance(b, str) and b in self
 
-  def put_temporary_overlap(self, overlap: RegionPair):
-    """
-    Add the given pair of Regions as a newly created edge in the graph.
-    The two regions must be overlapping in at least one dimension.
-    If two regions are has an edge between them, increment to overlap weight.
+    if intersect == True:
+      intersect = region(a).intersect(region(b), 'reference')
+      if intersect is None:
+        return
 
-    Args:
-      overlap:
-        The pair of Regions to be added
-        as a temporary overlap.
-    """
-    G = self.G
+    if (a, b) in self:
+      del self[a, b]
 
-    assert isinstance(overlap, Tuple) and len(overlap) == 2
-    assert all([isinstance(r, Region) for r in overlap])
-
-    rid = lambda r: r.id
-    overlap = tuple([rid(r) for r in overlap])
-
-    if overlap in G.edges:
-      edge = G.edges[overlap]
-      assert 'overlaps' in edge and edge['overlaps'] < self.dimension
-      edge['overlaps'] += 1
+    if intersect == False:
+      self.G.add_edge(a, b, **kwargs)
     else:
-      G.add_edge(*overlap, overlaps=1, intersect=None)
-
-  def finalize_overlap(self, overlap: Tuple[str, str]):
-    """
-    Update the edge associated with given pair of Region IDs in the graph,
-    with the computed intersection Region between the two Regions.
-    If the Regions do not overlap, remove the edge between the two Regions.
-
-    Args:
-      overlap:
-        The Region IDs to finalize the edge
-        into a permanent intersection or remove if
-        not intersecting.
-    """
-    G = self.G
-
-    assert isinstance(overlap, Tuple) and len(overlap) == 2
-    assert all([isinstance(r, str) and r in G.nodes for r in overlap])
-    assert overlap in G.edges; edge = G.edges[overlap]
-    assert 'overlaps' in edge; overlaps = edge['overlaps']
-
-    def intersect(a, b) -> Region:
-      assert isinstance(a, Region) and isinstance(b, Region)
-      ab = a.intersect(b, 'reference')
-      assert isinstance(ab, Region)
-      return ab
-
-    if self.dimension == overlaps:
-      a, b = tuple([G.nodes[r]['region'] for r in overlap])
-      edge['intersect'] = intersect(a, b)
-      del edge['overlaps']
-    else:
-      G.remove_edge(*overlap)
+      self.G.add_edge(a, b, intersect=intersect, **kwargs)
 
   ### Class Methods: Serialization
 

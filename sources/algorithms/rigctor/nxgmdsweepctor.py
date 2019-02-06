@@ -21,10 +21,11 @@ Classes:
 - NxGraphMdSweepCtor
 """
 
-from typing import Any, Callable, Iterable, Tuple
+from typing import Any, Callable, Iterable, List, Tuple
 
 from sources.abstract import Event, Subscriber
-from sources.core import NxGraph, Region, RegionGrp, RegionPair, RegionSet
+from sources.core import \
+     Interval, NxGraph, Region, RegionGrp, RegionPair, RegionSet
 
 from ..sweepln import RegionMdSweep, RegionSweepEvtKind, SweepTaskRunner
 from .nxgsweepctor import NxGraphSweepCtor
@@ -82,8 +83,20 @@ class NxGraphMdSweepCtor(NxGraphSweepCtor):
     assert event.kind == RegionSweepEvtKind.Intersect
     assert isinstance(event.context, Tuple) and len(event.context) == 2
     assert all([isinstance(r, Region) for r in event.context])
+    assert 0 <= event.dimension < self.dimension
 
-    self.G.put_temporary_overlap(event.context)
+    default = [None]*self.dimension
+    dim_intersect = lambda a, b, d: a[d].intersect(b[d])
+
+    if event.context in self.G:
+      intersect, data = self.G[event.context]
+      dim = data.get('dimensions', default)
+    else:
+      intersect = None
+      dim = default
+
+    dim[event.dimension] = dim_intersect(*event.context, event.dimension)
+    self.G.put_overlap(event.context, intersect=intersect, dimensions=dim)
 
   def on_completed(self):
     """
@@ -99,8 +112,23 @@ class NxGraphMdSweepCtor(NxGraphSweepCtor):
       Subscriber.on_completed
     """
     G = self.G
-    for a, b, _ in list(G.overlaps):
-      G.finalize_overlap((a, b))
+    for a, b, intersect, data in list(G.overlaps):
+      # Buffer G.overlaps into a list to prevent 'dictionary changed size
+      # during iteration' runtime error.
+      if intersect is not None:
+        continue
+
+      if 'dimensions' in data:
+        dim = data['dimensions']
+        assert isinstance(dim, List) and len(dim) == self.dimension
+        if all([isinstance(d, Interval) for d in dim]):
+          intersect = Region.from_intervals(dim)
+          intersect['intersect'] = [G.region(a), G.region(b)]
+          G.put_overlap((a, b), intersect=intersect)
+          continue
+
+      # 'dimensions' not in data OR any([d is None for d in dim])
+      del G[a, b]
 
   ### Class Methods: Evaluation
 

@@ -76,7 +76,7 @@ class SRQEnumByNxGraph(MRQEnumByNxGraph):
     assert r in G.nodes
 
     MRQEnumByNxGraph.__init__(self, graph, [r, *nx.neighbors(G, r)])
-    self.region = G.nodes[r]['region']
+    self.region = graph.region(r)
 
   ### Methods: Computations
 

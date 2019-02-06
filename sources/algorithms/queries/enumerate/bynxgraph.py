@@ -86,7 +86,7 @@ class EnumerateByNxGraph:
 
     for clique in nx.enumerate_all_cliques(graph.G):
       if len(clique) > 1:
-        intersect = [graph.G.nodes[r]['region'] for r in clique]
+        intersect = [graph.region(r) for r in clique]
         region    = Region.from_intersect(intersect, linked=True)
 
         assert isinstance(region, Region)

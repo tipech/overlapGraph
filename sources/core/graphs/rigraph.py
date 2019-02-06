@@ -24,14 +24,15 @@ Abstract Classes:
 """
 
 from abc import ABCMeta, abstractmethod
-from typing import Any, Generic, Iterator, Tuple, TypeVar
+from typing import Any, Dict, Generic, Iterator, Tuple, TypeVar, Union
 
-from ..shapes import Region, RegionPair
+from ..shapes import Region, RegionIdPair, RegionPair
 
 
-Graph = TypeVar('Graph')
+G = TypeVar('G')
 
-class RIGraph(Generic[Graph]): # pylint: disable=E1136
+
+class RIGraph(Generic[G]): # pylint: disable=E1136
   """
   Abstract Class
 
@@ -49,11 +50,11 @@ class RIGraph(Generic[Graph]): # pylint: disable=E1136
   """
   __metaclass__ = ABCMeta
 
-  G: Graph
+  G: G
   dimension: int
 
   @abstractmethod
-  def __init__(self, dimension: int, graph: Graph = None):
+  def __init__(self, dimension: int, graph: G = None):
     """
     Initializes the graph representation of intersecting
     and overlapping Regions.
@@ -71,7 +72,7 @@ class RIGraph(Generic[Graph]): # pylint: disable=E1136
   ### Properties: Getters
 
   @property
-  def graph(self) -> Graph:
+  def graph(self) -> G:
     """
     The internal graph representation or implementation for
     a graph of intersecting or overlapping Regions.
@@ -86,55 +87,181 @@ class RIGraph(Generic[Graph]): # pylint: disable=E1136
 
   @property
   @abstractmethod
-  def regions(self) -> Iterator[Tuple[str, Region]]:
+  def regions(self) -> Iterator[Tuple[str, Region, Dict]]:
     """
     Returns an Iterator of Regions within the graph
-    along with the Region ID or node ID within the graph
+    along with the Region ID or node ID and any additional
+    associated data properties for each node within the graph
     as a Tuple.
 
     Returns:
-      An Iterator of Regions and their IDs.
+      An Iterator of Regions, their IDs and
+      their node's data properties.
     """
     raise NotImplementedError
 
   @property
   @abstractmethod
-  def overlaps(self) -> Iterator[Tuple[str, str, Region]]:
+  def overlaps(self) -> Iterator[Tuple[str, str, Region, Dict]]:
     """
     Returns an Iterator of overlapping Regions within the graph
     along with the two Region IDs or node IDs within the graph
-    for which the two Regions are involved as a Tuple.
+    for which the two Regions are involved as a Tuple. Includes
+    any additional associated data properties for each edge within
+    the graph as the last field in the Tuple.
 
     Returns:
-      An Iterator of overlapping Regions and
-      the Region IDs of the two Regions involved.
+      An Iterator of overlapping Regions, the
+      Region IDs of the two Regions involved, and
+      the edge's data properties.
     """
     raise NotImplementedError
+
+  ### Methods: Queries
+
+  @abstractmethod
+  def __getitem__(self, key: Union[str, Tuple[str,str]]) -> Tuple[Region, Dict]:
+    """
+    Retrieve the Region or intersecting Region for the given Region ID or
+    pair of Region IDs. Also, retrieves the data properties for the Region
+    (node) or intersecting Region (edge). Returns None if Region or
+    intersecting Region is not contained as node or edge within the graph.
+
+    Syntactic Sugar:
+      self[key]
+
+    Args:
+      key:  The unique identifier for Region or
+            intersecting Region to be retrieved.
+    
+    Returns:
+      The retrieved Region or intersecting Region
+      and the associated data properties.
+      None, if Region or intersecting Region is not
+      contained as node or edge within the graph.
+    """
+    raise NotImplementedError
+
+  @abstractmethod
+  def __delitem__(self, key: Union[str, Tuple[str,str]]):
+    """
+    Remove the Region (node) or intersecting Region (edge) associated
+    with the given Region ID or pair of Regions IDs within the graph.
+
+    Syntactic Sugar:
+      del self[key]
+
+    Args:
+      key:  The unique identifier for Region or
+            intersecting Region to be removed.
+    """
+    raise NotImplementedError
+
+  @abstractmethod
+  def __contains__(self, key: Union[str, Tuple[str,str]]) -> bool:
+    """
+    Determine if the given Region ID or pair of Regions IDs are
+    contained as nodes or edges within the graph.
+
+    Syntactic Sugar:
+      key in self
+
+    Args:
+      key:    The unique identifier for Region or
+              intersecting Region to be queried.
+
+    Returns:
+      True:   If Region or intersecting Region is
+              contained as node or edge within the graph.
+      False:  Otherwise.
+    """
+    raise NotImplementedError
+
+  def region(self, key: Union[str, Tuple[str,str]]) -> Region:
+    """
+    Retrieve the Region or intersecting Region for the given Region ID or
+    pair of Region IDs. Returns None if Region or intersecting Region is not
+    contained as node or edge within the graph.
+
+    Syntactic Sugar:
+      self[key][0]
+
+    Args:
+      key:  The unique identifier for Region or
+            intersecting Region to be retrieved.
+    
+    Returns:
+      The retrieved Region or intersecting Region.
+      None, if Region or intersecting Region is not
+      contained as node or edge within the graph.
+    """
+    if key in self:
+      return self[key][0]
+    else:
+      return None
+
+  def data(self, key: Union[str, Tuple[str,str]]) -> Dict:
+    """
+    Retrieve the data properties for the given Region ID or pair of Region IDs.
+    Returns None if Region or intersecting Region is not contained as node
+    or edge within the graph.
+
+    Syntactic Sugar:
+      self[key][1]
+
+    Args:
+      key:  The unique identifier for Region or
+            intersecting Region's data properties
+            to be retrieved.
+
+    Returns:
+      The retrieved data properties.
+      None, if Region or intersecting Region is not
+      contained as node or edge within the graph.
+    """
+    if key in self:
+      return self[key][1]
+    else:
+      return None
 
   ### Methods: Insertion
 
   @abstractmethod
-  def put_region(self, region: Region):
+  def put_region(self, region: Region, **kwargs):
     """
     Add the given Region as a newly created node in the graph.
 
     Args:
       region:
         The Region to be added.
+      kwargs:
+        Additional data properties to be added
+        to the newly created node.
     """
     raise NotImplementedError
 
   @abstractmethod
-  def put_overlap(self, overlap: RegionPair, **kwargs):
+  def put_overlap(self, overlap: RegionIdPair, intersect = True, **kwargs):
     """
     Add the given pair of Regions as a newly created edge in the graph.
     The two regions must be intersecting or overlapping.
 
     Args:
       overlap:
-        The pair of Regions to be added
-        as an intersection.
+        The pair of Regions or Region IDs to be
+        added as an intersection.
+      intersect:
+        True:
+          Computes the intersect between the pair of Regions
+          and assigns the value as the 'intersect' data property.
+          Check if the Regions actually intersects;
+          removes edge if not.
+        False:
+          Don't assign any value as the 'intersect' data property.
+        Any:
+          Value to assign as the 'intersect' data property.
       kwargs:
-        Additional arguments.
+        Additional data properties to be added
+        to the newly created edge.
     """
     raise NotImplementedError
