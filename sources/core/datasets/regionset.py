@@ -21,7 +21,7 @@ from uuid import uuid4
 from sources.abstract import IOable
 from sources.helpers import RandomFn, Randoms, to_base26
 
-from ..shapes import Interval, Region, RegionPair
+from ..shapes import Interval, Region, RegionId, RegionPair
 from .regiontime import RegionEvtKind
 
 try: # cyclic codependency
@@ -370,7 +370,7 @@ class RegionSet(Iterable[Region], abc.Container, abc.Sized, IOable):
     """
     return self.length
 
-  def __contains__(self, value: Union[Region, str]) -> bool:
+  def __contains__(self, value: RegionId) -> bool:
     """
     Determine if the given Region or Region ID is contained within
     this collection. Return True if this collection contains that Region,
@@ -476,7 +476,7 @@ class RegionSet(Iterable[Region], abc.Container, abc.Sized, IOable):
 
     return regionset
 
-  def subset(self, subset: List[Union[Region, str]]) -> 'RegionSet':
+  def subset(self, subset: List[RegionId]) -> 'RegionSet':
     """
     Returns a new subsetted RegionSet with the only the Regions
     within the given, more restricted Regions subset.

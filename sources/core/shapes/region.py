@@ -31,9 +31,13 @@ from sources.helpers import NDArray, RandomFn, Randoms
 from .interval import Interval
 
 
-RegionPair  = Tuple['Region', 'Region']
-RegionIntxn = List['Region']
-RegionGrp   = Union['Region', RegionIntxn, RegionPair]
+RegionPair    = Tuple['Region', 'Region']
+RegionIntxn   = List['Region']
+RegionGrp     = Union['Region', RegionIntxn, RegionPair]
+RegionId      = Union['Region', str]
+RegionIdPair  = Tuple[RegionId, RegionId]
+RegionIdIntxn = List[RegionId]
+RegionIdGrp   = Union[RegionId, RegionIdIntxn, RegionIdPair]
 
 
 @dataclass

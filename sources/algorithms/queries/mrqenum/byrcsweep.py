@@ -21,7 +21,7 @@ from typing import Any, Callable, Iterable, Iterator, List, Union
 
 from sources.abstract import Subscriber
 from sources.algorithms import RestrictedRegionCycleSweep, SweepTaskRunner
-from sources.core import Region, RegionGrp, RegionSet
+from sources.core import Region, RegionGrp, RegionId, RegionSet
 
 from ..enumerate import EnumerateByRCSweep, RegionIntersect
 
@@ -40,8 +40,7 @@ class MRQEnumByRCSweep(EnumerateByRCSweep):
   ### Class Methods: Evaluation
 
   @classmethod
-  def prepare(cls, regions: RegionSet,
-                   subset: List[Union[Region, str]],
+  def prepare(cls, regions: RegionSet, subset: List[RegionId],
                    *subscribers: Iterable[Subscriber[RegionGrp]]) \
                    -> Callable[[Any], Iterator[RegionIntersect]]:
     """

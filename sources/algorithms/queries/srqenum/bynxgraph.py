@@ -28,7 +28,7 @@ from typing import Any, Callable, Iterable, Iterator, List, Union
 from networkx import networkx as nx
 
 from sources.abstract import Subscriber
-from sources.core import NxGraph, Region, RegionGrp, RegionSet
+from sources.core import NxGraph, Region, RegionId, RegionGrp, RegionSet
 
 from ..enumerate import EnumerateByNxGraph, NxGraphSweepCtor, RegionIntersect
 from ..mrqenum import MRQEnumByNxGraph
@@ -55,7 +55,7 @@ class SRQEnumByNxGraph(MRQEnumByNxGraph):
   """
   region: Region
 
-  def __init__(self, graph: NxGraph, region: Union[Region, str]):
+  def __init__(self, graph: NxGraph, region: RegionId):
     """
     Initialize this computation for enumerating intersecting
     Regions within the given Region intersection graph that all
@@ -100,8 +100,7 @@ class SRQEnumByNxGraph(MRQEnumByNxGraph):
   ### Class Methods: Evaluation
 
   @classmethod
-  def prepare(cls, context: Union[RegionSet, NxGraph],
-                   region: Union[Region, str],
+  def prepare(cls, context: Union[RegionSet, NxGraph], region: RegionId,
                    *subscribers: Iterable[Subscriber[RegionGrp]],
                    ctor = NxGraphSweepCtor) \
                    -> Callable[[Any], Iterator[RegionIntersect]]:

@@ -26,7 +26,7 @@ from typing import Any, Callable, Iterable, Iterator, List, Union
 from networkx import networkx as nx
 
 from sources.abstract import Subscriber
-from sources.core import NxGraph, Region, RegionGrp, RegionSet
+from sources.core import NxGraph, Region, RegionGrp, RegionId, RegionSet
 
 from ..enumerate import EnumerateByNxGraph, NxGraphSweepCtor, RegionIntersect
 
@@ -51,7 +51,7 @@ class MRQEnumByNxGraph(EnumerateByNxGraph):
   """
   subset: List[str]
 
-  def __init__(self, graph: NxGraph, subset: List[Union[Region, str]]):
+  def __init__(self, graph: NxGraph, subset: List[RegionId]):
     """
     Initialize this computation for enumerating subsetted intersecting
     Regions within the given Region intersection graph and the given
@@ -80,8 +80,7 @@ class MRQEnumByNxGraph(EnumerateByNxGraph):
   ### Class Methods: Evaluation
 
   @classmethod
-  def prepare(cls, context: Union[RegionSet, NxGraph],
-                   subset: List[Union[Region, str]],
+  def prepare(cls, context: Union[RegionSet, NxGraph], subset: List[RegionId],
                    *subscribers: Iterable[Subscriber[RegionGrp]],
                    ctor = NxGraphSweepCtor) \
                    -> Callable[[Any], Iterator[RegionIntersect]]:
