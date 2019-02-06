@@ -10,8 +10,7 @@ from time import perf_counter
 from typing import Dict, Iterator, List, NamedTuple, Tuple
 from unittest import TestCase
 
-from sources.algorithms.queries import \
-     EnumerateByNxGraph, EnumerateByRCSweep, RegionIntersect
+from sources.algorithms.queries import Enumerate, RegionIntersect
 from sources.algorithms.sweepln import RegionSweepDebug, SweepTaskRunner
 from sources.core import Region, RegionIntxn, RegionSet
 
@@ -84,8 +83,8 @@ class TestEnumerate(TestCase):
 
   def test_enumerate_results(self):
     for name in self.regions.keys():
-      nxg = self.run_evaluator(name, EnumerateByNxGraph)
-      rcs = self.run_evaluator(name, EnumerateByRCSweep)
+      nxg = self.run_evaluator(name, Enumerate.get('slig'))
+      rcs = self.run_evaluator(name, Enumerate.get('naive'))
 
       self.assertEqual(nxg.length, rcs.length)
       self.assertDictEqual(nxg.levels, rcs.levels)

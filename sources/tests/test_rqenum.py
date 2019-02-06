@@ -13,9 +13,8 @@ from time import perf_counter
 from typing import Dict, Iterator, List, NamedTuple, Tuple, Union
 from unittest import TestCase
 
-from sources.algorithms import \
-     MRQEnumByNxGraph, MRQEnumByRCSweep, RegionIntersect, RegionSweepDebug, \
-     SRQEnumByNxGraph, SRQEnumByRCSweep, SweepTaskRunner
+from sources.algorithms.queries import MRQEnum, RegionIntersect, SRQEnum
+from sources.algorithms.sweepln import RegionSweepDebug, SweepTaskRunner
 from sources.core import Region, RegionIntxn, RegionSet
 
 
@@ -106,8 +105,8 @@ class TestRQEnumerate(TestCase):
 
     for name in self.regions.keys():
       for s, subset in self.subsets[name].items():
-        nxg = self.run_evaluator(name, s, subset, MRQEnumByNxGraph)
-        rcs = self.run_evaluator(name, s, subset, MRQEnumByRCSweep)
+        nxg = self.run_evaluator(name, s, subset, MRQEnum.get('slig'))
+        rcs = self.run_evaluator(name, s, subset, MRQEnum.get('naive'))
 
         self.assertEqual(nxg.length, rcs.length)
         self.assertDictEqual(nxg.levels, rcs.levels)
@@ -122,8 +121,8 @@ class TestRQEnumerate(TestCase):
 
       for region in shuffled[0:ceil(0.01 * len(shuffled))]:
         r = region.id
-        nxg = self.run_evaluator(name, r, region, SRQEnumByNxGraph)
-        rcs = self.run_evaluator(name, r, region, SRQEnumByRCSweep)
+        nxg = self.run_evaluator(name, r, region, SRQEnum.get('slig'))
+        rcs = self.run_evaluator(name, r, region, SRQEnum.get('naive'))
 
         self.assertEqual(nxg.length, rcs.length)
         self.assertDictEqual(nxg.levels, rcs.levels)

@@ -27,10 +27,7 @@ from matplotlib.colors import to_rgb
 from networkx import networkx as nx
 
 from sources.abstract import IOable
-from sources.algorithms import \
-     EnumerateByNxGraph, EnumerateByRCSweep, \
-     MRQEnumByNxGraph, MRQEnumByRCSweep, NxGraphSweepCtor, \
-     SRQEnumByNxGraph, SRQEnumByRCSweep
+from sources.algorithms import Enumerate, MRQEnum, NxGraphSweepCtor, SRQEnum
 from sources.core import NxGraph, Region, RegionSet
 from sources.helpers import Randoms
 from sources.visualize import draw_regions, draw_rigraph
@@ -262,42 +259,29 @@ def enumerate(source: FileIO, output: FileIO, naive: bool, queries = []):
   regions = RegionSet.from_source(source)
   intersects = RegionSet(dimension=regions.dimension)
   counts = {}
-  algorithms = {
-    'nxgraph': {
-      'enumerate': EnumerateByNxGraph,
-      'srqenum':   SRQEnumByNxGraph,
-      'mrqenum':   MRQEnumByNxGraph
-    },
-    'rcsweep': {
-      'enumerate': EnumerateByRCSweep,
-      'srqenum':   SRQEnumByRCSweep,
-      'mrqenum':   MRQEnumByRCSweep
-    }
-  }
 
-  def get_enumeration(alg, *args):
-    return algs[alg].prepare(context, *args)()
-
-  def get_enumeration_results():
+  def get_enumerator():
     if len(queries) == 0:
-      return get_enumeration('enumerate')
+      return Enumerate.get(alg, context)
     elif len(queries) == 1:
-      return get_enumeration('srqenum', queries[0])
+      return SRQEnum.get(alg, context, queries[0])
     else:
-      return get_enumeration('mrqenum', list(queries))
+      return MRQEnum.get(alg, context, list(queries))
 
   start = perf_counter()
 
   if naive:
-    algs = algorithms['rcsweep']
+    alg = 'naive'
     context = regions
     elapse_ctor = 0
   else:
-    algs = algorithms['nxgraph']
+    alg = 'slig'
     context = NxGraphSweepCtor.prepare(regions)()
     elapse_ctor = perf_counter() - start
 
-  for region, intersect in get_enumeration_results():
+  enumerator = get_enumerator()
+
+  for region, intersect in enumerator():
     k = len(intersect)
     if k not in counts:
       counts[k] = 0

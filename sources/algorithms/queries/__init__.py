@@ -3,3 +3,4 @@
 from .enumerate import *
 from .mrqenum import *
 from .srqenum import *
+from .rquery import *

@@ -38,11 +38,8 @@ from time import perf_counter
 from typing import Callable, Dict, Iterator, List, Tuple
 
 from sources.abstract import Experiment
-from sources.algorithms import \
-     EnumerateByNxGraph, EnumerateByRCSweep, \
-     MRQEnumByNxGraph, MRQEnumByRCSweep, \
-     NxGraphMdSweepCtor, NxGraphSweepCtor, RegionIntersect, \
-     SRQEnumByNxGraph, SRQEnumByRCSweep
+from sources.algorithms.queries import Enumerate, MRQEnum, RegionIntersect, SRQEnum
+from sources.algorithms.rigctor import NxGraphMdSweepCtor, NxGraphSweepCtor
 from sources.core import NxGraph, Region, RegionSet
 from sources.helpers import Randoms
 
@@ -219,10 +216,10 @@ class ExperimentsOnRIQPerf(ExperimentsOnRegions):
     query = lambda exp, r, x: []
 
     self.common_experiment(exp, ctor, query, {
-      'base':       lambda r, g, q: EnumerateByRCSweep.prepare(r)(),
-      'rigctor':    lambda r, g, q: EnumerateByNxGraph.prepare(r)(),
-      'rigmdctor':  lambda r, g, q: EnumerateByNxGraph.prepare(r, ctor=NxGraphMdSweepCtor)(),
-      'rigprector': lambda r, g, q: EnumerateByNxGraph.prepare(g)()
+      'base':       lambda r, g, q: Enumerate.get('naive', r)(),
+      'rigctor':    lambda r, g, q: Enumerate.get('slig', r)(),
+      'rigmdctor':  lambda r, g, q: Enumerate.get('slig', r, ctor=NxGraphMdSweepCtor)(),
+      'rigprector': lambda r, g, q: Enumerate.get('slig', g)()
     })
 
   def common_experiment_mrqenum(self, exp: Experiment, ctor: RegionDSCtor, query: RegionQueryRnd):
@@ -238,10 +235,10 @@ class ExperimentsOnRIQPerf(ExperimentsOnRegions):
               of Regions to include in query.
     """
     self.common_experiment(exp, ctor, query, {
-      'base':       lambda r, g, q: MRQEnumByRCSweep.prepare(r, q)(),
-      'rigctor':    lambda r, g, q: MRQEnumByNxGraph.prepare(r, q)(),
-      'rigmdctor':  lambda r, g, q: MRQEnumByNxGraph.prepare(r, q, ctor=NxGraphMdSweepCtor)(),
-      'rigprector': lambda r, g, q: MRQEnumByNxGraph.prepare(g, q)()
+      'base':       lambda r, g, q: MRQEnum.get('naive', r, q)(),
+      'rigctor':    lambda r, g, q: MRQEnum.get('slig', r, q)(),
+      'rigmdctor':  lambda r, g, q: MRQEnum.get('slig', r, q, ctor=NxGraphMdSweepCtor)(),
+      'rigprector': lambda r, g, q: MRQEnum.get('slig', g, q)()
     })
 
   def common_experiment_srqenum(self, exp: Experiment, ctor: RegionDSCtor, query: RegionQueryRnd):
@@ -257,10 +254,10 @@ class ExperimentsOnRIQPerf(ExperimentsOnRegions):
               of Regions to include in query.
     """
     self.common_experiment(exp, ctor, query, {
-      'base':       lambda r, g, q: SRQEnumByRCSweep.prepare(r, q)(),
-      'rigctor':    lambda r, g, q: SRQEnumByNxGraph.prepare(r, q)(),
-      'rigmdctor':  lambda r, g, q: SRQEnumByNxGraph.prepare(r, q, ctor=NxGraphMdSweepCtor)(),
-      'rigprector': lambda r, g, q: SRQEnumByNxGraph.prepare(g, q)()
+      'base':       lambda r, g, q: SRQEnum.get('naive', r, q)(),
+      'rigctor':    lambda r, g, q: SRQEnum.get('slig', r, q)(),
+      'rigmdctor':  lambda r, g, q: SRQEnum.get('slig', r, q, ctor=NxGraphMdSweepCtor)(),
+      'rigprector': lambda r, g, q: SRQEnum.get('slig', g, q)()
     })
 
   ### Methods: Experiments
