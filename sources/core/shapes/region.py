@@ -570,8 +570,8 @@ class Region(IOable, abc.Container):
       True:   If the two Regions are equal.
       False:  Otherwise.
     """
-    return that is not None and \
-           all([isinstance(that, Region), self.dimension == that.dimension]) and \
+    return isinstance(that, Region) and \
+           self.dimension == that.dimension and \
            all([d == that[i] for i, d in enumerate(self.dimensions)])
 
   ### Methods: Generators
