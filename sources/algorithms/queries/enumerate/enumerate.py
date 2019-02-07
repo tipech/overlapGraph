@@ -14,12 +14,12 @@ Classes:
 
 from typing import Union
 
-from ..rquery import RegionQuery
+from ..rqenum import RQEnum
 from .bynxgraph import EnumerateByNxGraph
 from .byrcsweep import EnumerateByRCSweep
 
 
-class Enumerate(RegionQuery):
+class Enumerate(RQEnum):
   """
   Static Class
 
@@ -31,7 +31,7 @@ class Enumerate(RegionQuery):
   common single, abstracted interface.
 
   Extends:
-    RegionQuery
+    RQEnum
 
   Implementations:
   - naive

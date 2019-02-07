@@ -7,7 +7,7 @@ Binds together multiple implementations and algorithms into
 common single, abstracted interface.
 
 Classes:
-- RegionQuery
+- RQEnum
 """
 
 from abc import ABCMeta, abstractmethod
@@ -16,7 +16,7 @@ from typing import Any, Type, Union
 from sources.core import RegionSet
 
 
-class RegionQuery(metaclass=ABCMeta):
+class RQEnum(metaclass=ABCMeta):
   """
   Abstract Static Class
 

@@ -47,10 +47,10 @@ from .onregions import ExperimentsOnRegions
 
 
 RegionDataset   = Tuple[RegionSet, NxGraph]
-RegionQuery     = List[Region]
+RQEnum     = List[Region]
 RegionDSCtor    = Callable[[Experiment, Number], RegionDataset]
-RegionQueryRnd  = Callable[[Experiment, RegionSet, Number], RegionQuery]
-Algorithm       = Callable[[Experiment, RegionSet, NxGraph, RegionQuery], Iterator[RegionIntersect]]
+RegionQueryRnd  = Callable[[Experiment, RegionSet, Number], RQEnum]
+Algorithm       = Callable[[Experiment, RegionSet, NxGraph, RQEnum], Iterator[RegionIntersect]]
 
 
 class ExperimentsOnRIQPerf(ExperimentsOnRegions):
@@ -86,7 +86,7 @@ class ExperimentsOnRIQPerf(ExperimentsOnRegions):
 
   ### Methods: Helpers
 
-  def choose_query_subset(self, regions: RegionSet, qsizepc: float) -> RegionQuery:
+  def choose_query_subset(self, regions: RegionSet, qsizepc: float) -> RQEnum:
     """
     Randomly selects and generates a subset of Regions with the given
     query (subset) size as a percentage of the bounding Region.
@@ -123,7 +123,7 @@ class ExperimentsOnRIQPerf(ExperimentsOnRegions):
   def measure_performance(self, exp: Experiment,
                                 params: Tuple[str, Number, Number],
                                 regions: RegionSet, graph: NxGraph,
-                                query: RegionQuery, alg: Algorithm) -> float:
+                                query: RQEnum, alg: Algorithm) -> float:
     """
     Measure the performance of the given enumeration algorithm
 

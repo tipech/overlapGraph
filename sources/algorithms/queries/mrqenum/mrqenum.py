@@ -15,12 +15,12 @@ Classes:
 
 from typing import Union
 
-from ..rquery import RegionQuery
+from ..rqenum import RQEnum
 from .bynxgraph import MRQEnumByNxGraph
 from .byrcsweep import MRQEnumByRCSweep
 
 
-class MRQEnum(RegionQuery):
+class MRQEnum(RQEnum):
   """
   Static Class
 
@@ -34,7 +34,7 @@ class MRQEnum(RegionQuery):
   common single, abstracted interface.
 
   Extends:
-    RegionQuery
+    RQEnum
 
   Implementations:
   - naive
