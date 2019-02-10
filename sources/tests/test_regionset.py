@@ -12,6 +12,7 @@ Unit tests for Regions Collection
 - test_regionset_tofrom_output_backlinks
 - test_regionset_filter
 - test_regionset_subset
+- test_regionset_merge
 """
 
 from io import StringIO
@@ -150,7 +151,7 @@ class TestRegionSet(TestCase):
     nregions = 50
     bounds = Region([0]*2, [10]*2)
     sizepc = Region([0]*2, [0.5]*2)
-    regionset = RegionSet.from_random(nregions, bounds, sizepc=sizepc, precision=1)    
+    regionset = RegionSet.from_random(nregions, bounds, sizepc=sizepc, precision=1)
     subset = ['A', 'C', 'E', 'G', 'I', 'K'] + [regionset[r] for r in ['AA', 'P', 'Q', 'R']]
     subsetted = regionset.subset(subset)
 
@@ -167,3 +168,26 @@ class TestRegionSet(TestCase):
         self.assertIsInstance(r, Region)
         self.assertIn(r, subsetted)
         self.assertIs(regionset[r.id], subsetted[r.id])
+
+  def test_regionset_merge(self):
+    nregions = 50
+    sizepc = Region([0]*2, [0.5]*2)
+    first  = RegionSet.from_random(nregions, Region([0]*2, [10]*2), sizepc=sizepc, precision=1)
+    second = RegionSet.from_random(nregions, Region([0]*2, [100]*2), sizepc=sizepc, precision=1)
+    third  = RegionSet(dimension=2)
+    third.streamadd([
+      Region([-1]*2, [10]*2),
+      Region([-10, 0], [0, 100]),
+      Region([-100, -10], [10, 10])
+    ])
+
+    merged = RegionSet.from_merge([first, second, third])
+    regionkeys = []
+
+    for region in merged:
+      regionkeys.append(region.id)
+    for regions in [first, second, third]:
+      self.assertTrue(merged.bounds.encloses(regions.bbox))
+
+    self.assertEqual(len(first) + len(second) + len(third), len(merged))
+    self.assertEqual(len(regionkeys), len(set(regionkeys)))

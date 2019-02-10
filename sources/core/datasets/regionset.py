@@ -129,6 +129,12 @@ class RegionSet(Iterable[Region], abc.Container, abc.Sized, IOable):
       within this collection.
     """
     assert self._instance_invariant
+    
+    if len(self) == 0:
+      return None
+    if len(self) == 1:
+      return self[0].copy()
+
     return Region.from_union(self.regions)
 
   @property
@@ -499,6 +505,38 @@ class RegionSet(Iterable[Region], abc.Container, abc.Sized, IOable):
 
     return regionset
 
+  def merge(self, regionsets: List['RegionSet']) -> 'RegionSet':
+    """
+    Construct a new RegionSet by merging this RegionSet with the given
+    collections of Regions.
+
+    Args:
+      regionsets:
+        The collection of Regions to be merged.
+
+    Returns:
+      The newly generated, merged RegionSet.
+    """
+    assert len(regionsets) > 0
+    assert all([isinstance(r, RegionSet) for r in regionsets])
+    assert all([self.dimension == r.dimension for r in regionsets])
+
+    merged = self.copy()
+
+    if isinstance(merged.bounds, Region):
+      for regions in regionsets:
+        if len(regions) > 0 and not merged.bounds.encloses(regions.bbox):
+          merged.bounds = merged.bounds.union(regions.bbox)
+
+    for regions in regionsets:
+      for region in regions:
+        rid = region.id
+        region = region.copy()
+        region.id = f'{regions.id}_{rid}'
+        merged.add(region)
+
+    return merged
+
   ### CLass Methods: Generators
 
   @classmethod
@@ -534,6 +572,29 @@ class RegionSet(Iterable[Region], abc.Container, abc.Sized, IOable):
       regionset.add(region)
 
     return regionset
+
+  @classmethod
+  def from_merge(cls, regionsets: List['RegionSet'], id: str = '') -> 'RegionSet':
+    """
+    Construct a new RegionSet by merging the given
+    collections of Regions.
+
+    Args:
+      regionsets:
+        The collection of Regions to be merged.
+      id:
+        The unique identifier for this RegionSet.
+
+    Returns:
+      The newly generated, merged RegionSet.
+    """
+    assert len(regionsets) > 1
+
+    merged = regionsets[0].merge(regionsets[1:])
+    if isinstance(id, str) and len(id) > 0:
+      merged.id = id
+
+    return merged
 
   ### Class Methods: (De)serialization
 
