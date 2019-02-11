@@ -12,7 +12,8 @@ Commands:
 - visualize
 - vgraph
 - graph
-- enumerate
+- rqenum
+- vrqenum
 """
 
 import typing as t
@@ -23,7 +24,8 @@ from sys import stdout
 from time import perf_counter
 
 from matplotlib import pyplot
-from matplotlib.colors import to_rgb
+from matplotlib.cm import ScalarMappable, get_cmap
+from matplotlib.colors import Normalize, to_rgb
 from networkx import networkx as nx
 
 from sources.abstract import IOable
@@ -144,7 +146,7 @@ def visualize(source: FileIO, output: FileIO, colored: bool):
 @argument('source', type=File('r'))
 @argument('output', type=File('w'))
 @option('--colored', is_flag=True)
-def graph(source: FileIO, output: FileIO, colored: bool):
+def tograph(source: FileIO, output: FileIO, colored: bool):
   """
   Converts the given source file of Regions to its graph representation.
   Evaluates the sweep-line Region intersection graph construction
@@ -218,24 +220,21 @@ def vgraph(source: FileIO, output: FileIO, forced: bool, colored: bool):
   pyplot.close(figure)
 
 
-@main.command('enumerate')
+@main.command('rqenum')
 @argument('source', type=File('r'))
 @argument('output', type=File('w'))
 @argument('queries', type=str, nargs=-1)
 @option('--naive', is_flag=True)
-def enumerate(source: FileIO, output: FileIO, naive: bool, queries = []):
+def rqenum(source: FileIO, output: FileIO, naive: bool, queries = []):
   """
   Enumerate over the Regions in the given input source file.
   Outputs the results to as a JSON with performance data and the results
   as a RegionSet of intersecting Regions.
 
-  - If no Regions given in the query, enumerate all
-    intersecting Regions.
-  - If a single Region is given in the query, enumerate
-    all intersecting Regions that includes that Region.
-  - If multiple Regions given in the query, enumerate
-    all intersecting Regions amongst the subset of
-    Regions.
+  If no Regions given in the query, enumerate all intersecting Regions.
+  If a single Region is given in the query, enumerate all intersecting Regions
+  that includes that Region. If multiple Regions given in the query, enumerate
+  all intersecting Regions amongst the subset of Regions.
   \f
 
   Args:
@@ -297,9 +296,105 @@ def enumerate(source: FileIO, output: FileIO, naive: bool, queries = []):
       'query':        queries,
       'elapse_ctor':  elapse_ctor,
       'elapse_query': elapse_query - elapse_ctor,
-      'count': counts,
+      'count':        counts
     },
     'results': intersects
   }
 
   IOable.to_output(data, output, options={'compact': True})
+
+
+@main.command('vrqenum')
+@argument('source', type=File('r'))
+@argument('output', type=File('wb'))
+@argument('queries', type=str, nargs=-1)
+@option('--graph', is_flag=True)
+@option('--forced', is_flag=True)
+@option('--colormap', type=str, default='jet')
+def vrqenum(source: FileIO, output: FileIO,
+            graph: bool, forced: bool, colormap: str,
+            queries = []):
+  """
+  Enumerate over the Regions in the given input source file.
+  Outputs the results an visualization of intersecting Regions color
+  coded by the number of Regions involved in each intersection.
+
+  If no Regions given in the query, enumerate all intersecting Regions.
+  If a single Region is given in the query, enumerate all intersecting Regions
+  that includes that Region. If multiple Regions given in the query, enumerate
+  all intersecting Regions amongst the subset of Regions.
+  \f
+
+  Args:
+    source:
+      The input source file to load the
+      collection of Regions from.
+    output:
+      The output file to save the resulting
+      visualization of intersecting Regions.
+    graph:
+      Boolean flag for whether or not to output a
+      visualization for the intersecting Regions or
+      the region intersection graph.
+    forced:
+      Boolean flag whether or not to force apart
+      the unconnected clusters (nodes and edges)
+      within the graph. Only applicable when --graph.
+    colormap:
+      The name of a built-in matplotlib colormap.
+    queries:
+      The Regions to be queried.
+  """
+  assert source.readable()
+  assert output.writable()
+
+  regions = RegionSet.from_source(source)
+  intersects = RegionSet(dimension=regions.dimension)
+  count = 2
+
+  def get_enumerator():
+    if len(queries) == 0:
+      return Enumerate.get(alg, context)
+    elif len(queries) == 1:
+      return SRQEnum.get(alg, context, queries[0])
+    else:
+      return MRQEnum.get(alg, context, list(queries))
+
+  alg = 'slig'
+  context = NxGraphSweepCtor.prepare(regions)()
+  enumerator = get_enumerator()
+
+  for region, intersect in enumerator():
+    k = len(intersect)
+    if count < k:
+      count = k
+    intersects.add(region)
+
+  cnorm  = Normalize(vmin=1, vmax=count)
+  colors = ScalarMappable(norm=cnorm, cmap=get_cmap(colormap))
+
+  for region in regions:
+    region['color'] = tuple([0.5]*3)
+  for rid in queries:
+    region = regions[rid]
+    color = tuple(colors.to_rgba(1)[0:3])
+    region['color'] = color
+  for region in intersects:
+    color = tuple(colors.to_rgba(len(region['intersect']))[0:3])
+    region['color'] = color
+    if graph:
+      for i, a in enumerate(region['intersect']):
+        a['color'] = color
+        for b in region['intersect'][i+1:]:
+          intersect, _ = context[a, b]
+          intersect['color'] = color
+
+  figure, ax = pyplot.subplots(subplot_kw={'aspect': 'equal'}, figsize=(20, 10))
+
+  if graph:
+    draw_rigraph(context, ax, colored=True, forced=forced)
+  else:
+    draw_regions(regions.merge([intersects]), ax, colored=True)
+
+  figure.savefig(output, bbox_inches='tight')
+  pyplot.close(figure)

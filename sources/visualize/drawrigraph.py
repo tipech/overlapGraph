@@ -63,14 +63,22 @@ def draw_rigraph(graph: NxGraph, plot: Axes, **kwargs):
   def get_pos(G: nx.Graph):
     return nx.kamada_kawai_layout(G, **({'dist': force(G)} if forced else {}))
 
-  def get_edge_color(a: Region, b: Region):
+  def get_edge_color(r: Region):
+    a, b    = r['intersect']
+    r_color = r.getdata('color')
     a_color = a.getdata('color')
     b_color = b.getdata('color')
-    return a_color if a_color == b_color else black
+
+    if r_color:
+      return r_color
+    if a_color and a_color == b_color:
+      return a_color
+    else:
+      return black
 
   if colored:
-    node_color = [region.getdata('color', black) for r, region in graph.regions]
-    edge_color = [get_edge_color(*region['intersect']) for u, v, region in graph.overlaps]
+    node_color = [region.getdata('color', black) for r, region, data in graph.regions]
+    edge_color = [get_edge_color(region) for u, v, region, data in graph.overlaps]
   else:
     node_color = [black]*len(G)
     edge_color = [black]*nx.number_of_edges(G)
