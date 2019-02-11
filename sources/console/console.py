@@ -155,9 +155,10 @@ class ConsoleCommand(click.Command):
 
     for node in document.traverse(elementByTagName('field')):
       name, value = param(node)
-      if name.startswith('param '):
-        name = name[len('param'):].lstrip()
-        params[name] = value.replace('\n', ' ')
+      for keyword in ['param', 'keyword']:
+        if name.startswith(keyword + ' '):
+          name = name[len(keyword):].lstrip()
+          params[name] = value.replace('\n', ' ')
 
     return params
 
