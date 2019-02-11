@@ -23,8 +23,8 @@ Classes:
 - NxGraph
 """
 
-from typing import \
-     Any, Callable, Dict, Generic, Iterator, List, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, Iterator, List, Tuple, Union
+from uuid import uuid4
 
 from networkx import networkx as nx
 from networkx.readwrite import json_graph
@@ -54,7 +54,7 @@ class NxGraph(RIGraph[nx.Graph], IOable):
   NodeRegion = 'region'
   EdgeRegion = 'intersect'
 
-  def __init__(self, dimension: int, graph: nx.Graph = None):
+  def __init__(self, dimension: int, graph: nx.Graph = None, id: str = ''):
     """
     Initializes the NetworkX graph representation of
     intersecting and overlapping Regions.
@@ -67,16 +67,22 @@ class NxGraph(RIGraph[nx.Graph], IOable):
         The internal NetworkX graph representation or
         implementation for a graph of intersecting or
         overlapping Regions.
+      id:
+        The unique identifier for this RIGraph.
+        Randonly generated with UUID v4, if not provided.
     """
     assert isinstance(dimension, int) and dimension > 0
     assert graph == None or isinstance(graph, nx.Graph)
 
     self.dimension = dimension
+    self.id = id = id if len(id) > 0 else str(uuid4())
 
     if graph == None:
-      self.G = nx.Graph(dimension=dimension)
+      self.G = nx.Graph(id=id, dimension=dimension)
     else:
-      self.G = graph
+      self.G = G = graph      
+      self.dimension = G.graph.setdefault('dimension', dimension)
+      self.id = G.graph.setdefault('id', id)
 
   ### Properties: Getters
 
@@ -328,6 +334,7 @@ class NxGraph(RIGraph[nx.Graph], IOable):
 
     datafmt = kwargs['json_graph'] if 'json_graph' in kwargs else 'node_link'
     data = {
+      'id': object.id,
       'dimension': object.dimension,
       'json_graph': datafmt,
       'graph': to_data(object.G, datafmt)
@@ -349,7 +356,9 @@ class NxGraph(RIGraph[nx.Graph], IOable):
                 and tweaking the NxGraph object
                 generation process.
 
-    kwargs:
+    Keyword Args:
+      id:
+        The unique identifier for the generated RIGraph.
       json_graph:
         Allowed graph formats: 'node_link' or 'adjacency'.
         If not provided, defaults to: 'node_link'.
@@ -360,11 +369,11 @@ class NxGraph(RIGraph[nx.Graph], IOable):
     Raises:
       ValueError: If json_graph is unsupported format.
     """
-    types = { 'graph': Dict, 'json_graph': str, 'dimension': int }
+    types = { 'graph': Dict, 'json_graph': str, 'dimension': int, 'id': str }
 
     assert isinstance(object, Dict)
     assert all([k in object and isinstance(object[k], t) for k, t in types.items()])
-    assert object['dimension'] > 0
+    assert object['dimension'] > 0 and len(object['id']) > 0
 
     def to_graph(data: Dict, datafmt: str) -> nx.Graph:
       method_name = f'{datafmt}_graph'
@@ -383,9 +392,10 @@ class NxGraph(RIGraph[nx.Graph], IOable):
 
       return list(map(lambda r: G.node[r]['region'], regions))
 
-    nxgraph = NxGraph(object['dimension'])
-    nxgraph.G = to_graph(object['graph'], object['json_graph'])
-    G = nxgraph.G
+    graph   = to_graph(object['graph'], object['json_graph'])
+    graphid = kwargs.get('id', object['id'])
+    nxgraph = NxGraph(object['dimension'], graph, id=graphid)
+    G       = nxgraph.G
 
     assert nxgraph.dimension == G.graph['dimension']
 

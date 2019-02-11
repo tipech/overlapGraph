@@ -41,20 +41,23 @@ class RIGraph(Generic[G]): # pylint: disable=E1136
   the data representation.
 
   Attributes:
-    G:
-      The internal graph representation or implementation
-      for a graph of intersecting or overlapping Regions.
+    id:
+      The unique identifier for this RIGraph.
     dimension:
       The number of dimensions in all of the Regions
       within the graph; the dimensionality of all Regions.
+    G:
+      The internal graph representation or implementation
+      for a graph of intersecting or overlapping Regions.
   """
   __metaclass__ = ABCMeta
 
-  G: G
+  id: str
   dimension: int
+  G: G
 
   @abstractmethod
-  def __init__(self, dimension: int, graph: G = None):
+  def __init__(self, dimension: int, graph: G = None, id: str = ''):
     """
     Initializes the graph representation of intersecting
     and overlapping Regions.
@@ -66,6 +69,9 @@ class RIGraph(Generic[G]): # pylint: disable=E1136
       graph:
         The internal graph representation or implementation
         for a graph of intersecting or overlapping Regions.
+      id:
+        The unique identifier for this RIGraph.
+        Randonly generated with UUID v4, if not provided.
     """
     raise NotImplementedError
 

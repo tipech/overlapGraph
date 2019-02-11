@@ -59,7 +59,7 @@ class NxGraphSweepCtor(SweepTaskRunner[RegionGrp, NxGraph]):
     Subscriber.__init__(self, RegionSweepEvtKind)
 
     self.regions = regions
-    self.G = NxGraph(self.regions.dimension)
+    self.G = NxGraph(self.regions.dimension, id=regions.id)
 
     for region in self.regions:
       self.G.put_region(region)
