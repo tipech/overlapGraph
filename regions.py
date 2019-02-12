@@ -1,5 +1,5 @@
 #!/usr/bin/env python
 
-from sources.console.regions import main
+from sources.console.regions import RegionsConsole
 
-main()
+RegionsConsole()
