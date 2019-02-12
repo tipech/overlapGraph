@@ -3,33 +3,28 @@
 """
 Unit tests for Restricted Enumeration of Region Intersections
 
-- test_rstdenumerate_subset_results
-- test_rstdenumerate_neighbor_results
+- test_mrqenum_results
+- test_srqenum_results
 """
 
 from inspect import stack
 from math import ceil
-from random import shuffle
 from time import perf_counter
 from typing import Dict, Iterator, List, NamedTuple, Tuple, Union
 from unittest import TestCase
 
-from sources.algorithms.queries.enumerate import RegionIntersect
-from sources.algorithms.queries.rstdenumerate.bynxgraph import SubsettedEnumByNxGraph, NeighboredEnumByNxGraph
-from sources.algorithms.queries.rstdenumerate.byrcsweep import SubsettedEnumByRCSweep, NeighboredEnumByRCSweep
-from sources.algorithms.sweepln.basesweep import SweepTaskRunner
-from sources.algorithms.sweepln.regionsweepdebug import RegionSweepDebug
-from sources.datastructs.datasets.regionset import RegionSet
-from sources.datastructs.shapes.region import Region, RegionIntxn
+from sources.algorithms.queries import MRQEnum, RegionIntersect, SRQEnum
+from sources.algorithms.sweepln import RegionSweepDebug, SweepTaskRunner
+from sources.core import Region, RegionIntxn, RegionSet
 
 
-class TestRestrictedEnumerateResult(NamedTuple):
+class TestRQEnumResult(NamedTuple):
   length: int
   levels: Dict[int, int]
   intersects: List[Tuple[str]]
 
 
-class TestRestrictedEnumerate(TestCase):
+class TestRQEnumerate(TestCase):
 
   regions: Dict[str, RegionSet]
   subsets: Dict[str, List[str]]
@@ -56,8 +51,8 @@ class TestRestrictedEnumerate(TestCase):
     for nregions in [pow(10, n) for n in range(1, 4)]:
       for sizepc in [0.01, 0.05, 0.1]:
         name = f'{nregions},{sizepc:.2f}'
-        sizerng = Region([0]*2, [sizepc]*2)
-        regions = RegionSet.from_random(nregions, bounds, sizepc_range=sizerng, precision=1)
+        sizepcr = Region([0]*2, [sizepc]*2)
+        regions = RegionSet.from_random(nregions, bounds, sizepc=sizepcr, precision=1)
 
         self.regions[name] = regions
         self.subsets[name] = {}
@@ -66,7 +61,7 @@ class TestRestrictedEnumerate(TestCase):
           size = round(subsetpc * len(regions))
           if 0 < size < len(regions):
             subname = f'{subsetpc:.2f}'
-            shuffled = regions.regions.copy(); shuffle(shuffled)
+            shuffled = regions.shuffle()
             self.subsets[name][subname] = [r.id for i, r in enumerate(shuffled) if i < size]
 
   def run_evaluator(self, name: str, subname: str, 
@@ -77,7 +72,7 @@ class TestRestrictedEnumerate(TestCase):
     subscribers = [] #[RegionSweepDebug()]
     length, lvl = 0, 0
     levels, results = {}, []
-    evaluator = clazz.evaluate(regions, context, *subscribers)
+    evaluator = clazz.prepare(regions, context, *subscribers)
     starttime = perf_counter()
 
     for _, (_, intersect) in enumerate(evaluator()):
@@ -104,14 +99,14 @@ class TestRestrictedEnumerate(TestCase):
       #for intersect in results:
       #  output.write(f'{[r[0:8] for r in intersect]}\n')
 
-    return TestRestrictedEnumerateResult(length, levels, results)
+    return TestRQEnumResult(length, levels, results)
 
-  def test_rstdenumerate_subset_results(self):
+  def test_mrqenum_results(self):
 
     for name in self.regions.keys():
       for s, subset in self.subsets[name].items():
-        nxg = self.run_evaluator(name, s, subset, SubsettedEnumByNxGraph)
-        rcs = self.run_evaluator(name, s, subset, SubsettedEnumByRCSweep)
+        nxg = self.run_evaluator(name, s, subset, MRQEnum.get('slig'))
+        rcs = self.run_evaluator(name, s, subset, MRQEnum.get('naive'))
 
         self.assertEqual(nxg.length, rcs.length)
         self.assertDictEqual(nxg.levels, rcs.levels)
@@ -119,15 +114,15 @@ class TestRestrictedEnumerate(TestCase):
         for intersect in nxg.intersects:
           self.assertIn(intersect, rcs.intersects)
 
-  def test_rstdenumerate_neighbor_results(self):
+  def test_srqenum_results(self):
 
     for name in self.regions.keys():
-      shuffled = self.regions[name].regions.copy(); shuffle(shuffled)
+      shuffled = self.regions[name].shuffle()
 
       for region in shuffled[0:ceil(0.01 * len(shuffled))]:
         r = region.id
-        nxg = self.run_evaluator(name, r, region, NeighboredEnumByNxGraph)
-        rcs = self.run_evaluator(name, r, region, NeighboredEnumByRCSweep)
+        nxg = self.run_evaluator(name, r, region, SRQEnum.get('slig'))
+        rcs = self.run_evaluator(name, r, region, SRQEnum.get('naive'))
 
         self.assertEqual(nxg.length, rcs.length)
         self.assertDictEqual(nxg.levels, rcs.levels)

@@ -18,13 +18,13 @@ Classes:
 from collections import abc
 from dataclasses import asdict, astuple, dataclass
 from functools import reduce
-from numbers import Real
+from numbers import Number, Real
 from typing import Any, Callable, Dict, List, Tuple, Union
 
 from numpy import floor
 
-from sources.abstract.ioable import IOable
-from sources.helpers.randoms import NDArray, RandomFn, Randoms
+from sources.abstract import IOable
+from sources.helpers import NDArray, RandomFn, Randoms
 
 
 @dataclass(order = True)
@@ -50,7 +50,7 @@ class Interval(IOable, abc.Container, abc.Hashable):
   lower: float
   upper: float
 
-  def __init__(self, lower, upper):
+  def __init__(self, lower: Number, upper: Number):
     """
     Initialize a new Interval, with the lower and upper bounding values.
     Converts input values to floating point numbers, and assigns
@@ -152,7 +152,7 @@ class Interval(IOable, abc.Container, abc.Hashable):
       object.__setattr__(self, 'lower', float(lower))
       object.__setattr__(self, 'upper', float(upper))
 
-  ### Methods: Queries
+  ### Methods: Hash
 
   def __hash__(self) -> str:
     """
@@ -164,6 +164,31 @@ class Interval(IOable, abc.Container, abc.Hashable):
       The hash value for this object.
     """
     return hash(astuple(self))
+
+  ### Methods: Clone
+
+  def __copy__(self) -> 'Interval':
+    """
+    Create a shallow copy of this Interval and return it.
+
+    Returns:
+      The newly created Interval copy.
+    """
+    return Interval(*astuple(self))
+
+  def copy(self) -> 'Interval':
+    """
+    Create a shallow copy of this Interval and return it.
+
+    Alias for:
+      self.__copy__()
+
+    Returns:
+      The newly created Interval copy.
+    """
+    return self.__copy__()
+
+  ### Methods: Queries
 
   def contains(self, value: float, inc_lower = True, inc_upper = True) -> bool:
     """
@@ -406,7 +431,7 @@ class Interval(IOable, abc.Container, abc.Hashable):
 
     return randomng(nvalues, self.lower, self.upper)
 
-  def random_intervals(self, nintervals: int = 1, sizepc_range: 'Interval' = None,
+  def random_intervals(self, nintervals: int = 1, sizepc: 'Interval' = None,
                              posnrng: RandomFn = Randoms.uniform(),
                              sizerng: RandomFn = Randoms.uniform(),
                              precision: int = None) -> List['Interval']:
@@ -424,32 +449,32 @@ class Interval(IOable, abc.Container, abc.Hashable):
     arbitrary precision.
 
     Args:
-      nintervals:   The number of Intervals to be generated.
-      sizepc_range: The size range as a percentage of the
-                    total Interval length.
-      posnrng:      The random number generator for choosing
-                    the position of the Interval.
-      sizerng:      The random number generator for choosing
-                    the size of the Interval.
-      precision:    The number of digits after the decimal
-                    point for the lower and upper bounding
-                    values, or None for arbitrary precision.
+      nintervals: The number of Intervals to be generated.
+      sizepc:     The size range as a percentage of the
+                  total Interval length.
+      posnrng:    The random number generator for choosing
+                  the position of the Interval.
+      sizerng:    The random number generator for choosing
+                  the size of the Interval.
+      precision:  The number of digits after the decimal
+                  point for the lower and upper bounding
+                  values, or None for arbitrary precision.
 
     Returns:
       List of randonly generated Intervals
       within this Interval.
     """
-    if sizepc_range == None:
-      sizepc_range = Interval(0, 1)
+    if sizepc == None:
+      sizepc = Interval(0, 1)
     if precision != None:
       assert isinstance(precision, int)
 
-    assert isinstance(sizepc_range, Interval) and Interval(0, 1).encloses(sizepc_range)
+    assert isinstance(sizepc, Interval) and Interval(0, 1).encloses(sizepc)
     assert isinstance(posnrng, Callable) and isinstance(sizerng, Callable)
 
     intervals = []
     positions = self.random_values(nintervals, posnrng)
-    lengths   = [s * self.length for s in sizepc_range.random_values(nintervals, sizerng)]
+    lengths   = [s * self.length for s in sizepc.random_values(nintervals, sizerng)]
 
     for i in range(nintervals):
       length = lengths[i]
@@ -563,10 +588,10 @@ class Interval(IOable, abc.Container, abc.Hashable):
       The newly constructed Interval.
     """
     if isinstance(object, Dict):
-      assert 'lower' in object and isinstance(object['lower'], Real)
-      assert 'upper' in object and isinstance(object['upper'], Real)
+      assert 'lower' in object and isinstance(object['lower'], (Real, str))
+      assert 'upper' in object and isinstance(object['upper'], (Real, str))
       return Interval(**object)
     else:
       assert isinstance(object, (List, Tuple)) and len(object) == 2
-      assert all([isinstance(item, Real) for item in object])
+      assert all([isinstance(item, (Real, str)) for item in object])
       return Interval(*object)

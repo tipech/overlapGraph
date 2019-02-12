@@ -14,8 +14,9 @@ Classes:
 
 from typing import TypeVar
 
-from sources.abstract.timeline import Timeline
-from sources.algorithms.sweepln.basesweep import Sweepline
+from sources.abstract import Timeline
+
+from .basesweep import Sweepline
 
 
 T = TypeVar('T')

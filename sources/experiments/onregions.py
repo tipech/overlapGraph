@@ -19,11 +19,9 @@ from re import fullmatch, match
 from sys import stdout
 from typing import Any, Callable, Dict, Iterator, List, Tuple, Union
 
-from sources.abstract.experiment import Experiment
-from sources.algorithms.rigctor.nxgsweepctor import NxGraphSweepCtor
-from sources.datastructs.datasets.regionset import RegionSet
-from sources.datastructs.rigraphs.nxgraph import NxGraph
-from sources.datastructs.shapes.region import Region
+from sources.abstract import Experiment
+from sources.algorithms import NxGraphSweepCtor
+from sources.core import NxGraph, Region, RegionSet
 
 
 class ExperimentsOnRegions(metaclass=ABCMeta):
@@ -137,7 +135,7 @@ class ExperimentsOnRegions(metaclass=ABCMeta):
     """
     bounds  = Region([0]*dimension, [experiment.data['maxbound']]*dimension)
     sizepr  = Region([0]*dimension, [sizepc]*dimension)
-    regions = RegionSet.from_random(nregions, bounds=bounds, sizepc_range=sizepr)
+    regions = RegionSet.from_random(nregions, bounds=bounds, sizepc=sizepr)
 
     self.output_log(experiment, {
       'nregions': nregions,
@@ -166,7 +164,7 @@ class ExperimentsOnRegions(metaclass=ABCMeta):
       of Regions + its associated Region intersection graph.
     """
     regions = self.construct_regions(experiment, nregions, sizepc, dimension)
-    graph   = NxGraphSweepCtor.evaluate(regions)()
+    graph   = NxGraphSweepCtor.prepare(regions)()
 
     self.output_log(experiment, {
       'nregions': nregions,

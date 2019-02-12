@@ -18,15 +18,14 @@ from random import shuffle
 from typing import Any, Dict, Iterable, Iterator, List, Union
 from uuid import uuid4
 
-from sources.abstract.ioable import IOable
-from sources.datastructs.datasets.regiontime import RegionEvtKind
-from sources.datastructs.shapes.interval import Interval
-from sources.datastructs.shapes.region import Region, RegionPair
-from sources.helpers.base26 import to_base26
-from sources.helpers.randoms import RandomFn, Randoms
+from sources.abstract import IOable
+from sources.helpers import RandomFn, Randoms, to_base26
+
+from ..shapes import Interval, Region, RegionId, RegionPair
+from .regiontime import RegionEvtKind
 
 try: # cyclic codependency
-  from sources.datastructs.datasets.regiontime import RegionTimeln
+  from .regiontime import RegionTimeln
 except ImportError:
   pass
 
@@ -130,6 +129,12 @@ class RegionSet(Iterable[Region], abc.Container, abc.Sized, IOable):
       within this collection.
     """
     assert self._instance_invariant
+    
+    if len(self) == 0:
+      return None
+    if len(self) == 1:
+      return self[0].copy()
+
     return Region.from_union(self.regions)
 
   @property
@@ -277,18 +282,71 @@ class RegionSet(Iterable[Region], abc.Container, abc.Sized, IOable):
 
   ### Methods: Clone
 
-  def copy(self) -> 'RegionSet':
+  def __copy__(self) -> 'RegionSet':
     """
-    Clone this collection of Regions and returns the
-    copied collection of Regions.
+    Shallow clone this collection of Regions and
+    returns the copied collection of Regions.
 
     Returns:
-      The newly, constructed copy of this
-      collection of the Regions.
+      The newly, constructed shallow copy of
+      this collection of the Regions.
     """
-    regions = RegionSet(bounds=self.bounds, dimension=self.dimension)
-    regions.regions = self.regions
+    bounds  = self.bounds.copy() if self.bounds else None
+    regions = RegionSet(bounds=bounds, dimension=self.dimension)
+    regions.regions = self.regions.copy()
     return regions
+
+  def copy(self) -> 'RegionSet':
+    """
+    Shallow clone this collection of Regions and
+    returns the copied collection of Regions.
+
+    Alias for:
+      self.__copy__()
+
+    Returns:
+      The newly, constructed shallow copy of
+      this collection of the Regions.
+    """
+    return self.__copy__()
+
+  def __deepcopy__(self, memo: Dict = {}) -> 'RegionSet':
+    """
+    Deep clone this collection of Regions and
+    returns the copied collection of Regions.
+
+    Args:
+      memo: The dictionary of objects already copied
+            during the current copying pass.
+
+    Returns:
+      The newly, constructed deep copy of
+      this collection of the Regions.
+    """
+    bounds  = self.bounds.deepcopy(memo) if self.bounds else None
+    regions = RegionSet(bounds=bounds, dimension=self.dimension)
+    regions.streamadd([r.deepcopy(memo) for r in self.regions])
+    return regions
+
+  def deepcopy(self, memo: Dict = {}) -> 'RegionSet':
+    """
+    Deep clone this collection of Regions and
+    returns the copied collection of Regions.
+
+    Alias for:
+      self.__deepcopy__(memo)
+
+    Args:
+      memo: The dictionary of objects already copied
+            during the current copying pass.
+
+    Returns:
+      The newly, constructed deep copy of
+      this collection of the Regions.
+    """
+    return self.__deepcopy__(memo)
+
+  ### Methods: Shuffle
 
   def shuffle(self, random: RandomFn = Randoms.uniform()) -> 'RegionSet':
     """
@@ -318,7 +376,7 @@ class RegionSet(Iterable[Region], abc.Container, abc.Sized, IOable):
     """
     return self.length
 
-  def __contains__(self, value: Union[Region, str]) -> bool:
+  def __contains__(self, value: RegionId) -> bool:
     """
     Determine if the given Region or Region ID is contained within
     this collection. Return True if this collection contains that Region,
@@ -424,7 +482,7 @@ class RegionSet(Iterable[Region], abc.Container, abc.Sized, IOable):
 
     return regionset
 
-  def subset(self, subset: List[Union[Region, str]]) -> 'RegionSet':
+  def subset(self, subset: List[RegionId]) -> 'RegionSet':
     """
     Returns a new subsetted RegionSet with the only the Regions
     within the given, more restricted Regions subset.
@@ -446,6 +504,38 @@ class RegionSet(Iterable[Region], abc.Container, abc.Sized, IOable):
       regionset.add(region if isinstance(region, Region) else self[region])
 
     return regionset
+
+  def merge(self, regionsets: List['RegionSet']) -> 'RegionSet':
+    """
+    Construct a new RegionSet by merging this RegionSet with the given
+    collections of Regions.
+
+    Args:
+      regionsets:
+        The collection of Regions to be merged.
+
+    Returns:
+      The newly generated, merged RegionSet.
+    """
+    assert len(regionsets) > 0
+    assert all([isinstance(r, RegionSet) for r in regionsets])
+    assert all([self.dimension == r.dimension for r in regionsets])
+
+    merged = self.copy()
+
+    if isinstance(merged.bounds, Region):
+      for regions in regionsets:
+        if len(regions) > 0 and not merged.bounds.encloses(regions.bbox):
+          merged.bounds = merged.bounds.union(regions.bbox)
+
+    for regions in regionsets:
+      for region in regions:
+        rid = region.id
+        region = region.copy()
+        region.id = f'{regions.id}_{rid}'
+        merged.add(region)
+
+    return merged
 
   ### CLass Methods: Generators
 
@@ -483,6 +573,29 @@ class RegionSet(Iterable[Region], abc.Container, abc.Sized, IOable):
 
     return regionset
 
+  @classmethod
+  def from_merge(cls, regionsets: List['RegionSet'], id: str = '') -> 'RegionSet':
+    """
+    Construct a new RegionSet by merging the given
+    collections of Regions.
+
+    Args:
+      regionsets:
+        The collection of Regions to be merged.
+      id:
+        The unique identifier for this RegionSet.
+
+    Returns:
+      The newly generated, merged RegionSet.
+    """
+    assert len(regionsets) > 1
+
+    merged = regionsets[0].merge(regionsets[1:])
+    if isinstance(id, str) and len(id) > 0:
+      merged.id = id
+
+    return merged
+
   ### Class Methods: (De)serialization
 
   @classmethod
@@ -519,7 +632,7 @@ class RegionSet(Iterable[Region], abc.Container, abc.Sized, IOable):
       return asdict(object)
 
   @classmethod
-  def from_dict(cls, object: Dict, id: str = '') -> 'RegionSet':
+  def from_dict(cls, object: Dict, id: str = '', refset: 'RegionSet' = None) -> 'RegionSet':
     """
     Construct a new set of Region from the conversion of the given Dict.
     The Dict must contains one of the following combinations of fields:
@@ -539,6 +652,10 @@ class RegionSet(Iterable[Region], abc.Container, abc.Sized, IOable):
       id:
         The unique identifier for this RegionSet
         Randonly generated with UUID v4, if not provided.
+      refset:
+        A RegionSet to reference Regions from when
+        rematerializing backlinks to Regions. For use
+        in resulting RegionSet or subsets.
 
     Returns:
       The newly constructed RegionSet.
@@ -551,8 +668,15 @@ class RegionSet(Iterable[Region], abc.Container, abc.Sized, IOable):
     assert isinstance(object, Dict)
     assert 'regions' in object and isinstance(object['regions'], List)
 
-    if 'id' in object:
-      id = object['id']
+    def resolve_region(r: str) -> Region:
+      if r in regionset:
+        return regionset[r]
+      elif isinstance(refset, RegionSet) and r in refset:
+        return refset[r]
+      else:
+        return None
+
+    id = object.get('id', id)
 
     if 'length' in object:
       assert isinstance(object['length'], int) and 0 < object['length']
@@ -569,19 +693,21 @@ class RegionSet(Iterable[Region], abc.Container, abc.Sized, IOable):
     for region in object['regions']:
       regionset.add(Region.from_object(region))
 
+    if isinstance(refset, RegionSet):
+      assert regionset.dimension == refset.dimension
+
     # resolve backlinks amongst the set of Regions
     for region in regionset:
-      if 'intersect' in region:
-        assert all([r in regionset for r in region['intersect']])
-        region['intersect'] = list(map(lambda r: regionset[r], region['intersect']))
-      if 'union' in region:
-        assert all([r in regionset for r in region['union']])
-        region['union'] = list(map(lambda r: regionset[r], region['union']))
+      for field in ['intersect', 'union']:
+        if field in region:
+          resolved = [resolve_region(r) for r in region[field]]
+          assert all(resolved)
+          region[field] = resolved
 
     return regionset
 
   @classmethod
-  def from_object(cls, object: Any, id: str = '') -> 'RegionSet':
+  def from_object(cls, object: Any, **kwargs) -> 'RegionSet':
     """
     Construct a new Region from the conversion of the given object.
     The object must contains one of the following representations:
@@ -593,9 +719,9 @@ class RegionSet(Iterable[Region], abc.Container, abc.Sized, IOable):
     Args:
       object:
         The object to be converted to a RegionSet.
-      id:
-        The unique identifier for this RegionSet.
-        Randonly generated with UUID v4, if not provided.
+      kwargs:
+        Additional arguments to be passed to
+        RegionSet.from_dict.
 
     Returns:
       The newly constructed RegionSet.
@@ -606,11 +732,11 @@ class RegionSet(Iterable[Region], abc.Container, abc.Sized, IOable):
         combinations of fields.
     """
     if isinstance(object, Dict):
-      return cls.from_dict(object, id)
+      return cls.from_dict(object, **kwargs)
     elif isinstance(object, List):
       regions = list(map(Region.from_object, object))
       dimension = regions[0].dimension
       assert all([r.dimension == dimension for r in regions])
-      return cls.from_dict({'regions': regions, 'dimension': dimension}, id)
+      return cls.from_dict({'regions': regions, 'dimension': dimension}, **kwargs)
     else:
       raise ValueError('Unrecognized RegionSet representation')

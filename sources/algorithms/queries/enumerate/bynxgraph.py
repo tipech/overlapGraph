@@ -21,15 +21,14 @@ Classes:
 - EnumerateByNxGraph
 """
 
-from typing import Any, Callable, Iterator
+from typing import Any, Callable, Iterator, Union
 
 from networkx import networkx as nx
 
-from sources.algorithms.queries.enumerate import RegionIntersect
-from sources.algorithms.rigctor.nxgsweepctor import NxGraphSweepCtor
-from sources.datastructs.datasets.regionset import RegionSet
-from sources.datastructs.rigraphs.nxgraph import NxGraph
-from sources.datastructs.shapes.region import Region
+from sources.algorithms import NxGraphSweepCtor
+from sources.core import NxGraph, Region, RegionSet
+
+from .common import RegionIntersect
 
 
 class EnumerateByNxGraph:
@@ -87,7 +86,7 @@ class EnumerateByNxGraph:
 
     for clique in nx.enumerate_all_cliques(graph.G):
       if len(clique) > 1:
-        intersect = [graph.G.nodes[r]['region'] for r in clique]
+        intersect = [graph.region(r) for r in clique]
         region    = Region.from_intersect(intersect, linked=True)
 
         assert isinstance(region, Region)
@@ -96,20 +95,27 @@ class EnumerateByNxGraph:
   ### Class Methods: Evaluation
 
   @classmethod
-  def evaluate(cls, regions: RegionSet, *args, **kwargs) \
-                    -> Callable[[Any], Iterator[RegionIntersect]]:
+  def prepare(cls, context: Union[RegionSet, NxGraph],
+                   *args, ctor = NxGraphSweepCtor,
+                   **kwargs) -> Callable[[Any], Iterator[RegionIntersect]]:
     """
     Factory function for computes an Iterator of all of the intersecting
     Regions using the construction of a Region intersection graph by
     one-pass sweep-line algorithm. Wraps NxGraphSweepCtor.evaluate().
 
     Args:
-      regions:
-        The set of Regions to construct a new
-        Region intersection graph from.
+      context:
+        RegionSet:
+          The set of Regions to construct a new
+          Region intersection graph from.
+        NxGraph:
+          The preconstructed Region intersection graph.
+      ctor:
+        The Region intersection graph
+        construction algorithm.
       args, kwargs:
         Additional arguments for class method:
-        NxGraphSweepCtor.evaluate().
+        NxGraphSweepCtor.prepare().
 
     Returns:
       A function to evaluate the one-pass sweep-line
@@ -123,7 +129,12 @@ class EnumerateByNxGraph:
       Returns:
         The resulting Iterator of intersecting Regions.
     """
-    fn = NxGraphSweepCtor.evaluate(regions, *args, **kwargs)
+    assert isinstance(context, (RegionSet, NxGraph))
+
+    if isinstance(context, NxGraph):
+      fn = lambda: context
+    else:
+      fn = ctor.prepare(context, *args, **kwargs)      
 
     def evaluate(*args, **kwargs):
       return cls(fn(*args, **kwargs)).results

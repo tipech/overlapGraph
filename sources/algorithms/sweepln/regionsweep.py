@@ -16,11 +16,11 @@ Classes:
 from enum import IntEnum, auto, unique
 from typing import Dict, Iterator, List
 
-from sources.abstract.pubsub import Event, Publisher
-from sources.algorithms.sweepln.onesweep import OneSweep
-from sources.datastructs.datasets.regionset import RegionSet
-from sources.datastructs.datasets.regiontime import RegionEvent, RegionEvtKind
-from sources.datastructs.shapes.region import Region, RegionGrp, RegionPair
+from sources.abstract import Event, Publisher
+from sources.core import \
+     Region, RegionEvent, RegionEvtKind, RegionGrp, RegionPair, RegionSet
+
+from .onesweep import OneSweep
 
 
 @unique

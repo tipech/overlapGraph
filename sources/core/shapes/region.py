@@ -25,14 +25,19 @@ from numbers import Real
 from typing import Any, Callable, Dict, List, Tuple, Union
 from uuid import uuid4
 
-from sources.abstract.ioable import IOable
-from sources.datastructs.shapes.interval import Interval
-from sources.helpers.randoms import NDArray, RandomFn, Randoms
+from sources.abstract import IOable
+from sources.helpers import NDArray, RandomFn, Randoms
+
+from .interval import Interval
 
 
-RegionPair  = Tuple['Region', 'Region']
-RegionIntxn = List['Region']
-RegionGrp   = Union['Region', RegionIntxn, RegionPair]
+RegionPair    = Tuple['Region', 'Region']
+RegionIntxn   = List['Region']
+RegionGrp     = Union['Region', RegionIntxn, RegionPair]
+RegionId      = Union['Region', str]
+RegionIdPair  = Tuple[RegionId, RegionId]
+RegionIdIntxn = List[RegionId]
+RegionIdGrp   = Union[RegionId, RegionIdIntxn, RegionIdPair]
 
 
 @dataclass
@@ -266,6 +271,132 @@ class Region(IOable, abc.Container):
 
     return f'{self.__class__.__name__}({dictkvpairs})'
 
+  ### Methods: Clone
+
+  def __copy__(self) -> 'Region':
+    """
+    Create a shallow copy of this Region and return it. The lower and upper
+    values will remain the same. The 'id' is different. The data property
+    object is copied, but the object items are references to original values.
+
+    Returns:
+      The newly created Region copy.
+    """
+    return Region(self.lower, self.upper, **self.data)
+
+  def copy(self) -> 'Region':
+    """
+    Create a shallow copy of this Region and return it. The lower and upper
+    values will remain the same. The 'id' is different. The data property
+    object is copied, but the object items are references to original values.
+
+    Alias for:
+      self.__copy__(self)
+
+    Returns:
+      The newly created Region copy.
+    """
+    return self.__copy__()
+
+  def __deepcopy__(self, memo: Dict = {}) -> 'Region':
+    """
+    Create a deep copy of this Region and return it. The lower and upper
+    values will remain the same. The 'id' is different. The data property
+    object is copied with each item recursively copied.
+
+    Args:
+      memo: The dictionary of objects already copied
+            during the current copying pass.
+
+    Returns:
+      The newly created Region copy.
+    """
+    mkey, data = id(self), self.data.copy()
+
+    if mkey in memo:
+      return memo[mkey]
+
+    for k, v in data.items():
+      if callable(getattr(v, '__deepcopy__')):
+        data[k] = memo.setdefault(id(v), v.__deepcopy__(memo))
+      elif callable(getattr(v, '__copy__')):
+        data[k] = memo.setdefault(id(v), v.__copy__())
+      else:
+        data[k] = memo.setdefault(id(v), v)
+
+    region = Region(self.lower, self.upper, **data)
+    memo[mkey] = region
+    return region
+
+  def deepcopy(self, memo: Dict = {}) -> 'Region':
+    """
+    Create a deep copy of this Region and return it. The lower and upper
+    values will remain the same. The 'id' is different. The data property
+    object is copied with each item recursively copied.
+
+    Aliases:
+      self.__deepcopy__(memo)
+
+    Args:
+      memo: The dictionary of objects already copied
+            during the current copying pass.
+
+    Returns:
+      The newly created Region copy.
+    """
+    return self.__deepcopy__(memo)
+
+  ### Methods: Data Assignment
+
+  def getdata(self, key: str, default: Any = None) -> Any:
+    """
+    Return the data value for key if key is in this Region's data
+    dictionary, else 'default'. If 'default' is not given, it defaults to None,
+    so that this method never raises a KeyError.
+
+    Args:
+      key, default:
+        Arguments for self.data.get().
+
+    Returns:
+      This Region's data value or the default.
+    """
+    return self.data.get(key, default)
+
+  def initdata(self, key: str, default: Any = None) -> Any:
+    """
+    If key is in this Region's data dictionary, return its value.
+    If not, insert key with a value of 'default' and return 'default'.
+    'default' defaults to None.
+
+    Args:
+      key, default:
+        Arguments for self.data.setdefault().
+
+    Returns:
+      This Region's data value or the default.
+    """
+    return self.data.setdefault(key, default)
+
+  def removedata(self, key: str, default: Any = None) -> Any:
+    """
+    If key is in this Region's data dictionary, remove it and return its
+    value, else return 'default'. If 'default' is not given and key is not
+    in the data dictionary, a KeyError is raised.
+
+    Args:
+      key, default:
+        Arguments for self.data.pop().
+
+    Returns:
+      This Region's removed data value or the default.
+
+    Raises:
+      KeyError: If 'default' is not given and
+                key is not in the data dictionary.
+    """
+    return self.data.pop(key, default)
+
   ### Methods: Queries
 
   def contains(self, point: List[float], inc_lower = True, inc_upper = True) -> bool:
@@ -443,8 +574,8 @@ class Region(IOable, abc.Container):
       True:   If the two Regions are equal.
       False:  Otherwise.
     """
-    return that is not None and \
-           all([isinstance(that, Region), self.dimension == that.dimension]) and \
+    return isinstance(that, Region) and \
+           self.dimension == that.dimension and \
            all([d == that[i] for i, d in enumerate(self.dimensions)])
 
   ### Methods: Generators
@@ -649,7 +780,7 @@ class Region(IOable, abc.Container):
 
     return randomng([npoints, self.dimension], self.lower, self.upper)
 
-  def random_regions(self, nregions: int = 1, sizepc_range: 'Region' = None,
+  def random_regions(self, nregions: int = 1, sizepc: 'Region' = None,
                            posnrng: Union[RandomFn,List[RandomFn]] = Randoms.uniform(),
                            sizerng: Union[RandomFn,List[RandomFn]] = Randoms.uniform(),
                            precision: int = None,
@@ -669,31 +800,31 @@ class Region(IOable, abc.Container):
     precision. Additional arguments passed through to Region.from_intervals.
 
     Args:
-      nregions:     The number of Regions to be generated.
-      sizepc_range: The size range as a percentage of the
-                    total Regions' dimensional length.
-      posnrng:      The random number generator or list of
-                    random number generator (per dimension)
-                    for choosing the position of the Region.
-      sizerng:      The random number generator or list of
-                    random number generator (per dimension)
-                    for choosing the size of the Region.
-      precision:    The number of digits after the decimal
-                    point for the lower and upper bounding
-                    values, or None for arbitrary precision.
-      kwargs:       Additional arguments passed through to
-                    Region.from_intervals.
+      nregions:   The number of Regions to be generated.
+      sizepc:     The size range as a percentage of the
+                  total Regions' dimensional length.
+      posnrng:    The random number generator or list of
+                  random number generator (per dimension)
+                  for choosing the position of the Region.
+      sizerng:    The random number generator or list of
+                  random number generator (per dimension)
+                  for choosing the size of the Region.
+      precision:  The number of digits after the decimal
+                  point for the lower and upper bounding
+                  values, or None for arbitrary precision.
+      kwargs:     Additional arguments passed through to
+                  Region.from_intervals.
 
     Returns:
       List of randonly generated Regions
       within this Region.
     """
     ndunit_region = Region([0] * self.dimension, [1] * self.dimension)
-    if sizepc_range == None:
-      sizepc_range = ndunit_region
+    if sizepc == None:
+      sizepc = ndunit_region
 
-    assert isinstance(sizepc_range, Region) and self.dimension == sizepc_range.dimension
-    assert ndunit_region.encloses(sizepc_range)
+    assert isinstance(sizepc, Region) and self.dimension == sizepc.dimension
+    assert ndunit_region.encloses(sizepc)
 
     if isinstance(posnrng, Callable):
       posnrng = [posnrng] * self.dimension
@@ -709,7 +840,7 @@ class Region(IOable, abc.Container):
     for _ in range(nregions):
       region = []
       for i, d in enumerate(self.dimensions):
-        dimension = d.random_intervals(1, sizepc_range[i], posnrng[i], sizerng[i], precision)[0]
+        dimension = d.random_intervals(1, sizepc[i], posnrng[i], sizerng[i], precision)[0]
         region.append(dimension)
       regions.append(Region.from_intervals(region, **kwargs))
     return regions
@@ -873,8 +1004,10 @@ class Region(IOable, abc.Container):
     assert isinstance(object, Region)
 
     fieldnames = ['id', 'dimension', 'dimensions', 'data']
+    iscompact  = 'compact' in kwargs and kwargs['compact']
+    regionid   = lambda r: r.id if iscompact else r['id']
 
-    if 'compact' in kwargs and kwargs['compact']:
+    if iscompact:
       dictobj = dict(map(lambda f: (f, getattr(object, f)), fieldnames))
     else:
       dictobj = asdict(object)
@@ -883,9 +1016,9 @@ class Region(IOable, abc.Container):
       if dictobj['data'] is object.data:
         dictobj['data'] = dictobj['data'].copy()
       if 'intersect' in dictobj['data']:
-        dictobj['data']['intersect'] = list(map(lambda r: r.id, dictobj['data']['intersect']))
+        dictobj['data']['intersect'] = list(map(regionid, dictobj['data']['intersect']))
       if 'union' in dictobj['data']:
-        dictobj['data']['union'] = list(map(lambda r: r.id, dictobj['data']['union']))
+        dictobj['data']['union'] = list(map(regionid, dictobj['data']['union']))
       for k, _ in dictobj['data'].items():
         if k.startswith('_'):
           del dictobj['data'][k]
@@ -930,14 +1063,8 @@ class Region(IOable, abc.Container):
         combinations of fields.
     """
     assert isinstance(object, Dict)
-
-    if 'id' in object:
-      id = object['id']
-
-    data = {}
-    if 'data' in object:
-      assert isinstance(object['data'], Dict)
-      data = object['data']
+    id, data = object.get('id', id), object.get('data', {})
+    assert isinstance(data, Dict)
 
     if 'dimension' in object and any([k in object for k in ['lower', 'upper']]):
       assert isinstance(object['dimension'], int) and 0 < object['dimension']

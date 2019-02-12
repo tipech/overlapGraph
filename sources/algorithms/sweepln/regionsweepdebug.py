@@ -13,10 +13,10 @@ Classes:
 
 from typing import Tuple
 
-from sources.abstract.pubsub import Event, Subscriber
-from sources.algorithms.sweepln.regionsweep import RegionSweepEvtKind
-from sources.datastructs.datasets.regiontime import RegionEvent
-from sources.datastructs.shapes.region import RegionGrp
+from sources.abstract import Event, Subscriber
+from sources.core import RegionEvent, RegionGrp
+
+from .regionsweep import RegionSweepEvtKind
 
 
 class RegionSweepDebug(Subscriber[RegionGrp]):

@@ -21,12 +21,12 @@ from typing import Iterator, List, Union
 
 from sortedcontainers import SortedList
 
-from sources.abstract.mdtimeln import MdTEvent, MdTimeline
-from sources.abstract.timeline import Timeline
-from sources.datastructs.shapes.region import Region
+from sources.abstract import MdTEvent, MdTimeline, Timeline
+
+from ..shapes import Region
 
 try: # cyclic codependency
-  from sources.datastructs.datasets.regionset import RegionSet
+  from .regionset import RegionSet
 except ImportError:
   pass
 

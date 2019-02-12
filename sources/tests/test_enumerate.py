@@ -10,13 +10,9 @@ from time import perf_counter
 from typing import Dict, Iterator, List, NamedTuple, Tuple
 from unittest import TestCase
 
-from sources.algorithms.queries.enumerate import RegionIntersect
-from sources.algorithms.queries.enumerate.bynxgraph import EnumerateByNxGraph
-from sources.algorithms.queries.enumerate.byrcsweep import EnumerateByRCSweep
-from sources.algorithms.sweepln.basesweep import SweepTaskRunner
-from sources.algorithms.sweepln.regionsweepdebug import RegionSweepDebug
-from sources.datastructs.datasets.regionset import RegionSet
-from sources.datastructs.shapes.region import Region, RegionIntxn
+from sources.algorithms.queries import Enumerate, RegionIntersect
+from sources.algorithms.sweepln import RegionSweepDebug, SweepTaskRunner
+from sources.core import Region, RegionIntxn, RegionSet
 
 
 class TestEnumerateResult(NamedTuple):
@@ -48,7 +44,7 @@ class TestEnumerate(TestCase):
     for nregions in [pow(10, n) for n in range(1, 4)]:
       for sizepc in [0.01, 0.05, *([] if nregions > 100 else [0.1])]:
         sizerng = Region([0]*2, [sizepc]*2)
-        regions = RegionSet.from_random(nregions, bounds, sizepc_range=sizerng, precision=1)
+        regions = RegionSet.from_random(nregions, bounds, sizepc=sizerng, precision=1)
         self.regions[f'{nregions},{sizepc:.2f}'] = regions
 
   def run_evaluator(self, name: str, clazz: SweepTaskRunner):
@@ -56,7 +52,7 @@ class TestEnumerate(TestCase):
     subscribers = [] #[RegionSweepDebug()]
     length, lvl = 0, 0
     levels, enumeration = {}, []
-    evaluator = clazz.evaluate(regions, *subscribers)
+    evaluator = clazz.prepare(regions, *subscribers)
     starttime = perf_counter()
 
     for _, (_, intersect) in enumerate(evaluator()):
@@ -87,8 +83,8 @@ class TestEnumerate(TestCase):
 
   def test_enumerate_results(self):
     for name in self.regions.keys():
-      nxg = self.run_evaluator(name, EnumerateByNxGraph)
-      rcs = self.run_evaluator(name, EnumerateByRCSweep)
+      nxg = self.run_evaluator(name, Enumerate.get('slig'))
+      rcs = self.run_evaluator(name, Enumerate.get('naive'))
 
       self.assertEqual(nxg.length, rcs.length)
       self.assertDictEqual(nxg.levels, rcs.levels)

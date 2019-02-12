@@ -12,7 +12,7 @@ Unit tests for Base Experiment
 from typing import Tuple
 from unittest import TestCase
 
-from sources.abstract.experiment import Experiment
+from sources.abstract import Experiment
 
 
 class TestExperiment(TestCase):

@@ -18,11 +18,10 @@ Classes:
 
 from typing import Dict, List, Union
 
-from sources.abstract.pubsub import Event
-from sources.algorithms.sweepln.regionsweep import RegionSweep, RegionSweepEvtKind
-from sources.datastructs.datasets.regionset import RegionSet
-from sources.datastructs.datasets.regiontime import RegionEvent
-from sources.datastructs.shapes.region import Region
+from sources.abstract import Event
+from sources.core import Region, RegionEvent, RegionId, RegionSet
+
+from .regionsweep import RegionSweep, RegionSweepEvtKind
 
 
 class RestrictedRegionSweep(RegionSweep):
@@ -56,9 +55,8 @@ class RestrictedRegionSweep(RegionSweep):
 
     RegionSweep.__init__(self, self.regions)
 
-  def initialize(self, regions: RegionSet,
-                       region: Union[Region, str] = None,
-                       subset: List[Union[Region, str]] = []):
+  def initialize(self, regions: RegionSet, region: RegionId = None,
+                       subset: List[RegionId] = []):
     """
     Initialize the one-pass sweep-line algorithm over a
     restricted set of Regions.

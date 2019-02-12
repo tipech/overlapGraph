@@ -16,14 +16,13 @@ Classes:
 
 from typing import Any, Callable, Iterable, Iterator, List, Tuple
 
-from sources.abstract.pubsub import Event, Subscriber
-from sources.algorithms.queries.enumerate import EnumerateRegionIntersect, RegionIntersect
-from sources.algorithms.sweepln.basesweep import SweepTaskRunner
-from sources.algorithms.sweepln.regioncyclesweep import RegionCycleSweep
-from sources.algorithms.sweepln.regionsweep import RegionSweepEvtKind
-from sources.datastructs.datasets.regionset import RegionSet
-from sources.datastructs.datasets.regiontime import RegionEvent
-from sources.datastructs.shapes.region import Region, RegionGrp, RegionIntxn, RegionPair
+from sources.abstract import Event, Subscriber
+from sources.algorithms import \
+     RegionCycleSweep, RegionSweepEvtKind, SweepTaskRunner
+from sources.core import \
+     Region, RegionEvent, RegionGrp, RegionIntxn, RegionPair, RegionSet
+
+from .common import EnumerateRegionIntersect, RegionIntersect
 
 
 class EnumerateByRCSweep(EnumerateRegionIntersect):
@@ -125,15 +124,15 @@ class EnumerateByRCSweep(EnumerateRegionIntersect):
   ### Class Methods: Evaluation
 
   @classmethod
-  def evaluate(cls, regions: RegionSet,
-                    *subscribers: Iterable[Subscriber[RegionGrp]]) \
-                    -> Callable[[Any], Iterator[RegionIntersect]]:
+  def prepare(cls, regions: RegionSet,
+                   *subscribers: Iterable[Subscriber[RegionGrp]]) \
+                   -> Callable[[Any], Iterator[RegionIntersect]]:
     """
     Factory function for computes an Iterator of all of the intersecting
     Regions using the cyclic multi-pass sweep-line algorithm.
 
     Overrides:
-      SweepTaskRunner.evaluate
+      SweepTaskRunner.prepare
 
     Args:
       regions:
@@ -156,7 +155,7 @@ class EnumerateByRCSweep(EnumerateRegionIntersect):
         The resulting Iterator of intersecting Regions.
     """
     assert isinstance(regions, RegionSet)
-    return SweepTaskRunner.evaluate(cls, RegionCycleSweep, **{
+    return SweepTaskRunner.prepare(cls, RegionCycleSweep, **{
       'subscribers': subscribers,
       'alg_args': [regions]
     })

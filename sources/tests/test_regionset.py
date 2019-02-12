@@ -12,14 +12,14 @@ Unit tests for Regions Collection
 - test_regionset_tofrom_output_backlinks
 - test_regionset_filter
 - test_regionset_subset
+- test_regionset_merge
 """
 
 from io import StringIO
 from typing import Iterable, List
 from unittest import TestCase
 
-from sources.datastructs.datasets.regionset import RegionSet
-from sources.datastructs.shapes.region import Region
+from sources.core import Region, RegionSet
 
 
 class TestRegionSet(TestCase):
@@ -55,7 +55,7 @@ class TestRegionSet(TestCase):
       regionset.add(Region([-1, -1],[5, 5]))
 
   def test_regionset_iteration(self):
-    regionset = RegionSet.from_random(100, Region([0]*2, [10]*2), sizepc_range=Region([0]*2, [0.5]*2))
+    regionset = RegionSet.from_random(100, Region([0]*2, [10]*2), sizepc=Region([0]*2, [0.5]*2))
 
     for region in regionset:
       self.assertIsInstance(region, Region)
@@ -75,18 +75,18 @@ class TestRegionSet(TestCase):
   def test_regionset_from_random(self):
     nregions = 50
     bounds = Region([0]*2, [10]*2)
-    sizepc_range = Region([0]*2, [0.5]*2)
-    regionset = RegionSet.from_random(nregions, bounds, sizepc_range=sizepc_range, precision=1)
+    sizepc = Region([0]*2, [0.5]*2)
+    regionset = RegionSet.from_random(nregions, bounds, sizepc=sizepc, precision=1)
     self._test_regionset(regionset, nregions, bounds, regionset)
 
   def test_regionset_tofrom_output(self):
     nregions = 10
     bounds = Region([0]*2, [100]*2)
-    sizepc_range = Region([0]*2, [0.5]*2)
-    regionset = RegionSet.from_random(nregions, bounds, sizepc_range=sizepc_range, precision=1)
+    sizepc = Region([0]*2, [0.5]*2)
+    regionset = RegionSet.from_random(nregions, bounds, sizepc=sizepc, precision=1)
 
     with StringIO() as output:
-      regionset.to_output(output, options={'compact': True})
+      RegionSet.to_output(regionset, output, options={'compact': True})
       before = output.getvalue()
       #print(before)
       output.seek(0)
@@ -95,7 +95,7 @@ class TestRegionSet(TestCase):
 
       output.truncate(0)
       output.seek(0)
-      newregionset.to_output(output, options={'compact': True})
+      RegionSet.to_output(newregionset, output, options={'compact': True})
       after = output.getvalue()
       #print(after)
       self.assertEqual(before, after)
@@ -103,8 +103,8 @@ class TestRegionSet(TestCase):
   def test_regionset_tofrom_output_backlinks(self):
     nregions = 10
     bounds = Region([0]*2, [100]*2)
-    sizepc_range = Region([0]*2, [0.5]*2)
-    regionset = RegionSet.from_random(nregions, bounds, sizepc_range=sizepc_range, precision=1)
+    sizepc = Region([0]*2, [0.5]*2)
+    regionset = RegionSet.from_random(nregions, bounds, sizepc=sizepc, precision=1)
     regions = []
 
     for first in regionset:
@@ -119,26 +119,23 @@ class TestRegionSet(TestCase):
       regionset.add(region)
 
     with StringIO() as output:
-      regionset.to_output(output, options={'compact': True})
+      RegionSet.to_output(regionset, output, options={'compact': True})
       #print(output.getvalue())
       output.seek(0)
       newregionset = RegionSet.from_source(output, 'json')
 
       for region in regions:
-        if 'intersect' in region:
-          self.assertTrue('intersect' in newregionset[region.id])
-          self.assertTrue(all([isinstance(r, Region) for r in newregionset[region.id]['intersect']]))
-          self.assertListEqual(region['intersect'], newregionset[region.id]['intersect'])
-        if 'union' in region:
-          self.assertTrue('union' in newregionset[region.id])
-          self.assertTrue(all([isinstance(r, Region) for r in newregionset[region.id]['union']]))
-          self.assertListEqual(region['union'], newregionset[region.id]['union'])
+        for field in ['intersect', 'union']:
+          if field in region:
+            self.assertTrue(field in newregionset[region.id])
+            self.assertTrue(all([isinstance(r, Region) for r in newregionset[region.id][field]]))
+            self.assertListEqual(region[field], newregionset[region.id][field])
 
   def test_regionset_filter(self):
     nregions = 50
     bounds = Region([0]*2, [10]*2)
-    sizepc_range = Region([0]*2, [0.5]*2)
-    regionset = RegionSet.from_random(nregions, bounds, sizepc_range=sizepc_range, precision=1)    
+    sizepc = Region([0]*2, [0.5]*2)
+    regionset = RegionSet.from_random(nregions, bounds, sizepc=sizepc, precision=1)    
     filter_bound = Region([5]*2, [10]*2)
     filtered = regionset.filter(filter_bound)
 
@@ -153,8 +150,8 @@ class TestRegionSet(TestCase):
   def test_regionset_subset(self):
     nregions = 50
     bounds = Region([0]*2, [10]*2)
-    sizepc_range = Region([0]*2, [0.5]*2)
-    regionset = RegionSet.from_random(nregions, bounds, sizepc_range=sizepc_range, precision=1)    
+    sizepc = Region([0]*2, [0.5]*2)
+    regionset = RegionSet.from_random(nregions, bounds, sizepc=sizepc, precision=1)
     subset = ['A', 'C', 'E', 'G', 'I', 'K'] + [regionset[r] for r in ['AA', 'P', 'Q', 'R']]
     subsetted = regionset.subset(subset)
 
@@ -171,3 +168,26 @@ class TestRegionSet(TestCase):
         self.assertIsInstance(r, Region)
         self.assertIn(r, subsetted)
         self.assertIs(regionset[r.id], subsetted[r.id])
+
+  def test_regionset_merge(self):
+    nregions = 50
+    sizepc = Region([0]*2, [0.5]*2)
+    first  = RegionSet.from_random(nregions, Region([0]*2, [10]*2), sizepc=sizepc, precision=1)
+    second = RegionSet.from_random(nregions, Region([0]*2, [100]*2), sizepc=sizepc, precision=1)
+    third  = RegionSet(dimension=2)
+    third.streamadd([
+      Region([-1]*2, [10]*2),
+      Region([-10, 0], [0, 100]),
+      Region([-100, -10], [10, 10])
+    ])
+
+    merged = RegionSet.from_merge([first, second, third])
+    regionkeys = []
+
+    for region in merged:
+      regionkeys.append(region.id)
+    for regions in [first, second, third]:
+      self.assertTrue(merged.bounds.encloses(regions.bbox))
+
+    self.assertEqual(len(first) + len(second) + len(third), len(merged))
+    self.assertEqual(len(regionkeys), len(set(regionkeys)))

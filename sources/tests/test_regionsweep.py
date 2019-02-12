@@ -10,18 +10,17 @@ Unit tests for Generalized One-Pass Sweep-line Algorithm
 from typing import List
 from unittest import TestCase
 
-from sources.algorithms.sweepln.regionsweep import RegionSweep
-from sources.algorithms.sweepln.regionsweepdebug import RegionSweepDebug
-from sources.algorithms.sweepln.regionsweepovlps import RegionSweepOverlaps
-from sources.datastructs.datasets.regionset import RegionSet
-from sources.datastructs.shapes.region import Region, RegionPair
+from sources.algorithms import \
+     RegionSweep, RegionSweepDebug, RegionSweepOverlaps
+from sources.core import \
+     Region, RegionPair, RegionSet
 
 
 class TestRegionSweep(TestCase):
 
   def _evaluate_regionsweep(self, regions: RegionSet, i: int) -> List[RegionPair]:
     subscribers = [] #[RegionSweepDebug()]
-    return RegionSweepOverlaps.evaluate(regions, *subscribers)(i)
+    return RegionSweepOverlaps.prepare(regions, *subscribers)(i)
 
   def test_regionsweep_simple(self):
     regionset = RegionSet(dimension=2)
@@ -41,7 +40,7 @@ class TestRegionSweep(TestCase):
       self.assertEqual(len(expect), len(actual))
 
   def test_regionsweep_random(self):
-    regionset = RegionSet.from_random(30, Region([0]*3, [100]*3), sizepc_range=Region([0]*3, [0.5]*3), precision=0)
+    regionset = RegionSet.from_random(30, Region([0]*3, [100]*3), sizepc=Region([0]*3, [0.5]*3), precision=0)
     actuals = []
     #for region in regionset: print(f'{region}')
     for i in range(regionset.dimension):
