@@ -24,6 +24,7 @@ Abstract Classes:
 """
 
 from abc import ABCMeta, abstractmethod
+from collections import abc
 from typing import Any, Dict, Generic, Iterator, Tuple, TypeVar, Union
 
 from ..shapes import Region, RegionIdPair, RegionPair
@@ -32,13 +33,20 @@ from ..shapes import Region, RegionIdPair, RegionPair
 G = TypeVar('G')
 
 
-class RIGraph(Generic[G]): # pylint: disable=E1136
+class RIGraph(Generic[G], abc.Sized): # pylint: disable=E1136
   """
   Abstract Class
 
   A graph representation of intersecting and overlapping Regions.
   Provides a programming interface for accessing and constructing
   the data representation.
+
+  Generic:
+    G:  The underlying graph representation and
+        concrete implementation.
+
+  Extends:
+    abc.Sized
 
   Attributes:
     id:
@@ -160,6 +168,18 @@ class RIGraph(Generic[G]): # pylint: disable=E1136
     Args:
       key:  The unique identifier for Region or
             intersecting Region to be removed.
+    """
+    raise NotImplementedError
+
+  @abstractmethod
+  def __len__(self) -> int:
+    """
+    Determine the size of this graph. The size of this graph
+    is measured by the number of nodes (or Regions) within graph.
+
+    Returns:
+      The number of Regions as nodes
+      within this graph.
     """
     raise NotImplementedError
 

@@ -205,6 +205,17 @@ class NxGraph(RIGraph[nx.Graph], IOable):
     else:
       self.G.remove_node(key)
 
+  def __len__(self) -> int:
+    """
+    Determine the size of this graph. The size of this graph
+    is measured by the number of nodes (or Regions) within graph.
+
+    Returns:
+      The number of Regions as nodes
+      within this graph.
+    """
+    return len(self.G)
+
   def __contains__(self, key: Union[RegionId, RegionIdPair]) -> bool:
     """
     Determine if the given Region ID or pair of Regions IDs are
