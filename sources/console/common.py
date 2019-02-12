@@ -478,12 +478,12 @@ class CommonConsoleNS:
     for r in [regions[q] for q in queries]:
       r['color'] = get_color(vmin)
     for r in intersects:
-      intersects = r['intersect']
-      r['color'] = color = get_color(len(intersects))
+      intersect = r['intersect']
+      r['color'] = color = get_color(len(intersect))
       if isinstance(ctx, NxGraph):
-        for i, a in enumerate(r['intersect']):
+        for i, a in enumerate(intersect):
           a['color'] = color
-          for b in r['intersect'][i+1:]:
+          for b in intersect[i+1:]:
             rigraph.region((a, b))['color'] = color
 
     if isinstance(ctx, RegionSet):
