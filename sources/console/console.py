@@ -124,7 +124,7 @@ class ConsoleCommand(click.Command):
     self.paramdocs = self._getparams(kwargs.get('help', ''))
     self.sections  = sections or self.default_sections.copy()
 
-  ### Method: Private Helpers
+  ### Methods: Private Helpers
 
   def _getparams(self, docstring: str) -> Dict[str, str]:
     """
@@ -162,7 +162,7 @@ class ConsoleCommand(click.Command):
 
     return params
 
-  ### Method: Sections
+  ### Methods: Sections
 
   def register_section(self, section: str, before: str = '<end>'):
     """
@@ -235,7 +235,27 @@ class ConsoleCommand(click.Command):
       return f
     return decorator
 
-  ### Method: Formatting
+  ### Methods: Usage String
+
+  def collect_usage_pieces(self, ctx):
+    """
+    Returns all the pieces that go into the usage line and returns
+    it as a list of strings.
+
+    Overrides:
+      click.Command.collect_usage_pieces
+
+    Args:
+      ctx:
+        The context object.
+    """
+    rv = [self.options_metavar]
+    for param in self.get_params(ctx):
+      if not param.hidden:
+        rv.extend(param.get_usage_pieces(ctx))
+    return rv
+
+  ### Methods: Formatting
 
   def format_help(self, ctx, formatter):
     """
@@ -295,7 +315,8 @@ class ConsoleCommand(click.Command):
     for param in self.get_params(ctx):
       if not param.help and param.name in self.paramdocs:
         param.help = self.paramdocs[param.name]
-        param.hidden = False
+      if isinstance(param, ConsoleArgument) and param.hidden is None:
+        param.hidden = not param.help
 
       rv = param.get_help_record(ctx)
       if rv is not None and isinstance(param, click.Argument):
@@ -390,7 +411,7 @@ class ConsoleArgument(click.Argument):
     super().__init__(param_decls, **attrs)
 
     self.help = help
-    self.hidden = hidden if hidden is not None else not help
+    self.hidden = hidden
 
   def get_help_record(self, ctx) -> PyTuple[str, str]:
     """
