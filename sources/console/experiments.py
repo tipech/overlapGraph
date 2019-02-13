@@ -21,7 +21,7 @@ from .console import File, argument, command, option
 @option('--logger', type=File('w'), default=stdout)
 @option('--test/--full', default=True)
 @argument('experiments', nargs=-1)
-def main(logger = stdout, test = True, experiments = []):
+def ExperimentsConsole(logger = stdout, test = True, experiments = []):
   """
   Evaluate experiments that are specified by the given list of experiments,
   as exact/prefix matches or regular expressions.
@@ -67,7 +67,7 @@ def _list_experiments() -> Iterable[str]:
   return experiments
 
 
-@main.add_section('experiments', 'arguments')
+@ExperimentsConsole.add_section('experiments', 'arguments')
 def format_experiments(ctx, formatter):
   with formatter.section('Available Experiments'):
     formatter.write_paragraph()

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
 
-from sources.console.experiments import main
+from sources.console.experiments import ExperimentsConsole
 
-main()
+ExperimentsConsole()
