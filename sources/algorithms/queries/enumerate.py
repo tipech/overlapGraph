@@ -1,33 +1,30 @@
 #!/usr/bin/env python
 
 """
-Enumeration Query of Single Intersecting Regions -- Implementation Agnostic
+Enumeration of all Intersecting Regions -- Implementation Agnostic
 
-Perform enumeration of intersecting Regions involving a specific Region.
 The enumeration outputs an Iterator of the intersecting Regions as tuple of
 Region intersection and RegionIntns in order of the number of intersecting
 Regions involved. Binds together multiple implementations and algorithms into
 common single, abstracted interface.
 
 Classes:
-- SRQEnum
+- Enumerate
 """
 
 from typing import Union
 
-from ..rqenum import RQEnum
-from .bynxgraph import SRQEnumByNxGraph
-from .byrcsweep import SRQEnumByRCSweep
+from .common import RQEnum
+from .naive import EnumerateByRCSweep
+from .slig import EnumerateByNxGraph
 
 
-class SRQEnum(RQEnum):
+class Enumerate(RQEnum):
   """
   Static Class
 
-  Enumeration Query of Single Intersecting Regions
-  Regardless of Implementation
+  Enumeration of all Intersecting Regions Regardless of Implementation
 
-  Perform enumeration of intersecting Regions involving a specific Region.
   The enumeration outputs an Iterator of the intersecting Regions as tuple of
   Region intersection and RegionIntns in order of the number of intersecting
   Regions involved. Binds together multiple implementations and algorithms into
@@ -41,22 +38,22 @@ class SRQEnum(RQEnum):
   - slig
 
   Example:
-  >>> enumerator = SRQEnum.get('naive').prepare(regions, query)
+  >>> enumerator = Enumerate.get('naive').prepare(regions)
   >>> results = RegionSet(dimension=regions.dimension)
   >>> for region, intersect in enumerator():
   ...   results.add(region)
 
   Or get and prepare:
-  >>> enumerator = SRQEnum.get('slig', regions, query) # constructs graph, or takes
-  >>> enumerator = SRQEnum.get('slig', nxgraph, query) # one preconstructed
+  >>> enumerator = Enumerate.get('slig', regions) # constructs graph, or takes
+  >>> enumerator = Enumerate.get('slig', nxgraph) # one preconstructed
   >>> results = RegionSet(dimension=regions.dimension)
   >>> for region, intersect in enumerator():
   ...   results.add(region)
 
   Or get results directly:
-  >>> results = SRQEnum.results('naive', regions, query)
-  >>> results = SRQEnum.results('slig', regions, query)
-  >>> results = SRQEnum.results('slig', nxgraph, query)
+  >>> results = Enumerate.results('naive', regions)
+  >>> results = Enumerate.results('slig', regions)
+  >>> results = Enumerate.results('slig', nxgraph)
 
   Class Attributes:
     algorithms:
@@ -64,6 +61,6 @@ class SRQEnum(RQEnum):
       algorithm implementation classes.
   """
   algorithms = {
-    'naive': SRQEnumByRCSweep,
-    'slig':  SRQEnumByNxGraph
+    'naive': EnumerateByRCSweep,
+    'slig':  EnumerateByNxGraph
   }

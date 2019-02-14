@@ -22,7 +22,7 @@ from sources.algorithms import \
 from sources.core import \
      Region, RegionEvent, RegionGrp, RegionIntxn, RegionPair, RegionSet
 
-from .common import EnumerateRegionIntersect, RegionIntersect
+from ..common import EnumerateRegionIntersect, RegionIntersect
 
 
 class EnumerateByRCSweep(EnumerateRegionIntersect):

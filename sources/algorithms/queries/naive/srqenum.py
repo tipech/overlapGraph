@@ -23,7 +23,8 @@ from sources.abstract import Subscriber
 from sources.algorithms import RestrictedRegionCycleSweep, SweepTaskRunner
 from sources.core import Region, RegionGrp, RegionId, RegionSet
 
-from ..enumerate import EnumerateByRCSweep, RegionIntersect
+from ..common import RegionIntersect
+from .enumerate import EnumerateByRCSweep
 
 
 class SRQEnumByRCSweep(EnumerateByRCSweep):

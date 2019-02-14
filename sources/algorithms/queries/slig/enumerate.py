@@ -28,7 +28,7 @@ from networkx import networkx as nx
 from sources.algorithms import NxGraphSweepCtor
 from sources.core import NxGraph, Region, RegionSet
 
-from .common import RegionIntersect
+from ..common import RegionIntersect
 
 
 class EnumerateByNxGraph:
