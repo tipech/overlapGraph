@@ -33,10 +33,9 @@ from .interval import Interval
 RegionPair    = Tuple['Region', 'Region']
 RegionIntxn   = List['Region']
 RegionGrp     = Union['Region', RegionIntxn, RegionPair]
-RegionId      = Union['Region', str]
-RegionIdPair  = Tuple[RegionId, RegionId]
-RegionIdIntxn = List[RegionId]
-RegionIdGrp   = Union[RegionId, RegionIdIntxn, RegionIdPair]
+RegionIdPair  = Tuple[str, str]
+# RegionIdIntxn = List[RegionId]
+# RegionIdGrp   = Union[RegionId, RegionIdIntxn, RegionIdPair]
 
 
 @dataclass
@@ -60,6 +59,7 @@ class Region(IOable, abc.Container):
   id: str
   dimension: int = field(repr=False)
   factors: List[Interval] = field(repr=False)
+  originals: List[Region] = field(repr=False)
   data: Dict = field(repr=False)
 
   def __init__(self, lower: List[float], upper: List[float],

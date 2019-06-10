@@ -4,10 +4,10 @@
 Interval Data Class
 
 Implements the Interval class, a data class that defines lower and upper
-bounding values for an interval. Are the building blocks for representing
-multi-dimensional regions and computing for overlap between those regions.
+bounding values for an interval. Intervals are the building blocks for
+representing multi-dimensional region objects.
 Provides methods for determining if there is an overlap between two intervals
-and what the intersection interval between the two intervals is.
+and what that overlap interval is.
 
 
 Classes:
@@ -18,9 +18,7 @@ from collections import abc
 from dataclasses import asdict, astuple, dataclass
 from functools import reduce
 from numbers import Number, Real
-from typing import Any, Callable, Dict, List, Tuple, Union
-
-from numpy import floor
+from typing import Any, Dict, List, Tuple, Union
 
 from sources.abstract import IOable
 
