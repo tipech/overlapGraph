@@ -25,15 +25,14 @@ from numbers import Real
 from typing import Any, Callable, Dict, List, Tuple, Union
 from uuid import uuid4
 
-from sources.abstract import IOable
-
+from .ioable import IOable
 from .interval import Interval
 
 
-RegionPair    = Tuple['Region', 'Region']
-RegionIntxn   = List['Region']
-RegionGrp     = Union['Region', RegionIntxn, RegionPair]
-RegionIdPair  = Tuple[str, str]
+# RegionPair    = Tuple['Region', 'Region']
+# RegionIntxn   = List['Region']
+# RegionGrp     = Union['Region', RegionIntxn, RegionPair]
+# RegionIdPair  = Tuple[str, str]
 # RegionIdIntxn = List[RegionId]
 # RegionIdGrp   = Union[RegionId, RegionIdIntxn, RegionIdPair]
 
@@ -59,11 +58,11 @@ class Region(IOable, abc.Container):
   id: str
   dimension: int = field(repr=False)
   factors: List[Interval] = field(repr=False)
-  originals: List[Region] = field(repr=False)
+  originals: List['Region'] = field(repr=False)
   data: Dict = field(repr=False)
 
   def __init__(self, lower: List[float], upper: List[float],
-                     originals: List[Region] = [self], id: str = '', **kwargs):
+                     originals: List[str] = [], id: str = '', **kwargs):
     """
     Initialize a new Region, with the lower and upper bounding vertices.
     Computes the dimension from the lower and upper vertices, which must have
@@ -91,11 +90,14 @@ class Region(IOable, abc.Container):
     """
     if len(id) == 0:
       id = str(uuid4())
+    
+    if len(originals) == 0:
+      originals = [id]
 
     assert len(id) > 0
     assert isinstance(lower, List) and all([isinstance(l, Real) for l in lower])
     assert isinstance(upper, List) and all([isinstance(u, Real) for u in upper])
-    assert isinstance(originals, List) and all(isinstance(x, Region) for x in originals)
+    assert isinstance(originals, List) and all(isinstance(x, str) for x in originals)
     assert len(lower) > 0 and len(lower) == len(upper)
     assert all(isinstance(x, str) for x in kwargs.keys())
 
@@ -265,7 +267,8 @@ class Region(IOable, abc.Container):
     dictobj = {
       'id': self.id[0:8] if len(self.id) > 8 else self.id,
       'lower': self.lower,
-      'upper': self.upper
+      'upper': self.upper,
+      'originals': [o[0:8] if len(o) > 8 else o for o in self.originals]
     }
 
     dicttopairs = lambda item: f'{item[0]}={item[1]}'
@@ -631,20 +634,20 @@ class Region(IOable, abc.Container):
 
   ### Methods: Size queries
 
-def get_intersection_size(self, that: 'Region') -> float:
-  """
-  Compute the size of the intersection between this and that Region.
-  There's no need to check for exact bounds, as the size would be 0 anyway.
-
-    Args:
-      that:
-        The other Region with which to compute
-        the common intersecting Region.
-
-    Returns:
-      The size of the intersection
-      0: If the Regions do not intersect.
+  def get_intersection_size(self, that: 'Region') -> float:
     """
+    Compute the size of the intersection between this and that Region.
+    There's no need to check for exact bounds, as the size would be 0 anyway.
+
+      Args:
+        that:
+          The other Region with which to compute
+          the common intersecting Region.
+
+      Returns:
+        The size of the intersection
+        0: If the Regions do not intersect.
+      """
     assert isinstance(that, Region)
     assert self.dimension == that.dimension
 
@@ -738,7 +741,7 @@ def get_intersection_size(self, that: 'Region') -> float:
   ### Class Methods: Generators
 
   @classmethod
-  def from_intervals(cls, factors: List[Interval], originals: List[Region],
+  def from_intervals(cls, factors: List[Interval], originals: List['Region'] = [],
                           id: str = '', **kwargs) -> 'Region':
     """
     Construct a new Region from the given a list of Intervals.
@@ -765,14 +768,16 @@ def get_intersection_size(self, that: 'Region') -> float:
     """
     assert isinstance(factors, List)
     assert all([isinstance(d, Interval) for d in factors])
-    assert isinstance(originals, List) and all(isinstance(x, Region) for x in originals)
+    assert isinstance(originals, List) and all(isinstance(x, str) for x in originals)
     
     return cls([d.lower for d in factors],
                [d.upper for d in factors], originals, id, **kwargs)
 
+
   @classmethod
   def from_interval(cls, interval: Interval,
                          dimension: int = 1,
+                         originals: List['Region'] = [],
                          id: str = '', **kwargs) -> 'Region':
     """
     Construct a new Region from a given Interval and the specified number of
@@ -806,7 +811,7 @@ def get_intersection_size(self, that: 'Region') -> float:
 
   @classmethod
   def from_intersection(cls, regions: List['Region'],
-                          id: str = '') -> Union['Region', None]:
+                         id: str = '') -> Union['Region', None]:
     """
     Constructs a new Region from the intersection of two or more given Regions.
 
@@ -827,72 +832,34 @@ def get_intersection_size(self, that: 'Region') -> float:
     assert all([regions[0].dimension == r.dimension for r in regions])
 
     factors = zip(*list(map(lambda r: r.factors, regions)))
-    factors = [Interval.from_intersection(list(d)) for d in factors]
-    if any([d == None for d in factors]):
+    factors = [Interval.from_intersection(list(f)) for f in factors]
+
+    if any([f == None for f in factors]):
       return None
 
-    originals = list(set(self.originals + that.originals))
+    originals = list({o for r in regions for o in r.originals})
 
-    return cls.from_intervals(factors, originals, id, **data)
+    return cls.from_intervals(factors, originals, id)
 
 
-  ### Class Methods: (De)serialization
+  ### Methods: (De)serialization
 
-  @classmethod
-  def to_object(cls, object: 'Region', format: str = 'json', **kwargs) -> Any:
+  def to_dict(self) -> Dict:
     """
-    Generates an object (dict, list, or tuple) from the given Region object
-    that can be converted or serialized as the specified data format: 'json'.
-    Additional arguments passed via kwargs are used to customize and tweak the
-    object generation process.
-
-    Args:
-      object: The Interval convert to an object.
-      format: The targetted output format type.
-      kwargs: Additional arguments or options to customize
-              and tweak the object generation process.
-
-    kwargs:
-      compact:
-        Boolean flag for whether or not the data
-        representation of the output JSON is a compact,
-        abbreviated representation or the full data
-        representation with all fields.
+    Generates a dict object from this Region object that can be serialized.
 
     Returns:
-      The generated object.
+      The generated dict.
     """
-    assert isinstance(object, Region)
 
-    fieldnames = ['id', 'dimension', 'factors', 'data']
-    iscompact  = 'compact' in kwargs and kwargs['compact']
-    regionid   = lambda r: r.id if iscompact else r['id']
+    return asdict(self)
 
-    if iscompact:
-      dictobj = dict(map(lambda f: (f, getattr(object, f)), fieldnames))
-    else:
-      dictobj = asdict(object)
-
-    if 'data' in dictobj:
-      if dictobj['data'] is object.data:
-        dictobj['data'] = dictobj['data'].copy()
-      for k, _ in dictobj['data'].items():
-        if k.startswith('_'):
-          del dictobj['data'][k]
-      if len(dictobj['data']) == 0:
-        del dictobj['data']
-
-    for k, _ in dictobj.items():
-      if k.startswith('_'):
-        del dictobj[k]
-
-    return dictobj
 
   @classmethod
   def from_dict(cls, object: Dict, id: str = '') -> 'Region':
     """
     Construct a new Region from the conversion of the given Dict.
-    The Dict must contains one of the following combinations of fields:
+    The Dict must contain one of the following combinations of fields:
 
     - lower (List[float]) and upper (List[float])
     - factors (List[Interval-equivalent])
@@ -902,7 +869,7 @@ def get_intersection_size(self, that: 'Region') -> float:
 
     Note:
     - Interval-equivalent means parseable by
-      Interval.from_object.
+      Interval.from_dict.
 
     Args:
       object:
@@ -923,41 +890,38 @@ def get_intersection_size(self, that: 'Region') -> float:
     id, data = object.get('id', id), object.get('data', {})
     assert isinstance(data, Dict)
 
-    if 'dimension' in object and any([k in object for k in ['lower', 'upper']]):
-      assert isinstance(object['dimension'], int) and 0 < object['dimension']
-      for k in ['lower', 'upper']:
-        if isinstance(object[k], Real):
-          object[k] = [object[k]] * object['dimension']
+    if 'originals' not in object:
+      object['originals'] = [id]
 
-    if all([k in object for k in ['lower', 'upper']]):
+    if 'lower' in object and 'upper' in object:
       assert isinstance(object['lower'], List) and all([isinstance(x, Real) for x in object['lower']])
       assert isinstance(object['upper'], List) and all([isinstance(x, Real) for x in object['upper']])
       assert len(object['lower']) == len(object['upper'])
-      return cls(object['lower'], object['upper'], id, **data)
-    elif all([k in object for k in ['dimension', 'interval']]):
-      assert isinstance(object['dimension'], int) and 0 < object['dimension']
-      return cls.from_interval(Interval.from_object(object['interval']), object['dimension'], id, **data)
-    elif all([k in object for k in ['factors']]):
+      return cls(object['lower'], object['upper'], object['originals'], id, **data)
+
+    elif 'factors' in object:
       assert isinstance(object['factors'], List)
-      return cls.from_intervals(list(map(Interval.from_object, object['factors'])), object['originals'], id, **data)
+      return cls.from_intervals([Interval.from_dict(f) for f in object['factors']],
+        object['originals'], id, **data)
     else:
       raise ValueError('Unrecognized Region representation')
+
 
   @classmethod
   def from_object(cls, object: Any, id: str = '') -> 'Region':
     """
     Construct a new Region from the conversion of the given object.
-    The object must contains one of the following representations:
+    The object must contain one of the following representations:
 
     - A Dict that is parseable by the from_dict method.
     - A List of objects that are parseable by
-      Interval.from_object, to be passed to the
+      Interval.from_dict, to be passed to the
       from_intervals method.
     - A Tuple containing 2 values:
       - An int as the number of dimension,
         to be passed to from_interval and
       - An object that is parseable by the
-        Interval.from_object method.
+        Interval.from_dict method.
 
     Args:
       object:
@@ -977,10 +941,10 @@ def get_intersection_size(self, that: 'Region') -> float:
     if isinstance(object, Dict):
       return cls.from_dict(object, id)
     elif isinstance(object, List):
-      return cls.from_intervals(list(map(Interval.from_object, object)), id)
+      return cls.from_intervals(list(map(Interval.from_dict, object)), [], id)
     elif isinstance(object, Tuple):
       assert len(object) == 2
       assert isinstance(object[0], int) and 0 < object[0]
-      return cls.from_interval(Interval.from_object(object[1]), object[0], id)
+      return cls.from_interval(Interval.from_dict(object[1]), object[0], [], id)
     else:
       raise ValueError('Unrecognized Region representation')

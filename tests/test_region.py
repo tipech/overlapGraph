@@ -11,18 +11,15 @@ Unit tests for Region Data Class
 - test_region_equality
 - test_region_overlaps
 - test_region_intersect
-- test_region_union
 - test_region_linked_intersect
 - test_region_linked_union
 - test_region_project
-- test_region_random_points
-- test_region_random_regions
 - test_region_from_intervals
 - test_region_from_interval
 - test_region_from_intersect
 - test_region_from_union
 - test_region_from_dict
-- test_region_from_object
+- test_region_from_region
 - test_region_from_text
 """
 
@@ -32,8 +29,9 @@ from typing import List, Tuple
 from unittest import TestCase
 
 from numpy import mean
+from pprint import pprint
 
-from sources.core import Interval, Region
+from slig.datastructs import Interval, Region
 
 
 class TestRegion(TestCase):
@@ -65,10 +63,10 @@ class TestRegion(TestCase):
     for i, region in enumerate(test_regions):
       #print(region)
       self.assertEqual(region.dimension, i + 1)
-      self.assertEqual(region.dimension, len(region.dimensions))
+      self.assertEqual(region.dimension, len(region.factors))
       self.assertEqual(region.dimension, len(region.lower))
       self.assertEqual(region.dimension, len(region.upper))
-      self.assertTrue(all([d == Interval(0,5) for d in region.dimensions]))
+      self.assertTrue(all([d == Interval(0,5) for d in region.factors]))
       self.assertTrue(all([d == 0 for d in region.lower]))
       self.assertTrue(all([d == 5 for d in region.upper]))
       self.assertTrue(all([region.lower[i] <= region.upper[i] for i in range(region.dimension)]))
@@ -77,22 +75,20 @@ class TestRegion(TestCase):
 
   def test_region_dimension_mismatch(self):
     with self.assertRaises(AssertionError):
-      Region([0, 0], [10, 10], dimension=3)
-    with self.assertRaises(AssertionError):
       Region([0, 0, 0], [10, 10])
 
   def test_region_properties(self):
     for region in self.test_regions:
       #print('\n  '.join([
       #  f'{region}:',
-      #  f'dimensions={[astuple(d) for d in region.dimensions]}',
+      #  f'factors={[astuple(d) for d in region.factors]}',
       #  f'lengths={region.lengths}',
       #  f'midpoint={region.midpoint}',
       #  f'size={region.size}'
       #]))
-      self.assertEqual(region.dimensions, [Interval(region.lower[i], region.upper[i]) for i in range(region.dimension)])
-      self.assertEqual(region.lengths, [d.upper - d.lower for d in region.dimensions])
-      self.assertEqual(region.midpoint, [mean([d.lower, d.upper]) for d in region.dimensions])
+      self.assertEqual(region.factors, [Interval(region.lower[i], region.upper[i]) for i in range(region.dimension)])
+      self.assertEqual(region.lengths, [d.upper - d.lower for d in region.factors])
+      self.assertEqual(region.midpoint, [mean([d.lower, d.upper]) for d in region.factors])
       self.assertEqual(region.size, reduce(lambda x, y: x*y, region.lengths))
 
   def test_region_getsetitem(self):
@@ -181,7 +177,7 @@ class TestRegion(TestCase):
   def test_region_overlaps(self):
     for i, first in enumerate(self.test_regions):
       for j, second in enumerate(self.test_regions):
-        overlap = first.overlaps(second)
+        overlap = first.is_intersecting(second)
         #print(f'{first}\n{second}:')
         #print(f'  expect={self.overlaps[i][j]}')
         #print(f'  actual={overlap}')
@@ -190,65 +186,25 @@ class TestRegion(TestCase):
   def test_region_intersect(self):
     for i, first in enumerate(self.test_regions):
       for j, second in enumerate(self.test_regions):
-        intersect = first.intersect(second)
+        intersect = first.get_intersection(second)
         if self.overlaps[i][j]:
           #print(f'{first}\n{second}:')
           #print(f'  actual={intersect}')
           #print(f'  size={intersect.size}')
-          for x, d in enumerate(first.dimensions):
-            self.assertEqual(d.intersect(second.dimensions[x]),
-                             intersect.dimensions[x])
+          for x, d in enumerate(first.factors):
+            self.assertEqual(d.get_intersection(second.factors[x]),
+                             intersect.factors[x])
         else:
           #print(f'{first}\n{second}:')
           #print(f'  expect=None')
           #print(f'  actual={intersect}')
           self.assertEqual(intersect, None)
 
-  def test_region_union(self):
-    for first in self.test_regions:
-      for second in self.test_regions:
-        union = first.union(second)
-        #print(f'{first},\n{second}:')
-        #print(f'  union={union}')
-        #print(f'  lengths={union.lengths}')
-        #print(f'  size={union.size}')
-        self.assertTrue(first in union)
-        self.assertTrue(second in union)
-
-  def test_region_linked_intersect(self):
-    base_region = Region([0]*2, [10]*2)
-    regions = [Region([0]*2, [i]*2) for i in range(5, 1, -1)]
-    ref_region = base_region
-    agg_region = base_region
-    agg_regions = [base_region]
-
-    for region in regions:
-      old_region = ref_region
-      agg_regions.append(region)
-      ref_region = ref_region.intersect(region, 'reference')
-      agg_region = agg_region.intersect(region, 'aggregate')
-      #print(f'{asdict(ref_region)}')
-      #print(f'{asdict(agg_region)}')
-      self.assertListEqual([old_region, region], ref_region['intersect'])
-      self.assertListEqual(agg_regions, agg_region['intersect'])
-
-  def test_region_linked_union(self):
-    base_region = Region([0]*2, [1]*2)
-    regions = [Region([0, i], [1, i + 1]) for i in range(1, 5)]
-    ref_region = base_region
-    agg_region = base_region
-    agg_regions = [base_region]
-
-    for region in regions:
-      old_region = ref_region
-      agg_regions.append(region)
-      ref_region = ref_region.union(region, 'reference')
-      agg_region = agg_region.union(region, 'aggregate')
-      #print(f'{asdict(ref_region)}')
-      #print(f'{asdict(agg_region)}')
-      self.assertListEqual([old_region, region], ref_region['union'])
-      self.assertListEqual(agg_regions, agg_region['union'])
-
+  # def test_region_union_size(self):
+  #   base_region = Region([0]*2, [1]*2)
+  #   regions = [Region([0, i], [1, i + 1]) for i in range(1, 5)]
+  #   ref_region = base_region
+  
   def test_region_project(self):
     dimlimit = 7
     test_interval = Interval(1, 5)
@@ -261,27 +217,6 @@ class TestRegion(TestCase):
         interval = region[i] if i < region.dimension else test_interval
         self.assertEqual(new_region[i], interval)
 
-  def test_region_random_points(self):
-    region2d = Region([-5, 0], [15, 10])
-    region3d = Region([-5, 0, 0], [15, 10, 50])
-    points2d = region2d.random_points(5)
-    points3d = region3d.random_points(5)
-    #print(f'{region2d}: random={points2d}')
-    #print(f'{region3d}: random={points3d}')
-    for point in points2d:
-      self.assertTrue(region2d.contains(list(point), inc_upper=False))
-    for point in points3d:
-      self.assertTrue(region3d.contains(list(point), inc_upper=False))
-
-  def test_region_random_regions(self):
-    region = Region([-5, 0], [15, 10])
-    randoms  = region.random_regions(5, Region([0.25, 0.25], [0.75, 0.75]))
-    randoms += region.random_regions(5, Region([0.25, 0.25], [0.75, 0.75]), precision = 0)
-    #print(f'{region}:')
-    for subregion in randoms:
-      #print(f'- {subregion}')
-      self.assertTrue(subregion in region)
-
   def test_region_from_intervals(self):
     ndimens = 5
     base_interval = Interval(1, 5)
@@ -292,7 +227,7 @@ class TestRegion(TestCase):
     self.assertEqual(region.dimension, ndimens)
     self.assertEqual(region.lower, [base_interval.lower + d for d in range(ndimens)])
     self.assertEqual(region.upper, [base_interval.upper + d for d in range(ndimens)])
-    for d, dimension in enumerate(region.dimensions):
+    for d, dimension in enumerate(region.factors):
       self.assertEqual(dimension, intervals[d])
 
   def test_region_from_interval(self):
@@ -302,97 +237,38 @@ class TestRegion(TestCase):
       region = Region.from_interval(interval, d)
       #print(f'{region}')
       self.assertEqual(region.dimension, d)
-      for dimen in region.dimensions:
+      for dimen in region.factors:
         self.assertEqual(dimen, interval)
 
   def test_region_from_intersect(self):
     regions = [Region([-i]*2, [i]*2) for i in range(5, 1, -1)]
     for i in range(1, len(regions)):
-      expected_intersect = reduce(lambda a, b: a.intersect(b, 'aggregate'), regions[0:i+1])
-      intersect = Region.from_intersect(regions[0:i+1], True)
-      #print(f'Expected: {expected_intersect}')
-      #print(f'Expected["intersect"]: {expected_intersect["intersect"]}')
-      #print(f'Actual: {intersect}')
-      #print(f'Actual["intersect"]: {intersect["intersect"]}')
-      self.assertEqual(regions[i], intersect)
-      self.assertListEqual(regions[0:i+1], intersect['intersect'])
-      self.assertEqual(expected_intersect, intersect)
-      self.assertListEqual(expected_intersect['intersect'], intersect['intersect'])
-
-  def test_region_from_union(self):
-    region = Region([0]*2, [100]*2)
-    regions = region.random_regions(5, Region([0.1]*2, [0.25]*2), precision = 0)
-    expected_union = reduce(lambda a, b: a.union(b, 'aggregate'), regions)
-    union = Region.from_union(regions, True)
-    #print(f'Expected: {expected_union}')
-    #print(f'Actual: {union}')
-    #print(f'Expected["union"]: {expected_union["union"]}')
-    #print(f'Actual["union"]: {union["union"]}')
-    self.assertEqual(expected_union, union)
-    self.assertListEqual(expected_union['union'], union['union'])
-    self.assertTrue(all([union.encloses(r) for r in regions]))
-    self.assertTrue(region.encloses(union))
+      expected_intersect = reduce(lambda a, b: a.get_intersection(b), regions[0:i+1])
+      intersect = Region.from_intersection(regions[0:i+1])
+      # print(f'Expected: {expected_intersect}')
+      # print(f'Expected: {expected_intersect.originals}')
+      # print(f'Actual: {intersect}')
+      # print(f'Actual: {intersect.originals}')
+      self.assertListEqual(expected_intersect.originals, intersect.originals)
 
   def test_region_from_dict(self):
     test_region = Region([10]*3, [50]*3)
     objects = []
     objects.append({"lower": [10]*3, "upper": [50]*3})
-    objects.append({"dimension": 3, "lower": 10, "upper": [50]*3})
-    objects.append({"dimension": 3, "lower": 10, "upper": 50})
-    objects.append({"dimension": 3, "lower": [10]*3, "upper": 50})
-    objects.append({"dimension": 3, "interval": [10, 50]})
-    objects.append({"dimension": 3, "interval": (10, 50)})
-    objects.append({"dimension": 3, "interval": {"lower": 10, "upper": 50}})
-    objects.append({"dimensions": [[10, 50]]*3})
-    objects.append({"dimensions": [(10, 50)]*3})
-    objects.append({"dimensions": [{"lower": 10, "upper": 50}]*3})
+    objects.append({"factors": [{"lower": 10, "upper": 50}]*3})
 
     for object in objects:
       #print(f'{object}')
       self.assertEqual(test_region, Region.from_dict(object))
 
-  def test_region_from_object(self):
-    test_region = Region([10]*3, [50]*3)
-    objects = []
-    objects.append({"lower": [10]*3, "upper": [50]*3})
-    objects.append({"dimension": 3, "lower": 10, "upper": [50]*3})
-    objects.append({"dimension": 3, "lower": 10, "upper": 50})
-    objects.append({"dimension": 3, "lower": [10]*3, "upper": 50})
-    objects.append({"dimension": 3, "interval": [10, 50]})
-    objects.append({"dimension": 3, "interval": (10, 50)})
-    objects.append({"dimension": 3, "interval": {"lower": 10, "upper": 50}})
-    objects.append({"dimensions": [[10, 50]]*3})
-    objects.append({"dimensions": [(10, 50)]*3})
-    objects.append({"dimensions": [{"lower": 10, "upper": 50}]*3})
-    objects.append([[10, 50]]*3)
-    objects.append([(10, 50)]*3)
-    objects.append([{"lower": 10, "upper": 50}]*3)
-    objects.append((3, [10, 50]))
-    objects.append((3, (10, 50)))
-    objects.append((3, {"lower": 10, "upper": 50}))
-
-    for object in objects:
-      #print(f'{object}')
-      self.assertEqual(test_region, Region.from_object(object))
-
   def test_region_from_text(self):
     test_region = Region([10]*3, [50]*3)
     texts = []
-    texts.append(('{"lower": [10,10,10], "upper": [50,50,50]}', 'json'))
-    texts.append(('{"dimension": 3, "lower": 10, "upper": 50}', 'literal'))
-    texts.append(('{"dimension": 3, "lower": 10, "upper": 50}', 'json'))
-    texts.append(('{"dimension": 3, "interval": [10, 50]}', 'json'))
-    texts.append(('{"dimension": 3, "interval": [10, 50]}', 'literal'))
-    texts.append(('{"dimension": 3, "interval": (10, 50)}', 'literal'))
-    texts.append(('[[10, 50],[10, 50],[10, 50]]', 'json'))
-    texts.append(('[[10, 50],[10, 50],[10, 50]]', 'literal'))
-    texts.append(('[(10, 50),(10, 50),(10, 50)]', 'literal'))
-    texts.append(('[{"lower": 10, "upper": 50},{"lower": 10, "upper": 50},{"lower": 10, "upper": 50}]', 'json'))
-    texts.append(('[{"lower": 10, "upper": 50},{"lower": 10, "upper": 50},{"lower": 10, "upper": 50}]', 'literal'))
-    texts.append(('(3, [10, 50])', 'literal'))
-    texts.append(('(3, (10, 50))', 'literal'))
+    texts.append('{"lower": [10,10,10], "upper": [50,50,50]}')
+    texts.append('{"lower": [10,10,10], "upper": [50,50,50], "originals": ["1","2"]}')
+    texts.append('{"factors":[{"lower": 10, "upper": 50},{"lower": 10, "upper": 50},{"lower": 10, "upper": 50}]}')
 
     for text in texts:
       #print(f'text="{text[0]}"' if "'" in text else f"text='{text[0]}'")
       #print(f'format={text[1]}')
-      self.assertEqual(test_region, Region.from_text(*text))
+      self.assertEqual(test_region, Region.from_JSON(text))

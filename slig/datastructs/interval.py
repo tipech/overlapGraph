@@ -20,7 +20,7 @@ from functools import reduce
 from numbers import Number, Real
 from typing import Any, Dict, List, Tuple, Union
 
-from sources.abstract import IOable
+from .ioable import IOable
 
 
 @dataclass(order = True)
@@ -274,6 +274,7 @@ class Interval(IOable, abc.Container, abc.Hashable):
     else:
       return self.contains(value)
 
+
   def is_intersecting(self, that: 'Interval', inc_bounds = False) -> bool:
     """
     Determine if the given Interval overlaps with this Interval.
@@ -418,6 +419,7 @@ class Interval(IOable, abc.Container, abc.Hashable):
     return Interval(min(self.lower, that.lower),
                     max(self.upper, that.upper))
 
+
   ### Class Methods: Generators
 
   @classmethod
@@ -441,7 +443,7 @@ class Interval(IOable, abc.Container, abc.Hashable):
 
     def intersect(a: Interval, b: Interval) -> Interval:
       assert a != None and b != None
-      assert a.overlaps(b)
+      assert a.is_intersecting(b)
       return a.get_intersection(b)
 
     try:
@@ -472,58 +474,31 @@ class Interval(IOable, abc.Container, abc.Hashable):
 
   ### Class Methods: (De)serialization
 
-  @classmethod
-  def to_object(cls, object: 'Interval', format: str = 'json', **kwargs) -> Any:
+  def to_dict(self) -> Dict:
     """
-    Generates an object (dict, list, or tuple) from the given Interval object
-    that can be converted or serialized as the specified data format: 'json'.
-    Additional arguments passed via kwargs are used to customize and tweak the
-    object generation process.
-
-    Args:
-      object: The Interval convert to an object (dict, list, tuple).
-      format: The targetted output format type.
-      kwargs: Additional arguments or options to customize and
-              tweak the object generation process.
-
-    kwargs:
-      compact:
-        Boolean flag for whether or not the data representation
-        of the output JSON is a compact, abbreviated representation or
-        the full data representation with all fields.
+    Generates a dict object from this Interval object that can be serialized.
 
     Returns:
-      The generated object.
+      The generated dict.
     """
-    assert isinstance(object, Interval)
 
-    if 'compact' in kwargs and kwargs['compact']:
-      return astuple(object)
-    else:
-      return asdict(object)
+    return asdict(self)
+
 
   @classmethod
-  def from_object(cls, object: Any) -> 'Interval':
+  def from_dict(cls, object: Dict) -> 'Interval':
     """
-    Construct a new Interval from the conversion of the given object.
-    The object may be a Dict, List or Tuple. If it is a Dict contains fields:
-    lower and upper bounding values. If it is a List or Tuple contains two
-    values, first for the lower bound and second for the upper bound. Returns
-    the new Interval.
+    Construct a new Interval from the conversion of the given Dict object with
+    lower and upper bounding value fields.
 
     Args:
       object:
-        The object (dict, tuple, list) to be converted
-        into a new Interval instance.
+        The Dict to be converted into a new Interval instance.
 
     Returns:
       The newly constructed Interval.
     """
-    if isinstance(object, Dict):
-      assert 'lower' in object and isinstance(object['lower'], (Real, str))
-      assert 'upper' in object and isinstance(object['upper'], (Real, str))
-      return Interval(**object)
-    else:
-      assert isinstance(object, (List, Tuple)) and len(object) == 2
-      assert all([isinstance(item, (Real, str)) for item in object])
-      return Interval(*object)
+    assert isinstance(object, Dict)
+    assert 'lower' in object and isinstance(object['lower'], (Real, str))
+    assert 'upper' in object and isinstance(object['upper'], (Real, str))
+    return Interval(**object)
