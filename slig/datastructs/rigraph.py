@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Regional Intersection Graph
+Region Intersection Graph
 
 Implements the programming interface for representing and constructing a
 graph of intersecting or overlapping multidimensional Regions. This data
@@ -18,10 +18,8 @@ from uuid import uuid4
 from networkx import networkx as nx
 from networkx.readwrite import json_graph
 
-from sources.abstract import IOable
-
-from ..shapes import Region, RegionId, RegionIdPair, RegionPair
-from .rigraph import RIGraph
+from .ioable import IOable
+from .region import Region
 
 
 class RIGraph(IOable):
@@ -49,7 +47,7 @@ class RIGraph(IOable):
   """
   id: str
   dimension: int
-  G: G
+  G: nx.Graph
   datakey = 'region'
 
   def __init__(self, dimension: int, graph: nx.Graph = None, id: str = ''):
@@ -74,12 +72,9 @@ class RIGraph(IOable):
     # TODO maybe add 'assert all(isinstance( self.G.nodes(... , Region)))' ?
 
     self.dimension = dimension
-    self.id = id = id if len(id) > 0 else str(uuid4())
+    self.id = id if len(id) > 0 else str(uuid4())
 
-    if graph == None:
-      self.G = nx.Graph()
-    else:
-      self.G = graph
+    self.G = graph if graph is not None else nx.Graph()
 
 
   ### Properties: Getters
@@ -112,7 +107,7 @@ class RIGraph(IOable):
 
   ### Methods: Queries
 
-  def __getitem__(self, key: Union[str, RegionIdPair]) -> Tuple[Region, Dict]:
+  def __getitem__(self, key: Union[str, Tuple[str, str]]) -> Tuple[Region, Dict]:
     """
     Retrieve the Region or intersecting Region for the given Region ID or
     pair of Region IDs. Returns None if Region or intersecting Region is not
@@ -134,15 +129,13 @@ class RIGraph(IOable):
     if key not in self:
       return None
 
-    key = self._convert(key)
-
     if isinstance(key, Tuple):
       return self.G.edges[key][self.datakey]
     else:
       return self.G.nodes[key][self.datakey]
 
 
-  def __delitem__(self, key: Union[str, RegionIdPair]):
+  def __delitem__(self, key: Union[str, Tuple[str, str]]):
     """
     Remove the Region (node) or intersecting Region (edge) associated
     with the given Region ID or pair of Regions IDs within the graph.
@@ -176,7 +169,7 @@ class RIGraph(IOable):
     return len(self.G)
 
 
-  def __contains__(self, key: Union[str, RegionIdPair]) -> bool:
+  def __contains__(self, key: Union[str, Tuple[str, str]]) -> bool:
     """
     Determine if the given Region ID or pair of Regions IDs are
     contained as nodes or edges within the graph.
@@ -199,11 +192,12 @@ class RIGraph(IOable):
       return key in self.G.nodes
 
 
-  def region(self, key: Union[str, Tuple[str,str]]) -> Region:
+  def get_region(self, key: Union[str, Tuple[str, str]]) -> Region:
     """
     Retrieve the Region or intersecting Region for the given Region ID or
     pair of Region IDs. Returns None if Region or intersecting Region is not
     contained as node or edge within the graph.
+    Alias for __getitem__()
 
     Args:
       key:  The unique identifier for Region or
@@ -214,11 +208,7 @@ class RIGraph(IOable):
       None, if Region or intersecting Region is not
       contained as node or edge within the graph.
     """
-    if key in self:
-      return self[key][datakey]
-    else:
-      return None
-
+    return self[key]
 
   ### Methods: Insertion
 
@@ -234,82 +224,58 @@ class RIGraph(IOable):
     self.G.add_node(region.id, **{self.datakey: region})
 
 
-  def put_overlap(self, overlap: Union[Tuple[Region, Region], RegionIdPair]):
+  def put_intersection(self, a: Union[Region, str], b: Union[Region, str]):
     """
     Add the given pair of Regions as a newly created edge in the graph.
     The two regions must be intersecting or overlapping.
 
     Args:
-      overlap:
+      regions:
         The pair of Regions or Region IDs to be
         added as an intersection.
     """
 
-    region   = lambda r: r if isinstance(r, Region) else self.region(r)
-    regionid = lambda r: r.id if isinstance(r, Region) else r
-    a, b     = tuple(regionid(r) for r in overlap)
-
+    # convert to ids
+    a, b = tuple(r.id if isinstance(r, Region) else r for r in (a,b))
     assert isinstance(a, str) and a in self
     assert isinstance(b, str) and b in self
 
-    if intersect == True:
-      intersect = region(a).is_intersecting(region(b))
-      if intersect is None:
-        return
+    if self.get_region(a).is_intersecting(self.get_region(b)):
+      intersection = self.get_region(a).get_intersection(self.get_region(b))
+      self.G.add_edge(a, b, **{self.datakey: intersection})
 
-    if (a, b) in self:
-      del self[a, b]
 
-    if intersect == False:
-      self.G.add_edge(a, b, **kwargs)
-    else:
-      self.G.add_edge(a, b, intersect=intersect, **kwargs)
+  ### Methods: Serialization
 
-  ### Class Methods: Serialization
-
-  @classmethod
-  def to_object(cls, object: 'NxGraph', format: str = 'json', **kwargs) -> Any:
+  def to_dict(self, graph_format = 'node_link') -> Dict:
     """
-    Generates an object (dict, list, or tuple) from the given NxGraph object
-    that can be converted or serialized.
+    Generates a dict object from this Rigrph object that can be serialized
 
     Args:
-      object:   The NxGraph object to be converted to an
-                object (dict, list, or tuple).
-      format:   The output serialization format: 'json'.
-      kwargs:   Additional arguments to be used to
-                customize and tweak the object generation
-                process.
-
-    kwargs:
-      json_graph:
-        Allowed graph formats: 'node_link' or 'adjacency'.
-        If not provided, defaults to: 'node_link'.
+      graph_format:
+        Graph format for the json_graph serialization
+        Allowed formats: 'node_link' or 'adjacency'.
+        If not provided, defaults to 'node_link'.
 
     Returns:
-      The generated object (dict, list, or tuple).
+      The generated dict.
 
     Raises:
       ValueError: If json_graph is unsupported format.
     """
-    assert isinstance(object, NxGraph) and isinstance(object.G, nx.Graph)
-    assert isinstance(object.dimension, int) and object.dimension > 0
+    
+    if graph_format == 'node_link':
+      format_fnc = nx.node_link_data
+    elif graph_format == 'adjacency':
+      format_fnc = nx.adjacency_data
+    else:
+      raise ValueError(f'Unsupported json_graph format.')
 
-    def to_data(G, datafmt):
-      method_name = f'{datafmt}_data'
-      if hasattr(json_graph, method_name):
-        method = getattr(json_graph, method_name)
-        assert isinstance(method, Callable)
-        return method(G)
-      else:
-        raise ValueError(f'Unsupported json_graph format.')
-
-    datafmt = kwargs['json_graph'] if 'json_graph' in kwargs else 'node_link'
     data = {
-      'id': object.id,
-      'dimension': object.dimension,
-      'json_graph': datafmt,
-      'graph': to_data(object.G, datafmt)
+      'id': self.id,
+      'dimension': self.dimension,
+      'json_graph': graph_format,
+      'graph': format_fnc(self.G)
     }
 
     return data
@@ -317,26 +283,15 @@ class RIGraph(IOable):
   ### Class Methods: Deserialization
 
   @classmethod
-  def from_object(cls, object: Any, **kwargs) -> 'NxGraph':
+  def from_dict(cls, object: Any) -> 'RIGraph':
     """
-    Construct a new NxGraph object from the conversion of the given object.
+    Construct a new RIGraph object from the conversion of the given dict.
 
     Args:
-      object:   The object (dict, list, or tuple)
-                to be converted into an NxGraph object.
-      kwargs:   Additional arguments for customizing
-                and tweaking the NxGraph object
-                generation process.
-
-    Keyword Args:
-      id:
-        The unique identifier for the generated RIGraph.
-      json_graph:
-        Allowed graph formats: 'node_link' or 'adjacency'.
-        If not provided, defaults to: 'node_link'.
+      object:   The dict to be converted into an RIGraph.
 
     Returns:
-      The newly constructed NxGraph object.
+      The newly constructed RIGraph object.
 
     Raises:
       ValueError: If json_graph is unsupported format.
@@ -347,14 +302,12 @@ class RIGraph(IOable):
     assert all([k in object and isinstance(object[k], t) for k, t in types.items()])
     assert object['dimension'] > 0 and len(object['id']) > 0
 
-    def to_graph(data: Dict, datafmt: str) -> nx.Graph:
-      method_name = f'{datafmt}_graph'
-      if hasattr(json_graph, method_name):
-        method = getattr(json_graph, method_name)
-        assert isinstance(method, Callable)
-        return method(data)
-      else:
-        raise ValueError(f'Unsupported json_graph format.')
+    if object['json_graph'] == 'node_link':
+      format_fnc = nx.node_link_graph
+    elif object['json_graph'] == 'adjacency':
+      format_fnc = nx.adjacency_graph
+    else:
+      raise ValueError(f'Unsupported json_graph format.')
 
     def to_regions(G: nx.Graph, regions: List[str], edge: Tuple[str, str]) -> List[Region]:
       assert isinstance(regions, List) and len(regions) >= 2
@@ -364,29 +317,33 @@ class RIGraph(IOable):
 
       return list(map(lambda r: G.node[r]['region'], regions))
 
-    graph   = to_graph(object['graph'], object['json_graph'])
-    graphid = kwargs.get('id', object['id'])
-    nxgraph = NxGraph(object['dimension'], graph, id=graphid)
-    G       = nxgraph.G
+    graph   = format_fnc(object['graph'])
+    graphid = object['id']
+    rigraph = RIGraph(object['dimension'], graph, graphid)
 
-    assert nxgraph.dimension == G.graph['dimension']
 
-    # Rematerialize Regions
-    for node, region_data in G.nodes(data='region'):
-      region = Region.from_object(region_data)
-      assert region.dimension == nxgraph.dimension
-      G.node[node]['region'] = region
 
-    # Resolve backlinks amongst the edge, Region intersections
-    for (u, v, region_data) in G.edges(data='intersect'):
-      region = Region.from_object(region_data)
-      assert region.dimension == nxgraph.dimension
 
-      if 'intersect' in region:
-        region['intersect'] = to_regions(G, region['intersect'], (u, v))
-      if 'union' in region:
-        region['union'] = to_regions(G, region['union'], (u, v))
+    G       = rigraph.G
 
-      G.edges[u, v]['intersect'] = region
+    # assert rigraph.dimension == G.graph['dimension']
 
-    return nxgraph
+    # # Rematerialize Regions
+    # for node, region_data in rigraph.G.nodes(data=rigraph.datakey):
+    #   region = Region.from_object(region_data)
+    #   assert region.dimension == rigraph.dimension
+    #   G.node[node]['region'] = region
+
+    # # Resolve backlinks amongst the edge, Region intersections
+    # for (u, v, region_data) in G.edges(data='intersect'):
+    #   region = Region.from_object(region_data)
+    #   assert region.dimension == rigraph.dimension
+
+    #   if 'intersect' in region:
+    #     region['intersect'] = to_regions(G, region['intersect'], (u, v))
+    #   if 'union' in region:
+    #     region['union'] = to_regions(G, region['union'], (u, v))
+
+    #   G.edges[u, v]['intersect'] = region
+
+    return rigraph

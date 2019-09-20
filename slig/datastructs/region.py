@@ -18,7 +18,6 @@ Classes:
 - Region
 """
 
-from collections import abc
 from dataclasses import asdict, astuple, dataclass, field
 from functools import reduce
 from numbers import Real
@@ -38,7 +37,7 @@ from .interval import Interval
 
 
 @dataclass
-class Region(IOable, abc.Container):
+class Region(IOable):
   """
   A multidimensional region, with an upper and lower vertex.
 
@@ -113,23 +112,6 @@ class Region(IOable, abc.Container):
   ### Properties: Getters
 
   @property
-  def _instance_invariant(self) -> bool:
-    """
-    Invariant:
-    - dimension == len(factors)
-    - every item in factors is an Interval
-
-    Returns:
-      True: If instance invariant holds
-      False: Otherwise.
-    """
-    return all([
-      isinstance(self.factors, List),
-      self.dimension == len(self.factors),
-      all([isinstance(d, Interval) for d in self.factors])
-    ])
-
-  @property
   def lower(self) -> List[float]:
     """
     The lower bounding vertex of this Region. Calculate and return a copy of
@@ -188,7 +170,19 @@ class Region(IOable, abc.Container):
     return reduce(lambda x, y: x * y, self.lengths)
 
 
-  ### Methods: Assignment
+  ### Methods: Syntactic sugar
+
+  def __hash__(self) -> str:
+    """
+    Return the hash value for this object.
+    Two objects that compare equal must also have the same hash value,
+    but the reverse is not necessarily true.
+
+    Returns:
+      The hash value for this object.
+    """
+    return hash(self.id)
+
 
   def __getitem__(self, index: Union[int, str]) -> Union[Interval, Any]:
     """
@@ -731,8 +725,8 @@ class Region(IOable, abc.Container):
     """
     assert dimension > 0
 
-    factors = [Interval(*astuple(interval \
-                  if d >= self.dimension else self[d])) \
+    factors = [Interval(interval.lower, interval.upper)
+                  if d >= self.dimension else self[d] 
                   for d in range(dimension)]
 
     return Region.from_intervals(factors, **kwargs)

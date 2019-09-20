@@ -14,17 +14,15 @@ Classes:
 - Interval
 """
 
-from collections import abc
-from dataclasses import asdict, astuple, dataclass
 from functools import reduce
 from numbers import Number, Real
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Union
 
 from .ioable import IOable
 
 
-@dataclass(order = True)
-class Interval(IOable, abc.Container, abc.Hashable):
+
+class Interval(IOable):
   """
   The lower and upper bounding values for an interval.
 
@@ -33,11 +31,6 @@ class Interval(IOable, abc.Container, abc.Hashable):
   is an overlap between two intervals and what the intersection length between
   the two intervals is.
 
-  Extends:
-    IOable
-    abc.Container
-    abc.Hashable
-
   Attributes:
     lower, upper:
       The lower and upper bounding values.
@@ -45,7 +38,7 @@ class Interval(IOable, abc.Container, abc.Hashable):
   lower: float
   upper: float
 
-  def __init__(self, lower: Number, upper: Number):
+  def __init__(self, lower: Union[Number,str], upper: Union[Number,str]):
     """
     Initialize a new Interval, with the lower and upper bounding values.
     Converts input values to floating point numbers, and assigns
@@ -56,26 +49,22 @@ class Interval(IOable, abc.Container, abc.Hashable):
       lower, upper:
         the lower and upper bounding values.
     """
-    self.assign(float(lower), float(upper))
+    lower = float(lower)
+    upper = float(upper)
+
+    assert isinstance(lower, Real)
+    assert isinstance(upper, Real)
+
+    if lower > upper:
+      self.lower = float(upper)
+      self.upper = float(lower)
+    else:
+      self.lower = float(lower)
+      self.upper = float(upper)
+
 
 
   ### Properties: Getters
-
-  @property
-  def _instance_invariant(self) -> bool:
-    """
-    Invariant:
-    - lower, upper must Real or float values
-    - lower <= upper
-
-    Returns:
-      True: If instance invariant holds
-      False: Otherwise.
-    """
-    return all([isinstance(self.lower, Real),
-                isinstance(self.upper, Real),
-                self.lower <= self.upper])
-
 
   @property
   def length(self) -> float:
@@ -102,71 +91,6 @@ class Interval(IOable, abc.Container, abc.Hashable):
     return (self.lower + self.upper) / 2
 
 
-  ### Methods: Assignment
-
-  def __setattr__(self, name, value):
-    """
-    Called when an attribute assignment is attempted. This is called instead
-    of the normal mechanism. name is the attribute name, value is the value
-    to be assigned to it.
-
-    Ensures that the lower and upper bounding values satisfy the object
-    invariant: lower <= upper, the lower and upper bounding values cannot be
-    modified directly after this Interval is initialized. If the lower or upper
-    bounding values are attempted to be set, raises an exception. This
-    effectively prevents this Interval from being mutated into an invalid state.
-    To mutate this Interval, call the assign() method with both lower and
-    upper bounding values instead.
-
-    Args:
-      name:   The attribute name
-      value:  The value to be assigned to it.
-
-    Raises:
-      Exception: Attempt to be set lower or upper
-    """
-    if name == 'lower' or name == 'upper':
-      raise Exception(f'Cannot set immutable "{name}" attribute')
-
-    object.__setattr__(self, name, value)
-
-
-  def assign(self, lower: Real, upper: Real):
-    """
-    Assign the lower and upper bounding values of this Interval.
-    Converts input values to floating point numbers, and assigns
-    the float value to the lower and upper fields. If lower is greater
-    than upper, swaps the lower and upper values.
-
-    Args:
-      lower, upper:
-        the lower and upper bounding values.
-    """
-    assert isinstance(lower, Real)
-    assert isinstance(upper, Real)
-
-    if lower > upper:
-      object.__setattr__(self, 'lower', float(upper))
-      object.__setattr__(self, 'upper', float(lower))
-    else:
-      object.__setattr__(self, 'lower', float(lower))
-      object.__setattr__(self, 'upper', float(upper))
-
-
-  ### Methods: Hash
-
-  def __hash__(self) -> str:
-    """
-    Return the hash value for this object.
-    Two objects that compare equal must also have the same hash value,
-    but the reverse is not necessarily true.
-
-    Returns:
-      The hash value for this object.
-    """
-    return hash(astuple(self))
-
-
   ### Methods: Clone
 
   def __copy__(self) -> 'Interval':
@@ -176,7 +100,7 @@ class Interval(IOable, abc.Container, abc.Hashable):
     Returns:
       The newly created Interval copy.
     """
-    return Interval(*astuple(self))
+    return Interval(self.lower, self.upper)
 
 
   def copy(self) -> 'Interval':
@@ -187,6 +111,29 @@ class Interval(IOable, abc.Container, abc.Hashable):
 
 
   ### Methods: Queries
+
+  def __eq__(self, that) -> bool:
+    """
+    Determine if this interval is equivalent to another.
+
+    Args:
+      that:
+        The other Interval to test for equality. If for
+        both intervals lower and upper values match,
+        they are equal.
+
+    Returns:
+      True:   If intervals are equal.
+      False:  Otherwise.
+    """
+    if that is None:
+      return self is None
+
+    assert isinstance(that, Interval)
+
+    return self.lower == that.lower and self.upper == that.upper
+
+
 
   def contains(self, value: float, inc_lower = True, inc_upper = True) -> bool:
     """
@@ -209,7 +156,6 @@ class Interval(IOable, abc.Container, abc.Hashable):
               upper bounding values.
       False:  Otherwise.
     """
-    assert self._instance_invariant
 
     gte_lower = self.lower <= value if inc_lower else self.lower < value
     lte_upper = self.upper >= value if inc_upper else self.upper > value
@@ -219,7 +165,7 @@ class Interval(IOable, abc.Container, abc.Hashable):
 
   def encloses(self, that: 'Interval', inc_lower = True, inc_upper = True) -> bool:
     """
-    Determine if the Interval lies entirely within this Interval.
+    Determine if that Interval lies entirely within this Interval.
 
     Args:
       that:
@@ -243,36 +189,6 @@ class Interval(IOable, abc.Container, abc.Hashable):
     return all([self.length >= that.length,
                 self.contains(that.lower, inc_lower, inc_upper),
                 self.contains(that.upper, inc_lower, inc_upper)])
-
-
-  def __contains__(self, value: Union[float, 'Interval']) -> bool:
-    """
-    Determine if the value or Interval lies entirely between this Interval's
-    lower and upper bounding values, inclusively. Return True if value or
-    Interval is entirely within this Interval, otherwise False.
-
-    Is syntactic sugar for:
-      value in self
-
-    Overload Method that wraps:
-      self.contains when value is a float value, and
-      self.encloses when value is an Interval
-
-    Args:
-      value:
-        The value to test if it lies within this Interval's
-        bounds, or the other Interval to test if it lies
-        entirely within this Interval's bounds.
-
-    Returns:
-      True:   If the value or other Interval lies entirely
-              within this Interval's bounds.
-      False:  Otherwise.
-    """
-    if isinstance(value, Interval):
-      return self.encloses(value)
-    else:
-      return self.contains(value)
 
 
   def is_intersecting(self, that: 'Interval', inc_bounds = False) -> bool:
@@ -316,12 +232,10 @@ class Interval(IOable, abc.Container, abc.Hashable):
       - |<- Interval B ->|   |<- Interval A ->|
 
       Conditionally overlapping:
-      - |<- Interval A ->||<- Interval B ->|
-      - |<- Interval B ->||<- Interval A ->|
+      - |<- Interval A ->|<- Interval B ->|
+      - |<- Interval B ->|<- Interval A ->|
     """
     assert isinstance(that, Interval)
-    assert self._instance_invariant
-    assert that._instance_invariant
 
     if self == that:
       return True
@@ -331,8 +245,6 @@ class Interval(IOable, abc.Container, abc.Hashable):
 
     return self.upper > that.lower and that.upper > self.lower
 
-
-  ### Methods: Generators
 
   def get_intersection(self, that: 'Interval', inc_bounds = False) -> Union['Interval', None]:
     """
@@ -374,8 +286,6 @@ class Interval(IOable, abc.Container, abc.Hashable):
               |<- #### ->|
     """
     assert isinstance(that, Interval)
-    assert self._instance_invariant
-    assert that._instance_invariant
 
     if not self.is_intersecting(that, inc_bounds):
       return None
@@ -413,8 +323,6 @@ class Interval(IOable, abc.Container, abc.Hashable):
         |<- ############## ->|    |<- ############## ->|
     """
     assert isinstance(that, Interval)
-    assert self._instance_invariant
-    assert that._instance_invariant
 
     return Interval(min(self.lower, that.lower),
                     max(self.upper, that.upper))
@@ -445,6 +353,7 @@ class Interval(IOable, abc.Container, abc.Hashable):
       assert a != None and b != None
       assert a.is_intersecting(b)
       return a.get_intersection(b)
+
 
     try:
       return reduce(intersect, intervals)
@@ -482,7 +391,7 @@ class Interval(IOable, abc.Container, abc.Hashable):
       The generated dict.
     """
 
-    return asdict(self)
+    return {'lower': self.lower, 'upper': self.upper}
 
 
   @classmethod

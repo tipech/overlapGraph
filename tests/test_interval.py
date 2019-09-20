@@ -74,31 +74,21 @@ class TestInterval(TestCase):
   def test_interval_conversion(self):
     for interval in self.test_intervals:
       #print(f'{interval}: dict={asdict(interval)}, tuple={astuple(interval)}')
-      self.assertEqual(asdict(interval), {'lower': interval.lower, 'upper': interval.upper})
-      self.assertEqual(astuple(interval), (interval.lower, interval.upper))
-
-  def test_interval_hash(self):
-    intervals = {}
-    for interval in self.test_intervals:
-      intervals[interval] = interval.length
-    for interval in self.test_intervals:
-      other = Interval(interval.lower, interval.upper)
-      self.assertTrue(interval in intervals)
-      self.assertEqual(interval.length, intervals[interval])
-      self.assertTrue(interval == other)
-      self.assertTrue(hash(interval) == hash(other))
+      self.assertEqual(interval.to_dict(), {'lower': interval.lower,
+        'upper': interval.upper})
+      
 
   def test_interval_contains(self):
     interval = Interval(-5, 15)
-    self.assertTrue(interval.lower in interval)
-    self.assertTrue(interval.upper in interval)
-    self.assertTrue(interval.midpoint in interval)
-    self.assertTrue((interval.lower + 0.1) in interval)
-    self.assertTrue((interval.upper - 0.1) in interval)
+    self.assertTrue(interval.contains(interval.lower))
+    self.assertTrue(interval.contains(interval.upper))
+    self.assertTrue(interval.contains(interval.midpoint))
+    self.assertTrue(interval.contains(interval.lower + 0.1))
+    self.assertTrue(interval.contains(interval.upper - 0.1))
     self.assertFalse(interval.contains(interval.lower, inc_lower=False))
     self.assertFalse(interval.contains(interval.upper, inc_upper=False))
-    self.assertFalse((interval.lower - 0.1) in interval)
-    self.assertFalse((interval.upper + 0.1) in interval)
+    self.assertFalse(interval.contains(interval.lower - 0.1))
+    self.assertFalse(interval.contains(interval.upper + 0.1))
 
   def test_interval_encloses(self):
     interval = Interval(-5, 5)
@@ -111,9 +101,9 @@ class TestInterval(TestCase):
     test_intervals.append(Interval(-6, 6))
 
     for subinterval in test_intervals:
-      comparsion = interval.lower <= subinterval.lower <= subinterval.upper <= interval.upper
-      #print(f'{subinterval} in {interval}: expect={comparsion} actual={subinterval in interval}')
-      self.assertEqual(subinterval in interval, comparsion)
+      comparison = interval.lower <= subinterval.lower <= subinterval.upper <= interval.upper
+      # print(f'{subinterval} in {interval}: expect={comparsion} actual={subinterval in interval}')
+      self.assertEqual(interval.encloses(subinterval), comparison)
 
   def test_interval_overlaps(self):
     for i, first in enumerate(self.test_intervals):
@@ -146,6 +136,9 @@ class TestInterval(TestCase):
     for i in range(1, len(intervals)):
       intersect = Interval.from_intersection(intervals[0:i+1])
       #print(f'{intersect}')
+      # print(Interval.from_intersection(intervals[0:2]))
+      # print(intersect.to_dict())
+
       self.assertEqual(intervals[i], intersect)
 
     intervals = [Interval(x, x + 1) for x in range(5)]
