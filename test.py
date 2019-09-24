@@ -26,7 +26,12 @@ graph = alg.sweep()
 # pprint(list(graph.intersections))
 
 # alternatively, to save to file do:
-# with open("output.json", 'w+') as outfile:
-#   graph.to_output(outfile)
+# with open("graph.json", 'w+') as graphfile:
+#   graph.to_output(graphfile)
 
-pprint(list(alg.enumerate()))
+results = alg.enumerate_all()
+pprint(results.to_dict())
+
+# alternatively, to save to file do:
+# with open("results.json", 'w+') as resultsfile:
+#   results.to_output(resultsfile)

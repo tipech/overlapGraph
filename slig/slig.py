@@ -87,8 +87,8 @@ class SLIG():
     return self.graph
 
 
-  def enumerate(self):
-    """Enumerate all the multiple intersections in the graph."""
+  def stream_enumerate(self):
+    """Iteratively enumerate all multiple intersections in the graph."""
 
     for clique in nx.enumerate_all_cliques(self.graph.G):
       if len(clique) > 1:
@@ -96,6 +96,18 @@ class SLIG():
         region    = Region.from_intersection(intersect)
 
         assert isinstance(region, Region)
-        yield (region)
+        yield region
 
 
+  def enumerate_all(self, combine=False):
+    """Return the full enumeration of multiple intersections in the graph"""
+
+    if combine:
+      regionset = self.regionset
+    else:
+      regionset = RegionSet(dimension=self.regionset.dimension)
+
+    for region in self.stream_enumerate():
+      regionset.add(region)   
+
+    return regionset
