@@ -14,6 +14,7 @@ Classes:
 - Interval
 """
 
+from dataclasses import dataclass
 from functools import reduce
 from numbers import Number, Real
 from typing import Any, Dict, List, Union
@@ -21,7 +22,7 @@ from typing import Any, Dict, List, Union
 from .ioable import IOable
 
 
-
+@dataclass
 class Interval(IOable):
   """
   The lower and upper bounding values for an interval.

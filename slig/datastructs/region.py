@@ -94,9 +94,12 @@ class Region(IOable):
       originals = [id]
 
     assert len(id) > 0
-    assert isinstance(lower, List) and all([isinstance(l, Real) for l in lower])
-    assert isinstance(upper, List) and all([isinstance(u, Real) for u in upper])
-    assert isinstance(originals, List) and all(isinstance(x, str) for x in originals)
+    assert isinstance(lower, List) and all([isinstance(l, Real)
+      for l in lower])
+    assert isinstance(upper, List) and all([isinstance(u, Real)
+      for u in upper])
+    assert isinstance(originals, List) and all(isinstance(x, str)
+      for x in originals)
     assert len(lower) > 0 and len(lower) == len(upper)
     assert all(isinstance(x, str) for x in kwargs.keys())
 
@@ -335,7 +338,7 @@ class Region(IOable):
   def getdata(self, key: str, default: Any = None) -> Any:
     """
     Return the data value for key if key is in this Region's data
-    dictionary, else 'default'. If 'default' is not given, it defaults to None,
+    dictionary, else 'default'. If 'default' is not given, it defaults to None
     so that this method never raises a KeyError.
 
     Args:
@@ -386,7 +389,8 @@ class Region(IOable):
 
   ### Methods: Intersection and other spatial queries
 
-  def contains(self, point: List[float], inc_lower = True, inc_upper = True) -> bool:
+  def contains(self, point: List[float], inc_lower = True, inc_upper = True
+    ) -> bool:
     """
     Determine if the point lies within the lower and upper bounding vertices.
 
@@ -414,7 +418,8 @@ class Region(IOable):
                 for i, d in enumerate(self.factors)])
 
 
-  def encloses(self, that: 'Region', inc_lower = True, inc_upper = True) -> bool:
+  def encloses(self, that: 'Region', inc_lower = True, inc_upper = True
+    ) -> bool:
     """
     Determine if that Region lies within this Region.
 
@@ -549,7 +554,8 @@ class Region(IOable):
     assert isinstance(that, Region)
     assert self.dimension == that.dimension
 
-    return all([d.is_intersecting(that[i]) for i, d in enumerate(self.factors)])
+    return all([d.is_intersecting(that[i])
+      for i, d in enumerate(self.factors)])
 
 
   def __eq__(self, that: 'Region') -> bool:
@@ -735,7 +741,8 @@ class Region(IOable):
   ### Class Methods: Generators
 
   @classmethod
-  def from_intervals(cls, factors: List[Interval], originals: List['Region'] = [],
+  def from_intervals(cls, factors: List[Interval],
+                          originals: List['Region'] = [],
                           id: str = '', **kwargs) -> 'Region':
     """
     Construct a new Region from the given a list of Intervals.
@@ -762,7 +769,8 @@ class Region(IOable):
     """
     assert isinstance(factors, List)
     assert all([isinstance(d, Interval) for d in factors])
-    assert isinstance(originals, List) and all(isinstance(x, str) for x in originals)
+    assert (isinstance(originals, List)
+      and all(isinstance(x, str) for x in originals))
     
     return cls([d.lower for d in factors],
                [d.upper for d in factors], originals, id, **kwargs)
@@ -807,7 +815,7 @@ class Region(IOable):
   def from_intersection(cls, regions: List['Region'],
                          id: str = '') -> Union['Region', None]:
     """
-    Constructs a new Region from the intersection of two or more given Regions.
+    Constructs a new Region from the intersection of two or more Regions.
 
     Args:
       regions:
@@ -888,15 +896,18 @@ class Region(IOable):
       object['originals'] = [id]
 
     if 'lower' in object and 'upper' in object:
-      assert isinstance(object['lower'], List) and all([isinstance(x, Real) for x in object['lower']])
-      assert isinstance(object['upper'], List) and all([isinstance(x, Real) for x in object['upper']])
+      assert (isinstance(object['lower'], List)
+        and all([isinstance(x, Real) for x in object['lower']]))
+      assert (isinstance(object['upper'], List)
+        and all([isinstance(x, Real) for x in object['upper']]))
       assert len(object['lower']) == len(object['upper'])
-      return cls(object['lower'], object['upper'], object['originals'], id, **data)
+      return cls(object['lower'], object['upper'], object['originals'], id,
+        **data)
 
     elif 'factors' in object:
       assert isinstance(object['factors'], List)
-      return cls.from_intervals([Interval.from_dict(f) for f in object['factors']],
-        object['originals'], id, **data)
+      return cls.from_intervals([Interval.from_dict(f)
+        for f in object['factors']], object['originals'], id, **data)
     else:
       raise ValueError('Unrecognized Region representation')
 
@@ -939,6 +950,7 @@ class Region(IOable):
     elif isinstance(object, Tuple):
       assert len(object) == 2
       assert isinstance(object[0], int) and 0 < object[0]
-      return cls.from_interval(Interval.from_dict(object[1]), object[0], [], id)
+      return cls.from_interval(Interval.from_dict(object[1]),
+        object[0], [], id)
     else:
       raise ValueError('Unrecognized Region representation')

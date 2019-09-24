@@ -1,45 +1,72 @@
+#!/usr/bin/env python
+
+"""
+Unit tests for Interval Data Class
+
+"""
+
+import json, os
+from dataclasses import asdict, astuple
+from typing import List
+from unittest import TestCase
+
+from numpy import mean
+
+from slig.datastructs import Interval, Region, RegionSet
+from generator.random_regions import RegionGenerator
 
 
 
+class TestInterval(TestCase):
+
+  def test_init_generator(self):
+
+    gen = RegionGenerator()
+    self.assertEqual(gen.dimension, 2)
+    gen = RegionGenerator(Interval(0,1000))
+    self.assertEqual(gen.dimension, 1)
+    gen = RegionGenerator(Region([0,0],[1000,1000]))
+    self.assertEqual(gen.dimension, 2)
+
+    gen = RegionGenerator(sizepc=0.5)
+    self.assertEqual(gen.sizepc.dimension, 2)
+    gen = RegionGenerator(dimension=1,sizepc=Interval(0,0.5))
+    self.assertEqual(gen.sizepc.upper, [0.5])
+    gen = RegionGenerator(sizepc=Region([0,0],[0.5,0.5]))
+    self.assertEqual(gen.sizepc.upper, [0.5,0.5])
 
 
-  def test_interval_random_values(self):
-    interval = Interval(-5, 15)
-    randoms = interval.random_values(5)
-    #print(f'{interval}:')
-    for value in randoms:
-      #print(f'- {value}')
-      self.assertTrue(interval.contains(value, inc_upper=False))
+  def test_get_region(self):
 
-  def test_interval_random_interval(self):
-    interval = Interval(-5, 15)
-    randoms  = interval.random_intervals(5, Interval(0.25, 0.75))
-    randoms += interval.random_intervals(5, Interval(0.25, 0.75), precision=0)
-    #print(f'{interval}:')
-    for subinterval in randoms:
-      #print(f'- {subinterval}')
-      self.assertTrue(subinterval in interval)
+    gen = RegionGenerator()
+    region = gen.get_region()
+    self.assertTrue(isinstance(region, Region))
+    self.assertTrue(gen.bounds.encloses(region))
+
+    
+  def test_get_regionset(self):
+
+    gen = RegionGenerator()
+    regionset = gen.get_regionset(10)
+    self.assertTrue(isinstance(regionset, RegionSet))
+    for region in regionset:
+      self.assertTrue(isinstance(region, Region))
+      self.assertTrue(gen.bounds.encloses(region))
 
 
+  def test_store_region_set(self):
 
-      
-  def test_region_random_points(self):
-    region2d = Region([-5, 0], [15, 10])
-    region3d = Region([-5, 0, 0], [15, 10, 50])
-    points2d = region2d.random_points(5)
-    points3d = region3d.random_points(5)
-    #print(f'{region2d}: random={points2d}')
-    #print(f'{region3d}: random={points3d}')
-    for point in points2d:
-      self.assertTrue(region2d.contains(list(point), inc_upper=False))
-    for point in points3d:
-      self.assertTrue(region3d.contains(list(point), inc_upper=False))
+    gen = RegionGenerator()
+    gen.store_regionset(100, "test.json")
 
-  def test_region_random_regions(self):
-    region = Region([-5, 0], [15, 10])
-    randoms  = region.random_regions(5, Region([0.25, 0.25], [0.75, 0.75]))
-    randoms += region.random_regions(5, Region([0.25, 0.25], [0.75, 0.75]), precision = 0)
-    #print(f'{region}:')
-    for subregion in randoms:
-      #print(f'- {subregion}')
-      self.assertTrue(subregion in region)
+    self.assertTrue(os.path.exists("test.json"))
+    with open("test.json") as file:
+      regionset = json.load(file)
+
+      self.assertTrue('bounds' in regionset)
+      self.assertTrue(len(regionset['regions']) == 100)
+      for r in regionset['regions']:
+        region = Region.from_dict(r)
+        self.assertTrue(isinstance(region, Region))
+        self.assertTrue(gen.bounds.encloses(region))
+

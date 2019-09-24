@@ -4,23 +4,6 @@
 Unit tests for Region Data Class
 
 - test_create_region
-- test_region_dimension_mismatch
-- test_region_properties
-- test_region_getsetitem
-- test_region_contains
-- test_region_equality
-- test_region_overlaps
-- test_region_intersect
-- test_region_linked_intersect
-- test_region_linked_union
-- test_region_project
-- test_region_from_intervals
-- test_region_from_interval
-- test_region_from_intersect
-- test_region_from_union
-- test_region_from_dict
-- test_region_from_region
-- test_region_from_text
 """
 
 from dataclasses import asdict, astuple
