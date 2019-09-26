@@ -8,6 +8,10 @@ from slig import SLIG
 gen = RegionGenerator(dimension=1,posnrng=Randoms.gauss(),sizepc=Interval(0.2,0.5))
 
 regionset = gen.get_regionset(200)
+regionset2 = gen.get_regionset(300)
+
+regionset.merge(regionset2)
+print(len(regionset.regions))
 
 # regionset = RegionSet(dimension=2)
 # regionset.add(Region([0, 0], [5, 5]))
@@ -31,7 +35,7 @@ graph = alg.sweep()
 #   graph.to_output(graphfile)
 
 results = alg.enumerate_all()
-pprint(results.to_dict())
+# pprint(results.to_dict())
 
 # alternatively, to save to file do:
 # with open("results.json", 'w+') as resultsfile:

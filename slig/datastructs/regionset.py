@@ -256,6 +256,24 @@ class RegionSet(Iterable[Region], abc.Container, abc.Sized, IOable):
     """
     return self.__deepcopy__(memo)
 
+
+  def merge(self, other: 'RegionSet'):
+    """
+    Merge this Regionset to another Regionset.
+
+    Args:
+      other: The regionset to be merged with.
+
+    Returns:
+      The merged Regionset.
+    """
+    
+    assert(other.dimension == self.dimension)
+
+    for region in other.regions:
+      self.add(region)
+
+
   ### Methods: Shuffle
 
 
