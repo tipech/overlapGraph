@@ -16,7 +16,7 @@ from numbers import Real
 from io import TextIOBase
 
 from slig.datastructs import Region, Interval
-from generator.random_functions import RandomFn, Randoms
+from generator.random_functions import Randoms
 
 class GraphGenerator():
   """
@@ -26,8 +26,8 @@ class GraphGenerator():
   """
   def __init__(self, bounds: Union[Region,Interval] = None,
                dimensions = None, sizepc: Union[Region,Interval,Real] = 0.05,
-               posnrng: Union[RandomFn,List[RandomFn]] = Randoms.uniform(),
-               sizerng: Union[RandomFn,List[RandomFn]] = Randoms.uniform(),
+               posnrng: Union[Callable,List[Callable]] = Randoms.uniform(),
+               sizerng: Union[Callable,List[Callable]] = Randoms.uniform(),
                square = False):
     """
     Initialize the data generator with user-specified parameters.

@@ -16,7 +16,7 @@ from numbers import Real
 from io import TextIOBase
 
 from slig.datastructs import Region, Interval, RegionSet
-from generator.random_functions import RandomFn, Randoms
+from generator.random_functions import Randoms
 
 class RegionGenerator():
   """
@@ -26,8 +26,8 @@ class RegionGenerator():
   """
   def __init__(self, bounds: Union[Region,Interval] = None,
                dimension = None, sizepc: Union[Region,Interval,Real] = 0.05,
-               posnrng: Union[RandomFn,List[RandomFn]] = Randoms.uniform(),
-               sizerng: Union[RandomFn,List[RandomFn]] = Randoms.uniform(),
+               posnrng: Union[Callable,List[Callable]] = Randoms.uniform(),
+               sizerng: Union[Callable,List[Callable]] = Randoms.uniform(),
                square = False):
     """
     Initialize the data generator with user-specified parameters.
@@ -92,6 +92,7 @@ class RegionGenerator():
       posnrng = [posnrng] * self.dimension
     if isinstance(sizerng, Callable):
       sizerng = [sizerng] * self.dimension
+
 
     for rng in [posnrng, sizerng]:
       assert (isinstance(rng, List) and

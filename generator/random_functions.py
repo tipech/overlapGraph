@@ -20,12 +20,8 @@ Classes:
 
 from typing import Callable, Dict, List, Union
 
-from numpy import ndarray, mean, random
+import random
 
-
-ShapeSize = Union[None, int, List[int]]
-NDArray   = ndarray
-RandomFn  = Callable[[ShapeSize, float, float], NDArray]
 
 
 class Randoms:
@@ -38,7 +34,7 @@ class Randoms:
   """
 
   @classmethod
-  def get(cls, name: str, **kwargs) -> RandomFn:
+  def get(cls, name: str, **kwargs) :
     """
     Returns a function that draws samples from the specified distribution or
     random number generation function that corresponds with the given method
@@ -92,7 +88,7 @@ class Randoms:
 
 
   @classmethod
-  def uniform(cls) -> RandomFn:
+  def uniform(cls) :
     """
     Returns a function that draws samples from a uniform distribution.
     Samples are uniformly distributed over the half-open interval [low, high)
@@ -110,7 +106,7 @@ class Randoms:
 
 
   @classmethod
-  def triangular(cls, mode: float = 0.5) -> RandomFn:
+  def triangular(cls, mode: float = 0.5) :
     """
     Returns a function that draws samples from the triangular distribution
     over the interval [left, right]. The triangular distribution is a
@@ -131,9 +127,11 @@ class Randoms:
     def triangular_rng(left: float = 0, right: float = 1):
       return random.triangular(left, (right - left)*mode + left, right)
 
+    return triangular
+
 
   @classmethod
-  def gauss(cls, mean: float = 0.5, sigma: float = 0.2) -> RandomFn:
+  def gauss(cls, mean: float = 0.5, sigma: float = 0.2) :
     """
     Returns a function that draws samples from the gaussian distribution
     over the interval [left, right]. The gaussian distribution is a
@@ -157,11 +155,13 @@ class Randoms:
     def gauss_rng(left: float = 0, right: float = 1):
       return max(left, min(right,
         random.gauss((right - left)*mean + left, (right - left)*sigma)))
+
+    return gauss_rng
       
 
   @classmethod
   def bimodal_func(cls, mean1: float = 0.2, sigma1: float = 0.1,
-                        mean2: float = 0.8, sigma2: float = 0.1) -> RandomFn:
+                        mean2: float = 0.8, sigma2: float = 0.1) :
     """
     Returns a function that draws samples from a bimodal gauss distribution
     over the interval [left, right]. This distribution is a combination
