@@ -108,7 +108,11 @@ class RegionGenerator():
   def get_region(self):
     """Randomly generate a single Region according to generator parameters"""
 
-    size = [self.sizerng[d](self.sizepc.lower[d], self.sizepc.upper[d])
+    window_size = [self.bounds.upper[d] - self.bounds.lower[d]
+      for d in range(self.dimension)]
+
+    size = [self.sizerng[d](self.sizepc.lower[d] * window_size[d],
+      self.sizepc.upper[d] * window_size[d])
       for d in range(self.dimension)]
     
     lower = [self.posnrng[d](self.bounds.lower[d],

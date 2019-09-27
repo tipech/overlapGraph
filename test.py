@@ -10,9 +10,12 @@ from datetime import datetime
 gen = RegionGenerator(dimension=2,posnrng=Randoms.gauss(),
   sizepc=Interval(0.05,0.05))
 
+
 start = datetime.now()
 
 regionset = gen.get_regionset(100000)
+
+# pprint(regionset.regions)
 
 regionset.calculate_bounds()
 
