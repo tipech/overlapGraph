@@ -1,2 +1,2 @@
-from .random_regions import *
-from .random_graph import *
+from .region_generator import *
+from .graph_generator import *

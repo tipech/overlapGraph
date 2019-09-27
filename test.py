@@ -5,13 +5,22 @@ from generator import RegionGenerator
 from slig.datastructs import Region, RegionSet, RIGraph, Interval
 from slig import SLIG
 
-gen = RegionGenerator(dimension=1,posnrng=Randoms.gauss(),sizepc=Interval(0.2,0.5))
+from datetime import datetime
 
-regionset = gen.get_regionset(200)
-regionset2 = gen.get_regionset(300)
+gen = RegionGenerator(dimension=2,posnrng=Randoms.gauss(),
+  sizepc=Interval(0.05,0.05))
 
-regionset.merge(regionset2)
-print(len(regionset.regions))
+start = datetime.now()
+
+regionset = gen.get_regionset(100000)
+
+regionset.calculate_bounds()
+
+end = datetime.now()
+elapsed = end-start
+print("Generator: ",elapsed)
+# regionset.merge(regionset2)
+# print(len(regionset.regions))
 
 # regionset = RegionSet(dimension=2)
 # regionset.add(Region([0, 0], [5, 5]))
@@ -22,11 +31,19 @@ print(len(regionset.regions))
 
 # alternatively, to save to file do:
 # gen.store_regionset(100, "test.json")
+# with open("test.json", 'w+') as file:
+#   regionset.to_output(file)
 
+start = datetime.now()
 
 alg = SLIG(regionset)
 alg.prepare()
 graph = alg.sweep()
+
+
+end = datetime.now()
+elapsed = end-start
+print("Algorithm: ",elapsed)
 
 # pprint(list(graph.intersections))
 
@@ -34,7 +51,7 @@ graph = alg.sweep()
 # with open("graph.json", 'w+') as graphfile:
 #   graph.to_output(graphfile)
 
-results = alg.enumerate_all()
+# results = alg.enumerate_all()
 # pprint(results.to_dict())
 
 # alternatively, to save to file do:

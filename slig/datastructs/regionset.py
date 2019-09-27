@@ -274,7 +274,25 @@ class RegionSet(Iterable[Region], abc.Container, abc.Sized, IOable):
       self.add(region)
 
 
-  ### Methods: Shuffle
+
+  def calculate_bounds(self):
+    """
+    Automatically calculate and set this regionset's bounds.
+
+    Returns:
+      The new bounds.
+    """
+    min_lower = [interval.lower for interval in self.regions[0].factors]
+    max_upper = [interval.upper for interval in self.regions[0].factors]
+
+    for d in range(self.dimension):
+      for region in self.regions:
+        max_upper[d] = max(max_upper[d], region.factors[d].upper)
+        min_lower[d] = min(min_lower[d], region.factors[d].lower)
+
+    self.bounds = Region(lower=min_lower, upper=max_upper)
+    return self.bounds
+
 
 
   ### Methods: Queries
@@ -454,6 +472,7 @@ class RegionSet(Iterable[Region], abc.Container, abc.Sized, IOable):
       regions = list(map(Region.from_object, object))
       dimension = regions[0].dimension
       assert all([r.dimension == dimension for r in regions])
-      return cls.from_dict({'regions': regions, 'dimension': dimension}, **kwargs)
+      return cls.from_dict({'regions': regions, 'dimension': dimension},
+        **kwargs)
     else:
       raise ValueError('Unrecognized RegionSet representation')
