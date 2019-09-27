@@ -15,8 +15,8 @@ from typing import Callable, List, Union
 from numbers import Real
 from io import TextIOBase
 
-from slig.datastructs import Region, Interval
-from generator.random_functions import Randoms
+from ..slig.datastructs import Region, Interval
+from .random_functions import Randoms
 
 class GraphGenerator():
   """

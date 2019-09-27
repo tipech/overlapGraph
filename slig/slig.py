@@ -13,7 +13,7 @@ Classes:
 """
 from pprint import pprint
 from networkx import networkx as nx
-from slig.datastructs import Region, RegionSet, RIGraph
+from .datastructs import Region, RegionSet, RIGraph
 
 LOWER = False
 UPPER = True
