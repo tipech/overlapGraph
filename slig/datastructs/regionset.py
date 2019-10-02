@@ -273,6 +273,8 @@ class RegionSet(Iterable[Region], abc.Container, abc.Sized, IOable):
     for region in other.regions:
       self.add(region)
 
+    return self
+
 
 
   def calculate_bounds(self):

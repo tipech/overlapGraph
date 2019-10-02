@@ -125,9 +125,9 @@ class Randoms:
       from a triangular distribution.
     """
     def triangular_rng(left: float = 0, right: float = 1):
-      return random.triangular(left, (right - left)*mode + left, right)
+      return random.triangular(left, right, (right - left)*mode + left)
 
-    return triangular
+    return triangular_rng
 
 
   @classmethod
@@ -160,7 +160,7 @@ class Randoms:
       
 
   @classmethod
-  def bimodal_func(cls, mean1: float = 0.2, sigma1: float = 0.1,
+  def bimodal(cls, mean1: float = 0.2, sigma1: float = 0.1,
                         mean2: float = 0.8, sigma2: float = 0.1) :
     """
     Returns a function that draws samples from a bimodal gauss distribution
@@ -185,7 +185,7 @@ class Randoms:
     def bimodal_rng(left: float = 0, right: float = 1):
       return max(left, min(right, random.choice(
         [random.gauss((right - left)*mean1 + left, (right - left)*sigma1),
-         random.gauss((right - left)*mean1 + left, (right - left)*sigma1)])
+         random.gauss((right - left)*mean2 + left, (right - left)*sigma2)])
       ))
 
-    return triangular_rng
+    return bimodal_rng
