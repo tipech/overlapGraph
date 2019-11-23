@@ -88,7 +88,7 @@ class Region(IOable):
         To be assigned as data properties.
     """
     if len(id) == 0:
-      id = str(uuid4())
+      id = str(uuid4())[:8]
     
     if len(originals) == 0:
       originals = [id]
@@ -823,7 +823,7 @@ class Region(IOable):
         Region is generated with.
       id:
         The unique identifier for this Region
-        Randonly generated with UUID v4, if not provided.
+        Made by combining original ids, if not provided.
 
     Returns:
       The intersecting Region.
@@ -832,6 +832,9 @@ class Region(IOable):
     assert isinstance(regions, List) and len(regions) > 1
     assert all([isinstance(r, Region) for r in regions])
     assert all([regions[0].dimension == r.dimension for r in regions])
+
+    if id == '':
+      id = '_'.join(sorted(r.id for r in regions))
 
     factors = zip(*list(map(lambda r: r.factors, regions)))
     factors = [Interval.from_intersection(list(f)) for f in factors]

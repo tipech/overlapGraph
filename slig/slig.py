@@ -43,7 +43,7 @@ class SLIG():
       self.graph.put_region(r)
 
 
-  def prepare(self):
+  def prepare_sweep(self):
     """Prepare dataset for SLIG by sorting region ends in each dimension"""
 
     self.iterator = []
@@ -58,11 +58,25 @@ class SLIG():
       self.iterator[d].sort(key=lambda x: (x[0], x[1]))
 
 
+  def prepare_scan(self):
+    """Prepare dataset for SLIG by sorting region starts in each dimension"""
+
+    self.iterator = []
+
+    for d in range(self.regionset.dimension):
+      
+      self.iterator.append([])
+      for region in self.regionset:
+        self.iterator[d].append((region.factors[d].lower, region.id))
+
+      self.iterator[d].sort(key=lambda x: x[0])
+
+
   def sweep(self):
     """Execute the sweep line and construct the intersection graph"""
 
     if self.iterator is None:
-      self.prepare()
+      self.prepare_sweep()
 
     actives = []
     intersections = {}
@@ -73,7 +87,8 @@ class SLIG():
           actives.remove(point[2])
         else:
           for active in actives:
-            pair = (active, point[2])
+            pair = tuple(sorted([active, point[2]]))
+
             if pair not in intersections:
               intersections[pair] = 1
             else:
@@ -86,11 +101,40 @@ class SLIG():
 
     return self.graph
 
+  def scan_line(self):
+    """Execute the scan line and construct the intersection graph"""
+
+    if self.iterator is None:
+      self.prepare_scan()
+
+    intersections = {}
+    for d, regions in enumerate(self.iterator):
+      for i, (point,region) in enumerate(regions):
+        for j in range(i+1,len(regions)):
+          other_point, other_region = regions[j]
+          if other_point > self.regionset[region][d].upper:
+            break
+
+          pair = tuple(sorted([region, other_region]))
+          if pair not in intersections:
+            intersections[pair] = 1
+          else:
+            intersections[pair] += 1
+    
+
+    for i, (pair, value) in enumerate(intersections.items()):
+      if value == self.regionset.dimension:
+        self.graph.put_intersection(pair[0],pair[1])
+
+    return self.graph
+
+
 
   def stream_enumerate(self):
     """Iteratively enumerate all multiple intersections in the graph."""
 
     for clique in nx.enumerate_all_cliques(self.graph.G):
+
       if len(clique) > 1:
         intersect = [self.graph.get_region(r) for r in clique]
         region    = Region.from_intersection(intersect)
@@ -111,3 +155,4 @@ class SLIG():
       regionset.add(region)   
 
     return regionset
+    
