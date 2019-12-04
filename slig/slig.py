@@ -11,9 +11,12 @@ with the same dimensionality.
 Classes:
 - SLIG
 """
+from collections import deque
+from itertools import chain, combinations, islice, combinations
 from pprint import pprint
 from networkx import networkx as nx
 from .datastructs import Region, RegionSet, RIGraph
+from typing import Any, Callable, Dict, List, Tuple, Union
 
 LOWER = False
 UPPER = True
@@ -101,6 +104,7 @@ class SLIG():
 
     return self.graph
 
+
   def scan_line(self):
     """Execute the scan line and construct the intersection graph"""
 
@@ -129,9 +133,10 @@ class SLIG():
     return self.graph
 
 
+  def enumerate_all(self):
+    """Return the full enumeration of multiple intersections in the graph"""
 
-  def stream_enumerate(self):
-    """Iteratively enumerate all multiple intersections in the graph."""
+    regionset = RegionSet(dimension=self.regionset.dimension)
 
     for clique in nx.enumerate_all_cliques(self.graph.G):
 
@@ -140,19 +145,100 @@ class SLIG():
         region    = Region.from_intersection(intersect)
 
         assert isinstance(region, Region)
-        yield region
-
-
-  def enumerate_all(self, combine=False):
-    """Return the full enumeration of multiple intersections in the graph"""
-
-    if combine:
-      regionset = self.regionset
-    else:
-      regionset = RegionSet(dimension=self.regionset.dimension)
-
-    for region in self.stream_enumerate():
-      regionset.add(region)   
+        regionset.add(region)   
 
     return regionset
+
+
+
+  def enumerate_visible(self):
+    """Return the highest-k visible multiple intersections, in-memory."""
+
+    regionset = RegionSet(dimension=self.regionset.dimension)
+
+    G = self.graph.G
+
+    index = {}
+    nbrs = {}
+    for u in G:
+      index[u] = len(index)
+      # Neighbors of u that appear after u in the iteration order of G.
+      nbrs[u] = {v for v in G[u] if v not in index}
+
+    queue = deque(([u], self.graph.get_region(u),
+      sorted(nbrs[u], key=index.__getitem__)) for u in G)
+
+    # Loop invariants:
+    # 1. len(base) is nondecreasing.
+    # 2. (base + cnbrs) is sorted with respect to the iteration order of G.
+    # 3. cnbrs is a set of common neighbors of nodes in base.
+    while queue:
+      base, base_region, cnbrs = queue.popleft()
+      cnbrs = list(cnbrs)
+      visible = True
+
+      for i, u in enumerate(cnbrs):
+
+        # construct larger qlique and corresponding region
+        super_clique = base + [u]
+        if len(super_clique) > 1:
+          intersect = [self.graph.get_region(r) for r in super_clique]
+          super_region = Region.from_intersection(intersect)
+
+          # if larger clique's region covers base, mark base not visible
+          if super_region.size == base_region.size:
+            visible = False
+        else:
+          super_region = self.graph.get_region(super_clique[0])
+
+        queue.append((super_clique, super_region,
+          filter(nbrs[u].__contains__, islice(cnbrs, i + 1, None))))
+
+      if visible and len(base) > 1:
+        regionset.add(base_region)
+
+    return regionset
+
+  # def enumerate_maximal_helper(self, clique, size, results):
+  #   """Produce all k-1 multiple intersection combinations in given clique."""
+
+  #   if len(clique) <= 2:
+  #     return
+
+  #   for subclique in combinations(clique, len(clique)-1):
+
+  #     if subclique not in results:
+  #       intersect = [self.graph.get_region(r) for r in subclique]
+  #       subregion = Region.from_intersection(intersect)
+
+  #       if subregion.size > size:
+  #         results[subclique] = subregion
+      
+  #       self.enumerate_maximal_helper(subclique, subregion.size, results)
+        
+
+
+  # def enumerate_cover(self, combine=False):
+  #   """Return the highest-k visible multiple intersections, in-memory."""
+
+  #   if combine:
+  #     regionset = self.regionset
+  #   else:
+  #     regionset = RegionSet(dimension=self.regionset.dimension)
+
+  #   results = {}
     
+  #   for maximal in nx.find_cliques(self.graph.G):
+  #     if len(maximal) > 1:
+
+  #       intersect = [self.graph.get_region(r) for r in maximal]
+  #       region    = Region.from_intersection(intersect)
+  #       results[tuple(maximal)] = region
+
+  #       self.enumerate_maximal_helper(maximal, region.size, results)
+
+  #   for region in results.values():
+  #     regionset.add(region)  
+
+  #   return regionset
+
