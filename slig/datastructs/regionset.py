@@ -195,53 +195,56 @@ class RegionSet(Iterable[Region], abc.Container, abc.Sized, IOable):
   def __copy__(self) -> 'RegionSet':
     """
     Shallow clone this collection of Regions and
-    returns the copied collection of Regions.
+    return the copied collection of Regions.
 
     Returns:
-      The newly, constructed shallow copy of
-      this collection of the Regions.
+      The newly constructed shallow copy of
+      this collection of Regions.
     """
     bounds  = self.bounds.copy() if self.bounds else None
-    regions = RegionSet(bounds=bounds, dimension=self.dimension)
-    regions.regions = self.regions.copy()
-    return regions
+    regionset = RegionSet(id=self.id + "_copy", bounds=bounds,
+      dimension=self.dimension)
+    regionset.regions = self.regions.copy()
+    return regionset
 
   def copy(self) -> 'RegionSet':
     """
     Shallow clone this collection of Regions and
-    returns the copied collection of Regions.
+    return the copied collection of Regions.
 
     Alias for:
       self.__copy__()
 
     Returns:
-      The newly, constructed shallow copy of
-      this collection of the Regions.
+      The newly constructed shallow copy of
+      this collection of Regions.
     """
     return self.__copy__()
 
   def __deepcopy__(self, memo: Dict = {}) -> 'RegionSet':
     """
     Deep clone this collection of Regions and
-    returns the copied collection of Regions.
+    return the copied collection of Regions.
 
     Args:
       memo: The dictionary of objects already copied
             during the current copying pass.
 
     Returns:
-      The newly, constructed deep copy of
-      this collection of the Regions.
+      The newly constructed deep copy of
+      this collection of Regions.
     """
+
     bounds  = self.bounds.deepcopy(memo) if self.bounds else None
-    regions = RegionSet(bounds=bounds, dimension=self.dimension)
-    regions.streamadd([r.deepcopy(memo) for r in self.regions])
-    return regions
+    regionset = RegionSet(id=self.id + "_copy", bounds=bounds,
+      dimension=self.dimension)
+    regionset.streamadd([r.deepcopy(memo) for r in self.regions])
+    return regionset
 
   def deepcopy(self, memo: Dict = {}) -> 'RegionSet':
     """
     Deep clone this collection of Regions and
-    returns the copied collection of Regions.
+    return the copied collection of Regions.
 
     Alias for:
       self.__deepcopy__(memo)
@@ -251,8 +254,8 @@ class RegionSet(Iterable[Region], abc.Container, abc.Sized, IOable):
             during the current copying pass.
 
     Returns:
-      The newly, constructed deep copy of
-      this collection of the Regions.
+      The newly constructed deep copy of
+      this collection of Regions.
     """
     return self.__deepcopy__(memo)
 
@@ -369,7 +372,8 @@ class RegionSet(Iterable[Region], abc.Container, abc.Sized, IOable):
     return asdict(self)
 
   @classmethod
-  def from_dict(cls, object: Dict, id: str = '', refset: 'RegionSet' = None) -> 'RegionSet':
+  def from_dict(cls, object: Dict, id: str = '',
+    refset: 'RegionSet' = None) -> 'RegionSet':
     """
     Construct a new set of Region from the conversion of the given Dict.
     The Dict must contains one of the following combinations of fields:
