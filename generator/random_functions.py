@@ -19,6 +19,7 @@ Classes:
 """
 
 from typing import Callable, Dict, List, Union
+from functools import partial
 
 import random
 
@@ -99,7 +100,7 @@ class Randoms:
       A factory function that draws samples
       from a uniform distribution.
     """
-    def uniform_rng(lower: float = 0, upper: float = 1):
+    def uniform_rng(lower: float = 0, upper: float = 1, d: int = None):
       return random.uniform(lower, upper)
 
     return uniform_rng
@@ -124,7 +125,7 @@ class Randoms:
       A factory function that draws samples
       from a triangular distribution.
     """
-    def triangular_rng(left: float = 0, right: float = 1):
+    def triangular_rng(left: float = 0, right: float = 1, d: int = None):
       return random.triangular(left, right, (right - left)*mode + left)
 
     return triangular_rng
@@ -152,7 +153,7 @@ class Randoms:
       A factory function that draws samples
       from a triangular distribution.
     """
-    def gauss_rng(left: float = 0, right: float = 1):
+    def gauss_rng(left: float = 0, right: float = 1, d: int = None):
       return max(left, min(right,
         random.gauss((right - left)*mean + left, (right - left)*sigma)))
 
@@ -182,10 +183,57 @@ class Randoms:
       A factory function that draws samples
       from a triangular distribution.
     """
-    def bimodal_rng(left: float = 0, right: float = 1):
+    def bimodal_rng(left: float = 0, right: float = 1, d: int = None):
       return max(left, min(right, random.choice(
         [random.gauss((right - left)*mean1 + left, (right - left)*sigma1),
          random.gauss((right - left)*mean2 + left, (right - left)*sigma2)])
       ))
 
     return bimodal_rng
+      
+
+  @classmethod
+  def hotspot(cls, d: int, n: int, min_mean: float=0, max_mean: float=1,
+      min_sigma: float = 0.05, max_sigma: float = 0.2) :
+    """
+    Returns a function that draws samples from a gauss hotspot distribution
+    over the interval [left, right]. This distribution is a combination
+    of n gaussian probability distributions (hotspots) with lower limit left,
+    upper limit right, and mean and sigma vaules between min and max.
+
+    Args:
+      n:
+        Number of hotspots
+      d:
+        The number of dimensions
+      min_mean, max_mean:
+        Minimum and maximum mean values of the
+        gaussian distributions as a percentage
+        of the total length.
+      min_sigma, min_sigma:
+        Minimum and maximum standard deviations
+        of the gaussian distributions as a
+        percentage of the total length.
+
+    Returns:
+      A factory function that draws samples
+      from a triangular distribution.
+    """
+    hotspots = []
+    for h in range(n):
+
+      # generate list means and sigma for each hotspot
+      mean = [random.uniform(min_mean, max_mean) for i in range(d)]
+      sigma = [random.uniform(min_sigma, max_sigma) for i in range(d)]
+
+      def hotspot_rng(left: float = 0, right: float = 1, d: int = None, 
+        mean = None, sigma = None):
+        if d is None:
+          raise ValueError("Need to provide current dimension!")
+
+        return max(left, min(right, random.gauss(
+          (right - left)*mean[d] + left, (right - left)*sigma[d])))
+
+      hotspots.append(partial(hotspot_rng, mean=mean, sigma=sigma))
+
+    return hotspots

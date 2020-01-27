@@ -14,6 +14,8 @@ import json
 from typing import Callable, List, Union
 from numbers import Real
 from io import TextIOBase
+import random
+
 
 from ..slig.datastructs import Region, Interval, RegionSet
 from .random_functions import Randoms
@@ -36,10 +38,10 @@ class RegionGenerator():
       sizepc:     The size range as a percentage of the
                   total Regions' dimensional length.
       posnrng:    The random number generator or list of
-                  random number generator (per dimension)
+                  random number generator options
                   for choosing the position of the Region.
       sizerng:    The random number generator or list of
-                  random number generator (per dimension)
+                  random number generator options
                   for choosing the size of the Region.
       precision:  The number of digits after the decimal
                   point for the lower and upper bounding
@@ -89,15 +91,14 @@ class RegionGenerator():
 
     # random functions init
     if isinstance(posnrng, Callable):
-      posnrng = [posnrng] * self.dimension
+      posnrng = [posnrng]
     if isinstance(sizerng, Callable):
-      sizerng = [sizerng] * self.dimension
+      sizerng = [sizerng]
 
 
     for rng in [posnrng, sizerng]:
       assert (isinstance(rng, List) and
-              all(isinstance(f, Callable) for f in rng) and
-              len(rng) == self.dimension)
+              all(isinstance(f, Callable) for f in rng))
 
     self.posnrng = posnrng
     self.sizerng = sizerng
@@ -108,15 +109,17 @@ class RegionGenerator():
   def get_region(self):
     """Randomly generate a single Region according to generator parameters"""
 
+    sizerng = random.choice(self.sizerng)
+    posnrng = random.choice(self.posnrng)
+
     window_size = [self.bounds.upper[d] - self.bounds.lower[d]
       for d in range(self.dimension)]
 
-    size = [self.sizerng[d](self.sizepc.lower[d] * window_size[d],
-      self.sizepc.upper[d] * window_size[d])
+    size = [sizerng(self.sizepc.lower[d] * window_size[d],
+      self.sizepc.upper[d] * window_size[d], d)
       for d in range(self.dimension)]
     
-    lower = [self.posnrng[d](self.bounds.lower[d],
-              self.bounds.upper[d] - size[d])
+    lower = [posnrng(self.bounds.lower[d], self.bounds.upper[d] - size[d], d)
             for d in range(self.dimension)]
 
     upper = [lower[d] + size[d] for d in range(self.dimension)]
