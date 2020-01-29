@@ -115,9 +115,15 @@ class RegionGenerator():
     window_size = [self.bounds.upper[d] - self.bounds.lower[d]
       for d in range(self.dimension)]
 
-    size = [sizerng(self.sizepc.lower[d] * window_size[d],
-      self.sizepc.upper[d] * window_size[d], d)
-      for d in range(self.dimension)]
+    if self.square:
+      side_size = self.sizerng[0](self.sizepc.lower[0] * window_size[0],
+      self.sizepc.upper[0] * window_size[0])
+
+      size = [side_size for d in range(self.dimension)]
+    else:
+      size = [self.sizerng[d](self.sizepc.lower[d] * window_size[d],
+        self.sizepc.upper[d] * window_size[d])
+        for d in range(self.dimension)]
     
     lower = [posnrng(self.bounds.lower[d], self.bounds.upper[d] - size[d], d)
             for d in range(self.dimension)]
